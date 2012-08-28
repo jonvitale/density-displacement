@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+	<head>
+		<meta charset="utf-8">
+		<title> Experimenting with Materials</title>
+		<link rel="stylesheet" href="style.css">
+		<script src="easeljs.js"></script>
+		<script src="preloadjs.js"></script>
+		<script src="BalanceModel.js"></script>
+		<script src="BalanceViewer.js"></script>
+		<script src="BeakerModel.js"></script>
+		<script src="BeakerViewer.js"></script>
+		<script src="VolumeViewer.js"></script>
+		<script src="DraggableContainer.js"></script>
+		<script src="Cylinder.js"></script>
+		<script src="RectPrism.js"></script>
+		<script>
+			var STAGE_WIDTH = 810;
+			var STAGE_HEIGHT = 670;
+			var UNIT_TO_PIXEL = 20;
+			var METER_TO_UNIT = 100;
+			var PADDING = 8;
+			var canvas;
+			var stage; // stage for volume viewer
+			var update;
+			var vv; //volume viewer
+			var bv; // balance viewer
+			var kv; // beaKer viewer
+			var objects;
+			var makeCylinderButton;
+
+			function init()
+			{
+				canvas = document.getElementById("canvas");
+				stage = new Stage(canvas);
+				update = true;
+				vv = new VolumeViewer(10, 10);
+				stage.addChild(vv);
+				bv = new BalanceViewer (30, 16, 10);
+				bv.x = vv.width_px + PADDING;
+				bv.y = vv.y;
+				stage.addChild(bv);
+
+				kv = new BeakerViewer (30, 16, 500);
+				kv.x = vv.width_px + PADDING;
+				kv.y = bv.y + bv.height_px + PADDING;
+				stage.addChild(kv);
+	
+
+				objects = new Array();
+
+				// setup buttons for volume viewer	
+				formDOMElement = new DOMElement(document.getElementById("vvForm"));
+				formDOMElement.x = vv.x + canvas.offsetLeft;
+				formDOMElement.y = vv.y + vv.height_px + 2*PADDING;	
+				stage.addChild(formDOMElement);
+
+				// setup buttons for balance viewer
+				formDOMElement = new DOMElement(document.getElementById("bvForm"));
+				formDOMElement.x = bv.x + bv.width_px/2 - 50 + canvas.offsetLeft;
+				formDOMElement.y = bv.y + PADDING;// + canvas.offsetTop
+				stage.addChild(formDOMElement);
+
+				// setup buttons for beaker viewer
+				formDOMElement = new DOMElement(document.getElementById("kvForm"));
+				formDOMElement.x = kv.x + bv.width_px/2 - 50 + canvas.offsetLeft;
+				formDOMElement.y = kv.y + PADDING;	
+				stage.addChild(formDOMElement);			
+
+				Ticker.setFPS(24);
+				Ticker.addListener(window);
+			}
+			
+			function tick()
+			{
+				if (update)
+				{
+					bv._tick();
+					stage.update();
+					if (bv.isRunning() || kv.isRunning()) 
+					{
+						update = true;
+					} else
+					{
+						update = false;
+					}
+				}
+			}
+			// BUTTON INTERACTION WITH VOLUME VIEWER
+			function vvNewObject()
+			{
+				if (vv.currentObject == null)
+				{
+					var o = new Cylinder(6, 3, 0.5, "top");
+					o.x = vv.width_px/2;
+					o.y = vv.height_px/2;
+					objects.push(o);
+					stage.addChild(o);
+					o.setBounds(new Rectangle(0, 0, STAGE_WIDTH, STAGE_HEIGHT));
+					placeObjectInContainer(o);
+					stage.update();
+					return o;
+				}
+			}
+			// temporary
+			function vvNewRectPrism()
+			{
+				if (vv.currentObject == null)
+				{
+					var o = new RectPrism(4, 4, 6, 2, "top");
+					o.x = vv.width_px/2;
+					o.y = vv.height_px/2;
+					objects.push(o);
+					stage.addChild(o);
+					o.setBounds(new Rectangle(0, 0, STAGE_WIDTH, STAGE_HEIGHT));
+					placeObjectInContainer(o);
+					stage.update();
+					return o;
+				}
+			}
+
+			function vvSwitchView()
+			{
+				if (vv.currentObject != null)
+				{
+					vv.currentObject.switchView();
+				}
+			}
+
+			// BUTTON INTERACTION WITH BALANCE
+			function bvStart()
+			{
+				bv.start();
+			}
+			function bvReset()
+			{
+				bv.reset();
+			}
+
+			// BUTTON INTERACTION WITH BEAKER
+			function kvStart()
+			{
+				kv.start();
+			}
+			function kvReset()
+			{
+				kv.reset();
+			}
+
+			/** When an object is pressed for dragging, it may need to be released from its container */
+			function releaseObjectFromContainer(o)
+			{
+				if (vv.releaseObject(o)){}
+				else if (bv.releaseObject(o)){}	
+				else if (kv.releaseObject(o)){}	
+			}
+
+			/** When an object is released from dragging, check it's location and perform operations */
+			function placeObjectInContainer(o)
+			{
+				// is the object over the volume viewer?
+				if (vv.placeObject(o)){}
+				else if (bv.placeObject(o)){}
+				else if (kv.placeObject(o)){}
+			}
+		</script>
+	</head>
+	<body onload="init()">
+		<form id = "vvForm" class="outsideForm">
+			<input type="button" id="makeShape" value = "New Disk" onclick="vvNewObject();" class="button"/>
+			<input type="button" id="makeRectPrism" value = "New Prism" onclick="vvNewRectPrism();" class="button" />
+			<input type="button" id="switchView" value = "Switch view" onclick="vvSwitchView();" class="button"/>
+		</form> 
+		<form id = "bvForm" class="overForm">
+			<input type="button" id="startBalance" value = "Start" onclick="bvStart();" class="button"/>
+			<input type="button" id="resetBalance" value = "Reset" onclick="bvReset();" class="button"/>
+		</form>
+		<form id = "kvForm" class="overForm">
+			<input type="button" id="startBeaker" value = "Start" onclick="kvStart();" class="button"/>
+			<input type="button" id="resetBeaker" value = "Reset" onclick="kvReset();" class="button"/>
+		</form>	
+		<canvas width=810 height=670 id="canvas"></canvas>
+	</body>	
+</html>
