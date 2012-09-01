@@ -1,4 +1,4 @@
-function (window)
+(function (window)
 {
 	function BalanceModel (width_unit, height_unit, pan_width_unit)
 	{

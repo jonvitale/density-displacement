@@ -1,32 +1,34 @@
 (function (window)
 {
 	/** Construct boundaries for this object*/
-	var DraggableContainer = function()
+	DraggableBitmap.Inherits(Bitmap);
+	var DraggableBitmap = function(source)
 	{
+		this.Inherits(Bitmap, source)
 		this.initialize();
 	}
-	var p = DraggableContainer.prototype = new Container();
+	var p = DraggableBitmap.prototype;// = new Bitmap();
 	
 	// public properties
 	p.mouseEventsEnabled = true;
-	p.Container_initialize = p.initialize;
-	p.Container_tick = p._tick;
+	p.Bitmap_initialize = p.initialize;
+	p.Bitmap_tick = p._tick;
 
 	p.initialize = function()
 	{
-		this.Container_initialize();
+		this.Bitmap_initialize();
 		this.min_x = 0;
 		this.min_y = 0;
 		this.max_x = 0;
 		this.max_y = 0;
-		this.viewable_width = 0;
-		this.viewable_height = 0;
+		this.width_px = 0;
+		this.height_px = 0;
 		this.areBoundsSet = false;
 	}
 
 	p._tick = function ()
 	{
-		this.Container_tick();
+		this.Bitmap_tick();
 	}
 	/** Setup dragging bounds.  Prerequisite for dragging */
 	p.setBounds = function (rect)
@@ -34,14 +36,14 @@
 		this.areBoundsSet = true;
 		this.min_x = rect.x;
 		this.min_y = rect.y;
-		this.max_x = rect.x+rect.width - this.viewable_width;
-		this.max_y = rect.y+rect.height - this.viewable_height;
+		this.max_x = rect.x+rect.width - this.width_px;
+		this.max_y = rect.y+rect.height - this.height_px;
 		(function(target)
 		{
 			target.onPress = function (evt)
 			{
 				this.setDefaultView();
-				releaseObjectFromContainer (this);
+				releaseObjectFromBitmap (this);
 				var offset = {x:this.x-evt.stageX, y:this.y-evt.stageY}
 				evt.onMouseMove = function (ev)
 				{
@@ -71,14 +73,14 @@
 				}
 				evt.onMouseUp = function (ev)
 				{
-					placeObjectInContainer(this.target);					
+					//placeObjectInBitmap(this.target);					
 				}
 			}
-		}(DraggableContainer.prototype));
+		}(DraggableBitmap.prototype));
 	}
 	/** Sub-classes need to have the switch view method */
-	p.switchView = function (){}
-	p.setDefaultView = function (){}
+	//p.switchView = function (){}
+	//p.setDefaultView = function (){}
 
-	window.DraggableContainer = DraggableContainer;
+	window.DraggableBitmap = DraggableBitmap;
 }(window));
