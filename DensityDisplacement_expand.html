@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+	<head>
+		<meta charset="utf-8">
+		<title> Experimenting with Materials</title>
+		<link rel="stylesheet" href="style.css">
+		<script type="text/javascript" src="libs/jquery-1.7.1.min.js"></script>
+		<script type="text/javascript" src="libs/easeljs/geom/Matrix2D.js"></script>
+		<script type="text/javascript" src="libs/easeljs/geom/Point.js"></script>
+		<script type="text/javascript" src="libs/easeljs/geom/Rectangle.js"></script>
+		<script type="text/javascript" src="libs/easeljs/ui/Touch.js"></script>
+		<script type="text/javascript" src="libs/easeljs/utils/SpriteSheetUtils.js"></script>
+		<script type="text/javascript" src="libs/easeljs/utils/Ticker.js"></script>
+		<script type="text/javascript" src="libs/easeljs/utils/UID.js"></script>
+		<script type="text/javascript" src="libs/easeljs/display/DisplayObject.js"></script>
+		<script type="text/javascript" src="libs/easeljs/display/Container.js"></script>	
+		<script type="text/javascript" src="libs/easeljs/display/Bitmap.js"></script>
+		<script type="text/javascript" src="libs/easeljs/display/BitmapAnimation.js"></script>	
+		<script type="text/javascript" src="libs/easeljs/display/DOMElement.js"></script>
+		<script type="text/javascript" src="libs/easeljs/display/Graphics.js"></script>
+		<script type="text/javascript" src="libs/easeljs/display/Shadow.js"></script>
+		<script type="text/javascript" src="libs/easeljs/display/Shape.js"></script>
+		<script type="text/javascript" src="libs/easeljs/display/SpriteSheet.js"></script>
+		<script type="text/javascript" src="libs/easeljs/display/Stage.js"></script>
+		<script type="text/javascript" src="libs/easeljs/display/Text.js"></script>
+		<script type="text/javascript" src="libs/easeljs/events/MouseEvent.js"></script>
+		<script type="text/javascript" src="libs/easeljs/filters/Filter.js"></script>
+		<script type="text/javascript" src="libs/easeljs/filters/BoxBlurFilter.js"></script>
+		<script type="text/javascript" src="libs/easeljs/filters/ColorFilter.js"></script>
+		<script type="text/javascript" src="libs/easeljs/filters/ColorMatrix.js"></script>
+		<script type="text/javascript" src="libs/easeljs/filters/ColorMatrixFilter.js"></script>
+		
+		
+		
+
+		<script type="text/javascript" src="libs/Box2dWeb-2.1.a.3.min.js"></script>
+
+		<script src="js/StageManager.js"></script>
+
+		<script src="js/myDisplayObjects/TextContainer.js"></script>
+		<script src="js/myDisplayObjects/DraggableContainer.js"></script>
+		<script src="js/myDisplayObjects/DraggableBitmap.js"></script>
+		
+		<script src="js/builder/ObjectBuilder.js"></script>
+		<script src="js/builder/MaterialsMenu.js"></script>
+		<script src="js/builder/MaterialsDisplay.js"></script>
+		<script src="js/BalanceModel.js"></script>
+		<script src="js/BalanceViewer.js"></script>
+		<script src="js/BeakerModel.js"></script>
+		<script src="js/BeakerViewer.js"></script>
+		<script src="js/VolumeViewer.js"></script>
+		<script src="js/Cylinder.js"></script>
+		<script src="js/RectPrism.js"></script>
+		<script>
+			var STAGE_WIDTH = 810;
+			var STAGE_HEIGHT = 670;
+			var UNIT_TO_PIXEL = 20;
+			var METER_TO_UNIT = 100;
+			var PADDING = 8;
+			var canvas;
+			var stage;
+			var stageManager;
+			
+			/// EASEL JS FUNCTIONALITY
+			function init()
+			{
+				canvas = document.getElementById("canvas");
+				stage = new Stage(canvas);
+				stage.needs_to_update = true;
+				stageManager = new StageManager(stage);
+				// setup buttons for volume viewer	
+				
+				Ticker.setFPS(24);
+				Ticker.addListener(window);
+			}
+			
+			function tick() { stageManager.tick();}
+
+			// BUTTON INTERACTION 
+			
+		</script>
+	</head>
+	<body onload="init()">
+		<canvas width=810 height=670 id="canvas"></canvas>
+	</body>	
+</html>

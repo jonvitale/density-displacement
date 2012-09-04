@@ -40,8 +40,8 @@
 		{
 			target.onPress = function (evt)
 			{
-				this.setDefaultView();
-				releaseObjectFromContainer (this);
+				//this.setDefaultView();
+				//releaseObjectFromContainer (this);
 				var offset = {x:this.x-evt.stageX, y:this.y-evt.stageY}
 				evt.onMouseMove = function (ev)
 				{

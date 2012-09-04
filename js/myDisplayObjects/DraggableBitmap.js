@@ -1,22 +1,35 @@
 (function (window)
 {
 	/** Construct boundaries for this object*/
-	DraggableBitmap.Inherits(Bitmap);
-	var DraggableBitmap = function(source)
+	var DraggableBitmap = function(imageOrUri)
 	{
-		this.Inherits(Bitmap, source)
-		this.initialize();
+		//Bitmap.apply(this, arguments);
+		Bitmap.call(this, arguments);
+		this.initialize(imageOrUri);
 	}
-	var p = DraggableBitmap.prototype;// = new Bitmap();
-	
+	var p = DraggableBitmap.prototype = new Bitmap();
+	//p.constructor = DraggableBitmap;
+	/*
+	var p = DraggableBitmap.prototype = 
+	(function(parent, child)
+	{
+    	function protoCreator()
+    	{
+        	this.constructor = child.prototype.constructor
+    	};
+	    protoCreator.prototype = parent.prototype;
+    	return new protoCreator();
+	})(Bitmap, DraggableBitmap);
+	*/
+	//var p = DraggableBitmap.prototype = Object.create(Bitmap.prototype);
 	// public properties
 	p.mouseEventsEnabled = true;
 	p.Bitmap_initialize = p.initialize;
 	p.Bitmap_tick = p._tick;
 
-	p.initialize = function()
+	p.initialize = function(imageOrUri)
 	{
-		this.Bitmap_initialize();
+		this.Bitmap_initialize(imageOrUri);
 		this.min_x = 0;
 		this.min_y = 0;
 		this.max_x = 0;
@@ -42,8 +55,9 @@
 		{
 			target.onPress = function (evt)
 			{
-				this.setDefaultView();
-				releaseObjectFromBitmap (this);
+				//this.setDefaultView();
+				console.log("presed");
+				//releaseObjectFromBitmap (this);
 				var offset = {x:this.x-evt.stageX, y:this.y-evt.stageY}
 				evt.onMouseMove = function (ev)
 				{
