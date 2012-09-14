@@ -1,3 +1,19 @@
+//Global variables
+		// setup variables for box2d
+		var   b2Vec2 = Box2D.Common.Math.b2Vec2
+        , b2BodyDef = Box2D.Dynamics.b2BodyDef
+        , b2Body = Box2D.Dynamics.b2Body
+        , b2FixtureDef = Box2D.Dynamics.b2FixtureDef
+        , b2Fixture = Box2D.Dynamics.b2Fixture
+        , b2World = Box2D.Dynamics.b2World
+        , b2MassData = Box2D.Collision.Shapes.b2MassData
+        , b2PolygonShape = Box2D.Collision.Shapes.b2PolygonShape
+        , b2CircleShape = Box2D.Collision.Shapes.b2CircleShape
+        , b2DebugDraw = Box2D.Dynamics.b2DebugDraw
+          ;
+
+        var DEBUG = true;
+
 (function (window)
 {
 
@@ -9,11 +25,15 @@
 		this.stage.needs_to_update = true;
 
 		this.materialNameDisplayMapping = {"DWood":"Wood A", "LWood":"Wood B", "Metal":"Metal", "Plastic":"Plastic"}
+		this.materialNameMassMapping = {"DWood": 1.25, "LWood": 0.75, "Metal": 1.5, "Plastic": 0.0625}
 		// setup builder
-		this.builder = new ObjectBuilder(STAGE_WIDTH, 200, this.materialNameDisplayMapping);
+		this.builder = new ObjectBuildingPanel(STAGE_WIDTH, 200, this.materialNameDisplayMapping);
 		this.stage.addChild(this.builder);
-
-		this.b2objects = new Array();
+		
+		this.tester = new ObjectTestingPanel(STAGE_WIDTH, STAGE_HEIGHT-this.builder.height_px, this.builder.vv.width_px, this.builder.vv.height_px, this.builder.vv.height_from_depth);
+		this.stage.addChild(this.tester);
+		this.tester.y = this.builder.height_px;
+		
 	}
 
 	var p = StageManager.prototype
@@ -21,41 +41,33 @@
 	/** Tick function called on every step, if update, redraw */
 	p.tick = function ()
 	{
+		this.tester._tick();
 		if (this.stage.needs_to_update)
 		{
 			this.stage.update();
 		}
 	}
-	p.addToStage = function(o)
+	p.addToStage = function(o, name)
 	{
 		this.stage.addChild(o);
+		if (name == "makeObjectForm")
+		{
+			o.x = this.builder.vv.x - this.builder.vv.width_px + 10;
+			o.y = this.builder.vv.y + this.builder.vv.height_px + 10;
+		}
 	}
 	p.removeFromStage = function(o)
 	{
 		this.stage.removeChild(o);
 	}
 
+	//////////////////// SPECIFIC FUNCTIONS FOR BUTTON INTERACTION //////////////////////
+	p.makeObject = function()
+	{
+		var blockArray3d = this.builder.saveObject();
+		var compShape = new BlockCompShape(20, 20, 20, blockArray3d, this.materialNameMassMapping, 10*Math.PI/180, 20*Math.PI/180);
+		this.tester.addObjectToLibrary(compShape);
+	}
 	
-
-	/// MOST LIKELY GET RID OF THIS SHIT
-	/** When an object is pressed for dragging, it may need to be released from its container */
-	/*
-	p.releaseObjectFromContainer = function (o)
-	{
-		if (this.vv.releaseObject(o)){}
-		else if (this.bv.releaseObject(o)){}	
-		else if (this.kv.releaseObject(o)){}	
-	}
-	*/
-	/** When an object is released from dragging, check it's location and perform operations */
-	/*
-	p.placeObjectInContainer = function (o)
-	{
-		// is the object over the volume viewer?
-		if (this.vv.placeObject(o)){}
-		else if (this.bv.placeObject(o)){}
-		else if (this.kv.placeObject(o)){}
-	}
-	*/
 	window.StageManager = StageManager;
 }(window));

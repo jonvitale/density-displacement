@@ -36,18 +36,26 @@
 
 		<script src="js/StageManager.js"></script>
 
+		<script src="js/myDisplayObjects/BlockCompShape.js"></script>
+		<script src="js/myDisplayObjects/RectBlockShape.js"></script>
 		<script src="js/myDisplayObjects/TextContainer.js"></script>
 		<script src="js/myDisplayObjects/DraggableContainer.js"></script>
 		<script src="js/myDisplayObjects/DraggableBitmap.js"></script>
 		
-		<script src="js/builder/ObjectBuilder.js"></script>
+		<script src="js/Myb2Objects/Emptyb2World.js"></script>
+		<script src="js/Myb2Objects/b2Actor.js"></script>
+		<script src="js/builder/VolumeViewer.js"></script>
 		<script src="js/builder/MaterialsMenu.js"></script>
 		<script src="js/builder/MaterialsDisplay.js"></script>
+		<script src="js/builder/ObjectBuildingPanel.js"></script>
+		
+		<script src="js/testing/ObjectLibrary.js"></script>
+		<script src="js/testing/ObjectTestingPanel.js"></script>
+
 		<script src="js/BalanceModel.js"></script>
 		<script src="js/BalanceViewer.js"></script>
 		<script src="js/BeakerModel.js"></script>
 		<script src="js/BeakerViewer.js"></script>
-		<script src="js/VolumeViewer.js"></script>
 		<script src="js/Cylinder.js"></script>
 		<script src="js/RectPrism.js"></script>
 		<script>
@@ -68,18 +76,24 @@
 				stage.needs_to_update = true;
 				stageManager = new StageManager(stage);
 				// setup buttons for volume viewer	
-				
+				formDOMElement = new DOMElement(document.getElementById("makeObjectForm"));
+				stageManager.addToStage(formDOMElement, "makeObjectForm");
+
 				Ticker.setFPS(24);
 				Ticker.addListener(window);
 			}
-			
 			function tick() { stageManager.tick();}
 
 			// BUTTON INTERACTION 
+			function createObject() {stageManager.makeObject(); }
 			
 		</script>
 	</head>
 	<body onload="init()">
-		<canvas width=810 height=670 id="canvas"></canvas>
+		<form id = "makeObjectForm" class="overForm">
+			<input type="button" id="makeObject" value="Create" onclick="createObject()" class="button"/>
+		</form> 
+		<canvas width=500 height=670 id="canvas" ></canvas>
+		<canvas width=500 height=670 id="debugcanvas" style="position:absolute left:500 "></canvas>
 	</body>	
 </html>

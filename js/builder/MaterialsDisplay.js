@@ -1,6 +1,7 @@
+/*
 (function (window)
 {
-	/** This display a single type of materials */
+	// This display a single type of materials 
 	function MaterialsDisplay (width_px, height_px, materialName)
 	{
 		this.width_px = width_px;
@@ -46,15 +47,16 @@
 		var bmp, i;
 		for (i in this.MATERIAL_TYPES)
 		{
-			var temp = new Bitmap("images/"+this.materialName+"-"+this.MATERIAL_TYPES[i]+".svg");
-			bmp = new DraggableBitmap("images/"+this.materialName+"-"+this.MATERIAL_TYPES[i]+".svg");
+			//var temp = new Bitmap("images/"+this.materialName+"-"+this.MATERIAL_TYPES[i]+".svg");
+			bmp = new DraggableBitmap("images/"+this.materialName+"-"+this.MATERIAL_TYPES[i]+".png");
 			bmp.x = i * this.width_px/this.MATERIAL_TYPES.length + (this.width_px/this.MATERIAL_TYPES.length - bmp.image.width)/2;
 			bmp.y = (this.height_px - bmp.image.height)/2;
 			bmp.setBounds(new Rectangle(0, 0, this.width_px, this.height_px));
 			this.bitmaps.push(bmp);
-			this.addChild(bmp);
+			stage.addChild(bmp);
 		}
 	}
 
 	window.MaterialsDisplay = MaterialsDisplay;
 }(window));
+*/

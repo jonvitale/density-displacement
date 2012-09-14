@@ -3,6 +3,18 @@
 	/** Creates a menu with the names of the materials */
 	function MaterialsMenu (width_px, height_px, materialNameDisplayMapping)
 	{
+		this.initialize(width_px, height_px, materialNameDisplayMapping);
+	}
+	var p = MaterialsMenu.prototype = new Container();
+	p.Container_initialize = MaterialsMenu.prototype.initialize;
+	p.Container_tick = p._tick;
+	p.SELECTED_COLOR = "rgba(225,225,255,1.0)";
+	p.UNSELECTED_COLOR = "rgba(200,200,255,1.0)";
+	p.TEXT_COLOR = "rgba(0, 0, 200, 1.0)";
+
+	p.initialize = function(width_px, height_px, materialNameDisplayMapping)
+	{
+		this.Container_initialize();
 		this.width_px = width_px;
 		this.height_px = height_px;
 		this.materialNameDisplayMapping = materialNameDisplayMapping;
@@ -17,18 +29,6 @@
 			 	this.rev_materialNameDisplayMapping[materialNameDisplayMapping[key]] = key;
 			}
 		}
-		this.initialize();
-	}
-	var p = MaterialsMenu.prototype = new Container();
-	p.Container_initialize = MaterialsMenu.prototype.initialize;
-	p.Container_tick = p._tick;
-	p.SELECTED_COLOR = "rgba(225,225,255,1.0)";
-	p.UNSELECTED_COLOR = "rgba(200,200,255,1.0)";
-	p.TEXT_COLOR = "rgba(0, 0, 200, 1.0)";
-
-	p.initialize = function()
-	{
-		this.Container_initialize();
 		//background
 		this.g = new Graphics();
 		this.shape = new Shape(this.g);
@@ -47,18 +47,13 @@
 				{
 					this.defaultMaterialName = key;
 				}
-				tab = new TextContainer(this.materialNameDisplayMapping[key], "20px Arial", this.TEXT_COLOR, this.width_px/3, this.height_px/this.materialCount, this.UNSELECTED_COLOR, this.UNSELECTED_COLOR, 0, "center", "center");
+				tab = new TextContainer(this.materialNameDisplayMapping[key], "20px Arial", this.TEXT_COLOR, this.width_px, this.height_px/this.materialCount, this.UNSELECTED_COLOR, this.UNSELECTED_COLOR, 0, "center", "center");
 				tab.x = 0;
 				tab.y = i * (this.height_px/this.materialCount)+ (this.height_px/this.materialCount-tab.height_px)/2;
 				//tab.onMouseOver = this.mouseOverHandler.bind(this);
 				tab.onClick = this.clickHandler.bind(this);
 				this.tabArray[key] = tab;
 				this.addChild(tab);
-
-				// create corresponding materials display do not add child yet
-				materialsDisplay = new MaterialsDisplay (this.width_px*2/3, this.height_px, key);
-				materialsDisplay.x = this.width_px * 1/3;
-				this.materialsDisplayArray[key] = materialsDisplay;
 			}
 
 			i++;
@@ -71,12 +66,12 @@
 		this.addChild(this.projectedTextOutlineShape);
 		
 		this.g.beginFill(this.UNSELECTED_COLOR);
-		this.g.drawRect(0, 0, this.width_px/3, this.height_px);
+		this.g.drawRect(0, 0, this.width_px, this.height_px);
 		this.g.endFill();
 
 		this.projectedTextOutlineGraphics.setStrokeStyle(1);
 		this.projectedTextOutlineGraphics.beginStroke(this.TEXT_COLOR);
-		this.projectedTextOutlineGraphics.drawRect(0, 0, this.width_px/3, this.height_px/this.materialCount);
+		this.projectedTextOutlineGraphics.drawRect(0, 0, this.width_px, this.height_px/this.materialCount);
 			
 		// select
 		this.currentMaterialName = this.defaultMaterialName;
@@ -110,14 +105,14 @@
 	{
 		if (this.currentMaterialName != null)
 		{
-			this.removeChild(this.materialsDisplayArray[this.currentMaterialName]);
 			this.tabArray[this.currentMaterialName].setBackgroundColor(this.UNSELECTED_COLOR);
 		}
 		var key = this.rev_materialNameDisplayMapping[evt.target.textString];
+		this.parent.buttonClickHandler(key);
 		this.projectedTextOutlineShape.y = this.tabArray[key].y;
-		this.addChild(this.materialsDisplayArray[key]);
 		this.tabArray[key].setBackgroundColor(this.SELECTED_COLOR);
 		this.currentMaterialName = key;
+		
 	}
 
 	window.MaterialsMenu = MaterialsMenu;
