@@ -18,6 +18,10 @@
 		this.height_units = height_units;
 		this.view_topAngle = view_topAngle;
 		this.view_sideAngle = view_sideAngle;
+		this.width_px_3d = unit_width_px * width_units;
+		this.height_px_3d = unit_height_px * height_units;
+		this.depth_px_3d = unit_depth_px * depth_units;
+		
 		this.g = new Graphics();
 		this.shape = new Shape(this.g);
 		this.addChild(this.shape);

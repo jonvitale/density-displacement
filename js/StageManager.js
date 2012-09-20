@@ -10,9 +10,14 @@
         , b2PolygonShape = Box2D.Collision.Shapes.b2PolygonShape
         , b2CircleShape = Box2D.Collision.Shapes.b2CircleShape
         , b2DebugDraw = Box2D.Dynamics.b2DebugDraw
+        , b2RevoluteJointDef = Box2D.Dynamics.Joints.b2RevoluteJointDef
+        , b2DistanceJointDef = Box2D.Dynamics.Joints.b2DistanceJointDef
+        , b2FrictionJointDef = Box2D.Dynamics.Joints.b2FrictionJointDef
+        , b2ContactListener = Box2D.Dynamics.b2ContactListener;
           ;
 
         var DEBUG = true;
+        var SCALE = 20;
 
 (function (window)
 {
@@ -29,8 +34,8 @@
 		// setup builder
 		this.builder = new ObjectBuildingPanel(STAGE_WIDTH, 200, this.materialNameDisplayMapping);
 		this.stage.addChild(this.builder);
-		
-		this.tester = new ObjectTestingPanel(STAGE_WIDTH, STAGE_HEIGHT-this.builder.height_px, this.builder.vv.width_px, this.builder.vv.height_px, this.builder.vv.height_from_depth);
+
+		this.tester = new ObjectTestingPanel(STAGE_WIDTH, STAGE_HEIGHT-this.builder.height_px, this.builder.vv.width_px, this.builder.vv.height_px, this.builder.vv.width_from_depth, this.builder.vv.height_from_depth);
 		this.stage.addChild(this.tester);
 		this.tester.y = this.builder.height_px;
 		
@@ -65,7 +70,7 @@
 	p.makeObject = function()
 	{
 		var blockArray3d = this.builder.saveObject();
-		var compShape = new BlockCompShape(20, 20, 20, blockArray3d, this.materialNameMassMapping, 10*Math.PI/180, 20*Math.PI/180);
+		var compShape = new BlockCompShape(SCALE, SCALE, SCALE, blockArray3d, this.materialNameMassMapping, SCALE/2*Math.PI/180, SCALE*Math.PI/180);
 		this.tester.addObjectToLibrary(compShape);
 	}
 	

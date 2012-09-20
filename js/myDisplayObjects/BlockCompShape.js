@@ -31,11 +31,6 @@
 		this.materialName = materialName;
 
 		this.DEBUG = false;
-		this.min_x = 0;
-		this.min_y = 0;
-		this.max_x = 0;
-		this.max_y = 0;
-		this.areBoundsSet = false;
 
 		// composition vars
 		var g = this.g = new Graphics();
@@ -51,10 +46,16 @@
 		//console.log(this.massArray2d);
 		// draw figure
 		this.redraw();
-		//console.log("before", this.shape.x, this.shape.y);
+
+		// MOVE SHAPE SO THAT THE TOP-LEFT CORNER OF THE FRONT FACE IS 0,0
 		this.shape.x += (this.blockArray3d[1][1].length*Math.sin(this.view_sideAngle) + -this.leftmostColumn+1) * this.unit_width_px;// + (this.rightmostColumn+1 - this.leftmostColumn) /2 ) * this.unit_width_px;
 		this.shape.y += (-this.blockArray3d[1][1].length*Math.sin(this.view_topAngle) - this.highestRow) *  this.unit_height_px;;// + (this.lowestRow+1 - this.highestRow) / 2) * this.unit_height_px;
 		
+		this.width_px_left = 0;
+		this.width_px_right = (this.rightmostColumn + 1 - this.leftmostColumn) * this.unit_width_px;
+		this.height_px_above = this.blockArray3d[1][1].length*Math.sin(this.view_topAngle) * this.unit_depth_px;
+		this.height_px_below = (this.lowestRow+1 - this.highestRow) * this.unit_height_px;
+
 		if (this.DEBUG)
 		{
 			var dg = new Graphics();

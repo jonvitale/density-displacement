@@ -2,24 +2,25 @@
 {
 	/** A space for displaying the names of materials, clickable/draggable materials
 	and a grid space for putting them together */
-	function ObjectTestingPanel (width_px, height_px, max_shape_width_px, max_shape_height_px, height_from_depth)
+	function ObjectTestingPanel (width_px, height_px, max_shape_width_px, max_shape_height_px, width_from_depth, height_from_depth)
 	{
-		this.initialize(width_px, height_px, max_shape_width_px, max_shape_height_px, height_from_depth);
+		this.initialize(width_px, height_px, max_shape_width_px, max_shape_height_px, width_from_depth, height_from_depth);
 	}
 	var p = ObjectTestingPanel.prototype = new Container();
 	p.Container_initialize = ObjectTestingPanel.prototype.initialize;
 	p.Container_tick = p._tick;
-	p.SCALE = 30;
+	p.TITLE_HEIGHT = 40;
 	// constants
 	p.MATERIAL_TYPES = ["full", "center3", "center1", "ends"];
 
-	p.initialize = function(width_px, height_px, max_shape_width_px, max_shape_height_px, height_from_depth)
+	p.initialize = function(width_px, height_px, max_shape_width_px, max_shape_height_px, width_from_depth, height_from_depth)
 	{
 		this.Container_initialize();
 		this.width_px = width_px;
 		this.height_px = height_px;
 		this.max_shape_width_px = max_shape_width_px;
 		this.max_shape_height_px = max_shape_height_px;
+		this.width_from_depth = width_from_depth;
 		this.height_from_depth = height_from_depth;
 
 		//background
@@ -29,14 +30,14 @@
 
 		// the list of material names
 		//library
-		this.library = new ObjectLibrary(this.max_shape_width_px, this.max_shape_height_px*5+40, this.max_shape_height_px, height_from_depth);
+		this.library = new ObjectLibrary(this.max_shape_width_px, this.max_shape_height_px*5+this.TITLE_HEIGHT, this.max_shape_height_px, height_from_depth);
 		this.addChild(this.library);
 		this.library.x = 0;
 		this.library.y = 0;
 		//world
-		this.world = new Emptyb2World(300,300, 200, 0, 30);
+		this.world = new Balanceb2World((max_shape_width_px-width_from_depth)*4, (max_shape_height_px-height_from_depth)*3, this.max_shape_width_px, 0);
 		this.addChild(this.world);
-		this.world.x = 200;
+		this.world.x = this.max_shape_width_px;
 		this.world.y = 0;
 
 		this.g.beginFill("rgba(255,255,255,1.0)");
@@ -81,9 +82,10 @@
 		if (evt.target.parent instanceof ObjectLibrary)
 		{
 			evt.target.parent.removeObject(evt.target);
-		} else if (evt.target.parent instanceof Emptyb2World)
+		} else if (evt.target.parent instanceof Balanceb2World)
 		{
-			evt.target.removeFromWorld(evt.target.parent);
+			evt.target.parent.removeObject(evt.target)
+			//evt.target.removeFromWorld(evt.target.parent);
 		}
 		var lp = this.globalToLocal(gp.x, gp.y);
 		this.addChild(evt.target);
@@ -128,10 +130,12 @@
 		evt.onMouseUp = function (ev)
 		{
 			var parent = this.target.parent;
-			var wpoint = parent.world.globalToLocal(ev.stageX+offset.x, ev.stageY+offset.y);
-			if (parent.world.hitTest(wpoint.x, wpoint.y))
+			//
+			if (parent.world.hitTestObject(this.target))
 			{
-				this.target.addToWorld(parent.world, wpoint.x, wpoint.y);
+				var wpoint = parent.world.globalToLocal(ev.stageX+offset.x, ev.stageY+offset.y);
+				parent.world.addObject(this.target, wpoint.x, wpoint.y);
+				//this.target.addToWorld(parent.world, wpoint.x, wpoint.y);
 			} else
 			{
 				parent.library.addObject(this.target);

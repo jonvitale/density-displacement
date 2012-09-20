@@ -1,14 +1,14 @@
 (function (window)
 {
-	function BalanceModel (width_unit, height_unit, pan_width_unit)
+	function BalanceModel (width_unit, height_unit, PAN_WIDTH_unit)
 	{
 		this.width_unit = width_unit;
 		this.height_unit = height_unit;
-		this.pan_width_unit = pan_width_unit;
+		this.PAN_WIDTH_unit = PAN_WIDTH_unit;
 		this.width_px = width_unit * UNIT_TO_PIXEL;
 		this.height_px = height_unit * UNIT_TO_PIXEL;
-		this.pan_width_px = pan_width_unit * UNIT_TO_PIXEL;
-		this.pan_width = this.pan_width_px;
+		this.PAN_WIDTH_px = PAN_WIDTH_unit * UNIT_TO_PIXEL;
+		this.PAN_WIDTH = this.PAN_WIDTH_px;
 		this.initialize();
 	}
 	var p = BalanceModel.prototype = new Container();
@@ -75,6 +75,7 @@
 		this.BEAM_LENGTH_Y = this.BEAM_ARC_DY;
 		this.BEAM_LENGTH = Math.sqrt(this.BEAM_LENGTH_X*this.BEAM_LENGTH_X + this.BEAM_LENGTH_Y*this.BEAM_LENGTH_Y);
 		this.BEAM_ANGLE = Math.tan(this.BEAM_LENGTH_Y/this.BEAM_LENGTH_X);
+		this.PAN_WIDTH = this.width_px/4;
 		this.tiltAngle = 0; 
 		this.netTorque = 0;
 		this.angularVelocity = 0;
@@ -326,12 +327,12 @@
 		g.clear();
 		g.setStrokeStyle(2);
 		g.beginStroke("#AAAAAA");
-		g.moveTo(-this.pan_width/2, 0);
+		g.moveTo(-this.PAN_WIDTH/2, 0);
 		g.lineTo(0, -this.PAN_DY)
-		g.moveTo(this.pan_width/2, 0);
+		g.moveTo(this.PAN_WIDTH/2, 0);
 		g.lineTo(0, -this.PAN_DY)
 		g.beginFill("#CCCCCC");
-		g.drawRect(-this.pan_width/2, 0, this.pan_width, this.PAN_HEIGHT);
+		g.drawRect(-this.PAN_WIDTH/2, 0, this.PAN_WIDTH, this.PAN_HEIGHT);
 		g.endFill();
 	}
 	p.placeObjectsInPans = function ()

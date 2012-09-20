@@ -20,7 +20,12 @@
 		this.SCALE = SCALE;
 
 		this.addChild(this.compShape);
+		this.width_px_left = compShape.width_px_left;
+		this.width_px_right = compShape.width_px_right;
+		this.height_px_above = compShape.height_px_above;
+		this.height_px_below = compShape.height_px_below;
 
+		this.world = undefined;
 		// create an array of Fixture Definitions and Body Definitions and put them in relative space from each other
 		this.fixDefs = new Array();
 		
@@ -28,7 +33,7 @@
 		bodyDef.type = b2Body.b2_dynamicBody;
 		bodyDef.position.x = 0;
 		bodyDef.position.y = 0;
-
+		bodyDef.userData = {"type":"compShape", "contact":null};
 
 		var i, j;
 		for (i = 0; i < compShape.massArray2d.length; i++)
@@ -38,8 +43,8 @@
 				if (compShape.massArray2d[i][j] > 0)
 				{
 					var fixDef = new b2FixtureDef;
-					fixDef.density = 1.0;
-					fixDef.frictin = 0.5;
+					fixDef.density = compShape.massArray2d[i][j];
+					fixDef.friction = 1.0;
 					fixDef.restitution = 0.2;
 					var vec = new b2Vec2();
 					vec.Set (((i+0.5)*compShape.unit_width_px)/this.SCALE, ((j+0.5)*compShape.unit_width_px)/this.SCALE);
@@ -51,6 +56,7 @@
 			}
 		}
 	}
+
 	p.addToWorld = function(world, x, y)
 	{
 		world.addChild(this);
