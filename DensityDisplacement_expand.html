@@ -43,6 +43,7 @@
 		<script src="js/myDisplayObjects/DraggableBitmap.js"></script>
 		
 		<script src="js/Myb2Objects/Emptyb2World.js"></script>
+		<script src="js/Myb2Objects/Beakerb2World.js"></script>
 		<script src="js/Myb2Objects/Balanceb2World.js"></script>
 		<script src="js/Myb2Objects/b2Actor.js"></script>
 		<script src="js/builder/VolumeViewer.js"></script>
@@ -61,7 +62,7 @@
 		<script src="js/RectPrism.js"></script>
 		<script>
 			var STAGE_WIDTH = 810;
-			var STAGE_HEIGHT = 670;
+			var STAGE_HEIGHT = 680;
 			var UNIT_TO_PIXEL = 20;
 			var METER_TO_UNIT = 100;
 			var PADDING = 8;
@@ -94,7 +95,8 @@
 		<form id = "makeObjectForm" class="overForm">
 			<input type="button" id="makeObject" value="Create" onclick="createObject()" class="button"/>
 		</form> 
-		<canvas width=500 height=670 id="canvas" ></canvas>
-		<canvas width=500 height=670 id="debugcanvas" style="position:absolute left:600 "></canvas>
+		<canvas width=810 height=680 id="canvas" ></canvas>
+		<canvas width=700 height=600 id="debugcanvas2" ></canvas>
+		<canvas width=600 height=600 id="debugcanvas" ></canvas>
 	</body>	
 </html>

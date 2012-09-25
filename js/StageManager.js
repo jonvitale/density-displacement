@@ -13,11 +13,14 @@
         , b2RevoluteJointDef = Box2D.Dynamics.Joints.b2RevoluteJointDef
         , b2DistanceJointDef = Box2D.Dynamics.Joints.b2DistanceJointDef
         , b2FrictionJointDef = Box2D.Dynamics.Joints.b2FrictionJointDef
-        , b2ContactListener = Box2D.Dynamics.b2ContactListener;
-          ;
+        , b2ContactListener = Box2D.Dynamics.b2ContactListener
+        , b2RayCastInput = Box2D.Collision.b2RayCastInput
+        , b2RayCastOutput = Box2D.Collision.b2RayCastOutput
+        ;
 
         var DEBUG = true;
         var SCALE = 20;
+        var PADDING = 10;
 
 (function (window)
 {
@@ -31,11 +34,13 @@
 
 		this.materialNameDisplayMapping = {"DWood":"Wood A", "LWood":"Wood B", "Metal":"Metal", "Plastic":"Plastic"}
 		this.materialNameMassMapping = {"DWood": 1.25, "LWood": 0.75, "Metal": 1.5, "Plastic": 0.0625}
+		this.view_sideAngle = 10*Math.PI/180;
+		this.view_topAngle = 20*Math.PI/180;
 		// setup builder
-		this.builder = new ObjectBuildingPanel(STAGE_WIDTH, 200, this.materialNameDisplayMapping);
+		this.builder = new ObjectBuildingPanel(STAGE_WIDTH, 200, this.materialNameDisplayMapping, this.view_sideAngle, this.view_topAngle);
 		this.stage.addChild(this.builder);
 
-		this.tester = new ObjectTestingPanel(STAGE_WIDTH, STAGE_HEIGHT-this.builder.height_px, this.builder.vv.width_px, this.builder.vv.height_px, this.builder.vv.width_from_depth, this.builder.vv.height_from_depth);
+		this.tester = new ObjectTestingPanel(STAGE_WIDTH, STAGE_HEIGHT-this.builder.height_px, this.builder.vv.width_px, this.builder.vv.height_px, this.builder.vv.width_from_depth, this.builder.vv.height_from_depth, this.view_sideAngle, this.view_topAngle);
 		this.stage.addChild(this.tester);
 		this.tester.y = this.builder.height_px;
 		

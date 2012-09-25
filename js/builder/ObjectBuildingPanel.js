@@ -2,9 +2,9 @@
 {
 	/** A space for displaying the names of materials, clickable/draggable materials
 	and a grid space for putting them together */
-	function ObjectBuildingPanel (width_px, height_px, materialNameDisplayMapping)
+	function ObjectBuildingPanel (width_px, height_px, materialNameDisplayMapping, view_sideAngle, view_topAngle)
 	{
-		this.initialize(width_px, height_px, materialNameDisplayMapping);
+		this.initialize(width_px, height_px, materialNameDisplayMapping, view_sideAngle, view_topAngle);
 	}
 	var p = ObjectBuildingPanel.prototype = new Container();
 	p.Container_initialize = ObjectBuildingPanel.prototype.initialize;
@@ -13,13 +13,14 @@
 	// constants
 	p.MATERIAL_TYPES = ["full", "center3", "center1", "ends"];
 
-	p.initialize = function(width_px, height_px, materialNameDisplayMapping)
+	p.initialize = function(width_px, height_px, materialNameDisplayMapping, view_sideAngle, view_topAngle)
 	{
 		this.Container_initialize();
 		this.width_px = width_px;
 		this.height_px = height_px;
 		this.materialNameDisplayMapping = materialNameDisplayMapping;
-		
+		this.view_sideAngle = view_sideAngle;
+		this.view_topAngle = view_topAngle;
 
 		//background
 		this.g = new Graphics();
@@ -30,7 +31,7 @@
 		this.materialsMenu = new MaterialsMenu(this.width_px/8, this.height_px, this.materialNameDisplayMapping);
 		this.addChild(this.materialsMenu);
 		
-		this.vv = new VolumeViewer(20, 20, 20, 5, 5, 5, 10*Math.PI/180, 20*Math.PI/180);
+		this.vv = new VolumeViewer(20, 20, 20, 5, 5, 5, this.view_sideAngle, this.view_topAngle);
 		this.vv.x = this.materialsMenu.x + this.materialsMenu.width_px + 400;
 		this.vv.y = 0;
 		this.addChild(this.vv);

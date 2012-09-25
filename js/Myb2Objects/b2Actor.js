@@ -1,9 +1,9 @@
 (function (window)
 {
 
-	function b2Actor (compShape, SCALE)
+	function b2Actor (compShape)
 	{
-		this.initialize (compShape, SCALE);
+		this.initialize (compShape);
 	}
 
 	var p = b2Actor.prototype = new Container();
@@ -13,11 +13,10 @@
 	p.Container_tick = p._tick;
 
 
-	p.initialize = function (compShape, SCALE)
+	p.initialize = function (compShape)
 	{
 		this.Container_initialize();
 		this.compShape = compShape;
-		this.SCALE = SCALE;
 
 		this.addChild(this.compShape);
 		this.width_px_left = compShape.width_px_left;
@@ -33,69 +32,49 @@
 		bodyDef.type = b2Body.b2_dynamicBody;
 		bodyDef.position.x = 0;
 		bodyDef.position.y = 0;
-		bodyDef.userData = {"type":"compShape", "contact":null};
+		bodyDef.userData = {"skin":compShape}
 
+		this.constructFixtures();
+		
+	}
+	p.constructFixtures = function ()
+	{
 		var i, j;
-		for (i = 0; i < compShape.massArray2d.length; i++)
+		var compShape = this.compShape;
+		for (i = 0; i < compShape.array2d.length; i++)
 		{
-			for (j = 0; j < compShape.massArray2d[i].length; j++)
+			for (j = 0; j < compShape.array2d[i].length; j++)
 			{
-				if (compShape.massArray2d[i][j] > 0)
-				{
-					var fixDef = new b2FixtureDef;
-					fixDef.density = compShape.massArray2d[i][j];
-					fixDef.friction = 1.0;
-					fixDef.restitution = 0.2;
-					var vec = new b2Vec2();
-					vec.Set (((i+0.5)*compShape.unit_width_px)/this.SCALE, ((j+0.5)*compShape.unit_width_px)/this.SCALE);
-					fixDef.shape = new b2PolygonShape;
-					fixDef.shape.SetAsOrientedBox(compShape.unit_width_px/2/this.SCALE, (compShape.unit_height_px/2/this.SCALE), vec, 0.0);
-
-					this.fixDefs.push(fixDef);
-				}					
+				var fixDef = new b2FixtureDef;
+				fixDef.density = compShape.array2d[i][j].mass*1;
+				fixDef.friction = 0.5;
+				fixDef.restitution = 0.2;
+				fixDef.filter.categoryBits = 1;
+				fixDef.filter.maskBits = 3;
+				var vec = new b2Vec2();
+				vec.Set (((i+0.5)*compShape.unit_width_px)/SCALE, ((j+0.5)*compShape.unit_width_px)/SCALE);
+				fixDef.shape = new b2PolygonShape;
+				fixDef.shape.SetAsOrientedBox(compShape.unit_width_px/2/SCALE, (compShape.unit_height_px/2/SCALE), vec, 0.0);
+				// we need information about how many open spaces are in this fixture
+				fixDef.totalSpaces = compShape.array2d[i][j].totalSpaces;
+				fixDef.materialSpaces = compShape.array2d[i][j].materialSpaces;
+				fixDef.exteriorSpaces = compShape.array2d[i][j].exteriorSpaces;
+				fixDef.interiorSpaces = compShape.array2d[i][j].interiorSpaces;
+				fixDef.protectedSpaces = compShape.array2d[i][j].protectedSpaces;
+				fixDef.materialDensity = compShape.array2d[i][j].mass / compShape.array2d[i][j].materialSpaces;
+				this.fixDefs.push(fixDef);							
 			}
 		}
 	}
-
-	p.addToWorld = function(world, x, y)
-	{
-		world.addChild(this);
-		this.x = x;
-		this.y = y;
-		
-		this.world = world;
-		
-		var bodyDef = this.bodyDef;
-		bodyDef.position.x = (world.x + x) / this.SCALE;
-		bodyDef.position.y = (world.y + y) / this.SCALE;
-			
-		var body = this.body = world.b2world.CreateBody(bodyDef);
 	
-		for (var i = 0; i < this.fixDefs.length; i++)
-		{
-			var fixDef = this.fixDefs[i];
-			body.CreateFixture(fixDef);
-
-		}
-		world.actors.push(this);
-		
-	}
-	p.removeFromWorld = function (world)
-	{
-		world.removeChild(this);
-		world.actors.splice(world.actors.indexOf(this), 1);
-		world.b2world.DestroyBody(this.body);
-		this.world = undefined;
-	}
-
 	p.update = function ()
 	{
 		if (this.body != undefined && this.parent != undefined)
 		{
 			var vec = new b2Vec2()
 			vec.Set(0, 0);
-			this.x = (this.body.GetWorldPoint(vec).x) * this.SCALE  - this.parent.x;
-			this.y = (this.body.GetWorldPoint(vec).y ) * this.SCALE - this.parent.y;
+			this.x = (this.body.GetWorldPoint(vec).x) * SCALE  - this.parent.x;
+			this.y = (this.body.GetWorldPoint(vec).y ) * SCALE - this.parent.y;
 			this.rotation = this.body.GetAngle() * (180 / Math.PI);
 		}
 	}

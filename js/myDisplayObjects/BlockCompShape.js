@@ -24,6 +24,9 @@
 		this.unit_width_px = unit_width_px;
 		this.unit_height_px = unit_height_px;
 		this.unit_depth_px = unit_depth_px;
+		this.width_units = blockArray3d.length;
+		this.height_units = blockArray3d[0].length;
+		this.depth_units = blockArray3d[0][0].length;
 		this.blockArray3d = blockArray3d;
 		this.materialNameMassMapping = materialNameMassMapping;
 		this.view_topAngle = view_topAngle;
@@ -41,7 +44,10 @@
 		this.getLowestRow();
 		this.getLeftmostColumn();
 		this.getRightmostColumn();
-		this.getMassArray2d();
+		this.getArray2d();
+		//this.classifyOpenSpaces();
+		//this.getMassArray2d();
+		//this.getDepthCountArray2d();
 		//console.log(this.leftmostColumn, this.highestRow, this.rightmostColumn, this.lowestRow);
 		//console.log(this.massArray2d);
 		// draw figure
@@ -198,7 +204,7 @@
 			var bottom_y = this.getLowestRow();
 
 			// go through rows and columns adding up mass in depths
-			var i, j, k
+			var i, j, k, d;
 			for (i = left_x; i <= right_x; i++)
 			{
 				massArray2d[i - left_x] = new Array();
@@ -221,6 +227,422 @@
 		{
 			return this.massArray2d;
 		}	
+	}
+
+	p.getArray2d = function ()
+	{
+		if (this.array2d == undefined)
+		{
+			var array2d = this.array2d = new Array();
+			var spaces3d = this.classifyOpenSpaces();
+			var left_x = this.getLeftmostColumn();
+			var right_x = this.getRightmostColumn();
+			var top_y = this.getHighestRow();
+			var bottom_y = this.getLowestRow();
+
+			// go through rows and columns adding up mass in depths
+			var i, j, k, d;
+			for (i = left_x; i <= right_x; i++)
+			{
+				array2d[i - left_x] = new Array();
+				for (j = top_y; j <= bottom_y; j++)
+				{
+					var mass = 0;
+					var materialSpaces = 0;
+					var exteriorSpaces = 0;
+					var interiorSpaces = 0;
+					var protectedSpaces = 0;
+					for (k = 0; k < this.blockArray3d[i][j].length; k++)
+					{
+						if (this.blockArray3d[i][j][k] != "")
+						{
+							mass += this.materialNameMassMapping[this.blockArray3d[i][j][k]];
+						}
+
+						if (spaces3d[i][j][k] == "B")
+						{
+							materialSpaces++;
+						} else if (spaces3d[i][j][k] == "E")
+						{
+							exteriorSpaces++;
+						} else if (spaces3d[i][j][k] == "I")
+						{
+							interiorSpaces++;
+						} else if (spaces3d[i][j][k] == "P")
+						{
+							protectedSpaces++;
+						}
+					}
+					array2d[i - left_x][j - top_y] = {"mass":mass, "totalSpaces":spaces3d[0][0].length, "materialSpaces":materialSpaces, "exteriorSpaces":exteriorSpaces, "interiorSpaces":interiorSpaces, "protectedSpaces":protectedSpaces};
+				}
+			} 
+			return this.massArray2d;
+			
+		} else
+		{
+			return this.array2d;
+		}	
+	}
+
+	/** This function classifies each space as either "B" (has a block within it), "I" (empty space is on the interior of the hull), "E" (Empty space is on the exterior of the hull)
+		Works from lowest level up, makes three passes from a corner to see if the left-bottom-below spaces are occupied/interior or exterior, if temporarily interior given a temporary designation of "L".  
+		Does the same from top-right point looking at top-right-below space, given temporary designation of "R".  One more pass, R spaces converted to I if left-bottom-below okay. */
+	p.classifyOpenSpaces = function ()
+	{
+		var input = this.blockArray3d;
+		var output = new Array();
+		var i, j, k
+		// populate interior array with "", exterior with B or E
+		for (i = 0; i < input.length; i++)
+		{
+			output[i] = new Array(); 
+			for (j = 0; j < input[0].length; j++)
+			{
+				output[i][j] = new Array();
+				for (k = 0; k < input[0][0].length; k++)
+				{
+					if (i == 0 || i == input.length-1 || j == input[0].length-1 || k == 0 || k == input[0][0].length-1)
+					{
+						// is this exterior space occupied
+						if (input[i][j][k] != "")
+						{
+							output[i][j][k] = "B";
+						} else
+						{
+							output[i][j][k] = "E";
+						}
+					} else
+					{
+						// is this exterior space occupied
+						if (input[i][j][k] != "")
+						{
+							output[i][j][k] = "B";
+						} else
+						{
+							output[i][j][k] = "";
+						}
+					}
+				}
+			}
+		}
+		// first pass, from bottom up. from 0,0  Don't bother with exterior
+		for (j = output[0].length - 2; j >= 0; j--)
+		{
+			i = 0;
+			k = 0;
+			for (d = 1; d < output.length + output[0][0].length - 2; d++)
+			{
+				i = d;
+				k = 0;
+				// a diagonal
+				while (i >= 0)
+				{
+					// just need interior
+					if (i > 0 && i < output.length-1 && k > 0 && k < output[0][0].length-1)
+					{
+						// ((output[i][j+1][k] != "E") && (output[i-1][j][k] != "E") && (output[i][j][k-1] != "E"))
+						if (output[i][j][k] == "")
+						{
+							if ((output[i][j+1][k] == "B" || output[i][j+1][k] == "I" || output[i][j+1][k] == "L") && (output[i-1][j][k] == "B" || output[i-1][j][k] == "I" || output[i-1][j][k] == "L") && (output[i][j][k-1] == "B" || output[i][j][k-1] == "I" || output[i][j][k-1] == "L"))
+							{
+								output[i][j][k] = "L";
+							} else
+							{
+								output[i][j][k] = "E";
+							}
+						}
+						
+					}
+					i--;
+					k++;
+				}
+			}
+		}
+		// second pass, from length-1, length-1
+		for (j = output[0].length - 2; j >= 0; j--)
+		{
+			i = 0;
+			k = 0;
+			for (d = output.length + output[0][0].length - 3; d >= 1; d--)
+			{
+				k = d;
+				i = 0;
+				// a diagonal
+				while (k >= 0)
+				{
+					// just need interior
+					if (i > 0 && i < output.length-1 && k > 0 && k < output[0][0].length-1)
+					{
+						if (output[i][j][k] == "L")
+						{
+							if ((output[i][j+1][k] == "B" || output[i][j+1][k] == "I" || output[i][j+1][k] == "R") && (output[i+1][j][k] == "B" || output[i+1][j][k] == "I" || output[i+1][j][k] == "R") && (output[i][j][k+1] == "B" || output[i][j][k+1] == "I" || output[i][j][k+1] == "R"))
+							{
+								output[i][j][k] = "R";
+							} else 
+							{
+								output[i][j][k] = "E";
+							}
+						}
+						
+					}
+					i++;
+					k--;
+				}
+			}
+		}
+		// final pass, make sure all R's are okay and turn into I
+		for (j = output[0].length - 2; j >= 0; j--)
+		{
+			i = 0;
+			k = 0;
+			for (d = 1; d < output.length + output[0][0].length - 2; d++)
+			{
+				i = d;
+				k = 0;
+				// a diagonal
+				while (i >= 0 && k < output[0][0].length)
+				{
+					// just need interior
+					if (i > 0 && i < output.length-1 && k > 0 && k < output[0][0].length-1)
+					{
+						if (output[i][j][k] == "R")
+						{
+							if ((output[i][j+1][k] == "B" || output[i][j+1][k] == "I" || output[i][j+1][k] == "R") && (output[i-1][j][k] == "B" || output[i-1][j][k] == "I" || output[i-1][j][k] == "R") && (output[i][j][k-1] == "B" || output[i][j][k-1] == "I" || output[i][j][k-1] == "R"))
+							{
+								output[i][j][k] = "I";
+							} else
+							{
+								output[i][j][k] = "E";
+							}
+						}
+						
+					}
+					i--;
+					k++;
+				}
+			}
+		}
+		////////////////////////////////////////////////////////////
+		// repeat process above starting at the top of the structure
+		var output_top = new Array();
+		// populate interior array with "", exterior with B or E
+		for (i = 0; i < input.length; i++)
+		{
+			output_top[i] = new Array(); 
+			for (j = 0; j < input[0].length; j++)
+			{
+				output_top[i][j] = new Array();
+				for (k = 0; k < input[0][0].length; k++)
+				{
+					if (i == 0 || i == input.length-1 || j == input[0].length-1 || k == 0 || k == input[0][0].length-1)
+					{
+						// is this exterior space occupied
+						if (input[i][j][k] != "")
+						{
+							output_top[i][j][k] = "B";
+						} else
+						{
+							output_top[i][j][k] = "E";
+						}
+					} else
+					{
+						// is this exterior space occupied
+						if (input[i][j][k] != "")
+						{
+							output_top[i][j][k] = "B";
+						} else
+						{
+							output_top[i][j][k] = "";
+						}
+					}
+				}
+			}
+		}
+		// first pass, from bottom up. from 0,0  Don't bother with exterior
+		for (j = 1; j < output_top[0].length - 1; j++)
+		{
+			i = 0;
+			k = 0;
+			for (d = 1; d < output_top.length + output_top[0][0].length - 2; d++)
+			{
+				i = d;
+				k = 0;
+				// a diagonal
+				while (i >= 0)
+				{
+					// just need interior
+					if (i > 0 && i < output_top.length-1 && k > 0 && k < output_top[0][0].length-1)
+					{
+						if (output_top[i][j][k] == "")
+						{
+							if ((output_top[i][j-1][k] == "B" || output_top[i][j-1][k] == "I" || output_top[i][j-1][k] == "L") && (output_top[i-1][j][k] == "B" || output_top[i-1][j][k] == "I" || output_top[i-1][j][k] == "L") && (output_top[i][j][k-1] == "B" || output_top[i][j][k-1] == "I" || output_top[i][j][k-1] == "L"))
+							{
+								output_top[i][j][k] = "L";
+							} else
+							{
+								output_top[i][j][k] = "E";
+							}
+						}
+						
+					}
+					i--;
+					k++;
+				}
+			}
+		}
+		// second pass, from length-1, length-1
+		for (j = 1; j < output_top[0].length - 1; j++)
+		{
+			i = 0;
+			k = 0;
+			for (d = output_top.length + output_top[0][0].length - 3; d >= 1; d--)
+			{
+				k = d;
+				i = 0;
+				// a diagonal
+				while (k >= 0)
+				{
+					// just need interior
+					if (i > 0 && i < output_top.length-1 && k > 0 && k < output_top[0][0].length-1)
+					{
+						// ((output_top[i][j-1][k] != "E") && (output_top[i-1][j][k] != "E") && (output_top[i][j][k-1] != "E"))
+						if (output_top[i][j][k] == "L")
+						{
+							if ((output_top[i][j-1][k] == "B" || output_top[i][j-1][k] == "I" || output_top[i][j-1][k] == "R") && (output_top[i+1][j][k] == "B" || output_top[i+1][j][k] == "I" || output_top[i+1][j][k] == "R") && (output_top[i][j][k+1] == "B" || output_top[i][j][k+1] == "I" || output_top[i][j][k+1] == "R"))
+							{
+								output_top[i][j][k] = "R";
+							} else 
+							{
+								output_top[i][j][k] = "E";
+							}
+						}
+						
+					}
+					i++;
+					k--;
+				}
+			}
+		}
+		// final pass, make sure all R's are okay and turn into I
+		for (j = 1; j < output_top[0].length - 1; j++)
+		{
+			i = 0;
+			k = 0;
+			for (d = 1; d < output_top.length + output_top[0][0].length - 2; d++)
+			{
+				i = d;
+				k = 0;
+				// a diagonal
+				while (i >= 0 && k < output_top[0][0].length)
+				{
+					// just need interior
+					if (i > 0 && i < output_top.length-1 && k > 0 && k < output_top[0][0].length-1)
+					{
+						if (output_top[i][j][k] == "R")
+						{
+							if ((output_top[i][j-1][k] == "B" || output_top[i][j-1][k] == "I" || output_top[i][j-1][k] == "R") && (output_top[i-1][j][k] == "B" || output_top[i-1][j][k] == "I" || output_top[i-1][j][k] == "R") && (output_top[i][j][k-1] == "B" || output_top[i][j][k-1] == "I" || output_top[i][j][k-1] == "R"))
+							{
+								output_top[i][j][k] = "I";
+							} else
+							{
+								output_top[i][j][k] = "E";
+							}
+						}
+						
+					}
+					i--;
+					k++;
+				}
+			}
+		}
+
+		// Check both arrays, if both have I, then change to P (protected), else leave as is
+		for (i = 0; i < output.length; i++)
+		{
+			for (j = 0; j < output[0].length; j++)
+			{
+				for (k = 0; k < output[0][0].length; k++)
+				{
+					if (output[i][j][k] == "I" && output_top[i][j][k] == "I")
+					{
+						output[i][j][k] = "P";
+					}
+				}
+			}
+		}
+
+		//this.printArray3d(output);
+		return (output);
+	}
+
+	
+
+	p.getDepthCountArray2d = function ()
+	{
+		if (this.depthCountArray2d == undefined)
+		{
+			var depthCountArray2d = this.depthCountArray2d = new Array();
+			var left_x = this.getLeftmostColumn();
+			var right_x = this.getRightmostColumn();
+			var top_y = this.getHighestRow();
+			var bottom_y = this.getLowestRow();
+
+			// go through rows and columns adding up mass in depths
+			var i, j, k
+			for (i = left_x; i <= right_x; i++)
+			{
+				depthCountArray2d[i - left_x] = new Array();
+				for (j = top_y; j <= bottom_y; j++)
+				{
+					var count = 0;
+					for (k = 0; k < this.blockArray3d[i][j].length; k++)
+					{
+						if (this.blockArray3d[i][j][k] != "")
+						{
+							count += 1;
+						}
+					}
+					depthCountArray2d[i - left_x][j - top_y] = count;
+				}
+			} 
+			return this.depthCountArray2d;
+			
+		} else
+		{
+			return this.depthCountArray2d;
+		}	
+	}
+
+	p.printArray3d = function (arr)
+	{
+		var i, j, k, e;
+		var str;
+		console.log("_________________start________________________________");
+		for (j = 0; j < arr[0].length; j++)
+		{
+			for (k = arr[0][0].length-1; k >= 0; k--)
+			{
+				str = ""
+				for (e = 0; e < k; e++)
+				{
+					str = str + " ";
+				}
+
+				for (i = 0; i < arr.length; i ++)
+				{
+					if (arr[i][j][k] == "")
+					{
+						str = str + "  ";
+					} else
+					{
+						str = str + arr[i][j][k] + " ";	
+					}				
+				}
+				console.log (str);
+			}
+		}
+		console.log("_________________stop________________________________");
+		
 	}
 
 ////////////////////// DRAWING STUFF /////////////////////////
@@ -268,6 +690,7 @@
 						// continuously override bottom left
 						this.bl_x = fbl_x; this.bl_y = fbl_y;
 
+						
 						// draw cube top, front, side
 						g.setStrokeStyle(1);
 						g.beginLinearGradientStroke(this.getMaterialStrokeColors(materialName), this.getMaterialStrokeRatios(materialName), ftl_x, ftl_y, btr_x, ftl_y);
@@ -279,10 +702,17 @@
 						g.lineTo(btr_x, btr_y);
 						g.endStroke();
 						g.endFill();
+
 						g.setStrokeStyle(1);
 						g.beginLinearGradientStroke(this.getMaterialStrokeColors(materialName), this.getMaterialStrokeRatios(materialName), ftl_x, ftl_y, ftr_x, ftr_y);
-						g.beginLinearGradientFill(this.getMaterialFillColors(materialName), this.getMaterialFillRatios(materialName), ftl_x, ftl_y, ftr_x, ftr_y);
+						if (k != 0) //this.depthArray.length-1)
+						{
+							g.beginLinearGradientFill(this.getMaterialFillColors(materialName), this.getMaterialFillRatios(materialName), ftl_x, ftl_y, btr_x, ftl_y);
+						} else
+						{
 						
+							g.beginLinearGradientFill(this.getMaterialFillColorsShadow(materialName), this.getMaterialFillRatios(materialName), ftl_x, ftl_y, btr_x, ftl_y);
+						}
 						g.moveTo(ftr_x, ftr_y);
 						g.lineTo(ftl_x, ftl_y);
 						g.lineTo(fbl_x, fbl_y);
@@ -290,10 +720,10 @@
 						g.lineTo(ftr_x, ftr_y);
 						g.endStroke();
 						g.endFill();
+
 						g.setStrokeStyle(1);
 						g.beginLinearGradientStroke(this.getMaterialStrokeColors(materialName), this.getMaterialStrokeRatios(materialName), ftr_x, ftr_y, btr_x, btr_y);
-						g.beginLinearGradientFill(this.getMaterialFillColors(materialName), this.getMaterialFillRatios(materialName), btr_x, btr_y, fbl_x, btr_y);
-						
+						g.beginLinearGradientFill(this.getMaterialFillColorsShadow(materialName), this.getMaterialFillRatios(materialName), btr_x, btr_y, fbl_x, btr_y);						
 						g.moveTo(btr_x, btr_y);
 						g.lineTo(ftr_x, ftr_y);
 						g.lineTo(fbr_x, fbr_y);
@@ -301,6 +731,7 @@
 						g.lineTo(btr_x, btr_y);
 						g.endStroke();
 						g.endFill();
+						
 					} else if (this.DEBUG && k == 0)
 					{
 						g.beginFill("rgba(255,255,0,0.5)");
@@ -350,6 +781,23 @@
 		} else if (m == "Plastic")
 		{
 			return ["#F074AC", "#EB008B", "#EB008B", "#F074AC", "#EB008B", "#EB008B", "#F074AC"];
+		}
+	}
+	/** Get a gradient fill for given material type */
+	p.getMaterialFillColorsShadow = function (m)
+	{
+		if (m == "DWood")
+		{
+			return ["#4D1603", "#5D2905", "#440B08", "#5D2905", "#440B08", "#4C0402", "#440B08"];
+		} else if (m == "LWood")
+		{
+			return ["#CBBFA0", "#CAAB72", "#CAB380", "#B89F71", "#C0A371", "#CBBEA2", "#C9B28A"];
+		} else if (m == "Metal")
+		{
+			return ["#8B8C8E", "#686C70", "#8F8E92", "#6E7074", "#77797C", "#93868A", "#8B8C8E"];
+		} else if (m == "Plastic")
+		{
+			return ["#C0447C", "#BB005B", "#BB005B", "#C0447C", "#BB005B", "#BB005B", "#C0447C"];
 		}
 	}
 	p.getMaterialFillRatios = function (m)

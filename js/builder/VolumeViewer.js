@@ -164,7 +164,14 @@
 					// is this the first block?
 					if (this.getNumChildren() == 2)
 					{
-						goodLocation = true;
+						// cannot be an "ends" piece
+						if (o.allBlocksConnected())
+						{
+							goodLocation = true;
+						} else
+						{
+							goodLocation = false;
+						}
 					}  else
 					{	
 						// is this block attached to another?

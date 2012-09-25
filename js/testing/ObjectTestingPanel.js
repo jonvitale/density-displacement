@@ -2,9 +2,9 @@
 {
 	/** A space for displaying the names of materials, clickable/draggable materials
 	and a grid space for putting them together */
-	function ObjectTestingPanel (width_px, height_px, max_shape_width_px, max_shape_height_px, width_from_depth, height_from_depth)
+	function ObjectTestingPanel (width_px, height_px, max_shape_width_px, max_shape_height_px, width_from_depth, height_from_depth, view_sideAngle, view_topAngle)
 	{
-		this.initialize(width_px, height_px, max_shape_width_px, max_shape_height_px, width_from_depth, height_from_depth);
+		this.initialize(width_px, height_px, max_shape_width_px, max_shape_height_px, width_from_depth, height_from_depth, view_sideAngle, view_topAngle);
 	}
 	var p = ObjectTestingPanel.prototype = new Container();
 	p.Container_initialize = ObjectTestingPanel.prototype.initialize;
@@ -13,7 +13,7 @@
 	// constants
 	p.MATERIAL_TYPES = ["full", "center3", "center1", "ends"];
 
-	p.initialize = function(width_px, height_px, max_shape_width_px, max_shape_height_px, width_from_depth, height_from_depth)
+	p.initialize = function(width_px, height_px, max_shape_width_px, max_shape_height_px, width_from_depth, height_from_depth, view_sideAngle, view_topAngle)
 	{
 		this.Container_initialize();
 		this.width_px = width_px;
@@ -22,6 +22,8 @@
 		this.max_shape_height_px = max_shape_height_px;
 		this.width_from_depth = width_from_depth;
 		this.height_from_depth = height_from_depth;
+		this.view_sideAngle = view_sideAngle;
+		this.view_topAngle = view_topAngle;
 
 		//background
 		this.g = new Graphics();
@@ -30,15 +32,25 @@
 
 		// the list of material names
 		//library
-		this.library = new ObjectLibrary(this.max_shape_width_px, this.max_shape_height_px*5+this.TITLE_HEIGHT, this.max_shape_height_px, height_from_depth);
+		this.library = new ObjectLibrary(this.width_px, this.max_shape_height_px, this.max_shape_width_px, this.max_shape_height_px, width_from_depth, height_from_depth);
 		this.addChild(this.library);
 		this.library.x = 0;
 		this.library.y = 0;
-		//world
-		this.world = new Balanceb2World((max_shape_width_px-width_from_depth)*4, (max_shape_height_px-height_from_depth)*3, this.max_shape_width_px, 0);
-		this.addChild(this.world);
-		this.world.x = this.max_shape_width_px;
-		this.world.y = 0;
+		//balanceWorld
+		this.balanceWorld = new Balanceb2World((max_shape_width_px-width_from_depth)*4, (max_shape_height_px-height_from_depth)*3, 0, this.library.y + this.library.height_px + PADDING);
+		this.addChild(this.balanceWorld);
+		this.balanceWorld.x = 0;
+		this.balanceWorld.y = this.library.y + this.library.height_px + PADDING;
+		//beakerWorld
+		var beaker_world_width_px = (max_shape_width_px-width_from_depth)*2;
+		var beaker_world_height_px = (max_shape_height_px-height_from_depth)*3
+		var beaker_width_px = this.max_shape_width_px;
+		var beaker_height_px = beaker_world_height_px*2/3;
+		var beaker_depth_px = this.max_shape_width_px - this.width_from_depth;
+		this.beakerWorld = new Beakerb2World(beaker_world_width_px, beaker_world_height_px, this.balanceWorld.x + PADDING + this.balanceWorld.width_px , this.library.y + this.library.height_px + PADDING, beaker_width_px, beaker_height_px, beaker_depth_px, this.view_sideAngle, this.view_topAngle, 0.5, 1.0) ;
+		this.addChild(this.beakerWorld);
+		this.beakerWorld.x = this.balanceWorld.x + PADDING + this.balanceWorld.width_px;
+		this.beakerWorld.y = this.library.y + this.library.height_px + PADDING;
 
 		this.g.beginFill("rgba(255,255,255,1.0)");
 		this.g.drawRect(0, 0, this.width_px, this.height_px);
@@ -65,8 +77,7 @@
 	////////////////////// CLASS SPECIFIC ////////////////////
 	p.addObjectToLibrary = function (compShape)
 	{
-		var actor = new b2Actor(compShape, this.SCALE);
-		this.library.addObject(actor);
+		var actor = new b2Actor(compShape); this.library.addObject(actor);
 		actor.onPress = this.actorPressHandler.bind(this);
 		actor.orig_parent = this.library;
 		this.actors.push(actor);
@@ -84,8 +95,10 @@
 			evt.target.parent.removeObject(evt.target);
 		} else if (evt.target.parent instanceof Balanceb2World)
 		{
-			evt.target.parent.removeObject(evt.target)
-			//evt.target.removeFromWorld(evt.target.parent);
+			evt.target.parent.removeObject(evt.target);
+		} else if (evt.target.parent instanceof Beakerb2World)
+		{
+			evt.target.parent.removeObject(evt.target);
 		}
 		var lp = this.globalToLocal(gp.x, gp.y);
 		this.addChild(evt.target);
@@ -131,12 +144,17 @@
 		{
 			var parent = this.target.parent;
 			//
-			if (parent.world.hitTestObject(this.target))
+			if (parent.balanceWorld.hitTestObject(this.target))
 			{
-				var wpoint = parent.world.globalToLocal(ev.stageX+offset.x, ev.stageY+offset.y);
-				parent.world.addObject(this.target, wpoint.x, wpoint.y);
-				//this.target.addToWorld(parent.world, wpoint.x, wpoint.y);
-			} else
+				var wpoint = parent.balanceWorld.globalToLocal(ev.stageX+offset.x, ev.stageY+offset.y);
+				parent.balanceWorld.addObject(this.target, wpoint.x, wpoint.y);
+				//this.target.addToWorld(parent.balanceWorld, wpoint.x, wpoint.y);
+			} else if (parent.beakerWorld.hitTestObject(this.target))
+			{
+				var wpoint = parent.beakerWorld.globalToLocal(ev.stageX+offset.x, ev.stageY+offset.y);
+				parent.beakerWorld.addObject(this.target, wpoint.x, wpoint.y);
+				//this.target.addToWorld(parent.balanceWorld, wpoint.x, wpoint.y);
+			}else
 			{
 				parent.library.addObject(this.target);
 			}

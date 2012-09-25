@@ -97,18 +97,25 @@
 				// draw cube top, front, side
 				g.setStrokeStyle(1);
 				g.beginLinearGradientStroke(this.getMaterialStrokeColors(highlightColor), this.getMaterialStrokeRatios(highlightColor), ftl_x, ftl_y, btr_x, ftl_y);
-				g.beginLinearGradientFill(this.getMaterialFillColors(this.materialName), this.getMaterialFillRatios(this.materialName), ftl_x, ftl_y, btr_x, ftl_y);
+				g.beginLinearGradientFill(this.getMaterialFillColors(this.materialName), this.getMaterialFillRatios(this.materialName), ftl_x, ftl_y, ftr_x, ftr_y);
 				g.moveTo(btr_x, btr_y);
 				g.lineTo(btl_x, btl_y);
 				g.lineTo(ftl_x, ftl_y);
 				g.lineTo(ftr_x, ftr_y);
 				g.lineTo(btr_x, btr_y);
-				g.endStroke();
+				//g.endStroke();
 				g.endFill();
+
+
 				g.setStrokeStyle(1);
 				g.beginLinearGradientStroke(this.getMaterialStrokeColors(highlightColor), this.getMaterialStrokeRatios(highlightColor), ftl_x, ftl_y, ftr_x, ftr_y);
-				g.beginLinearGradientFill(this.getMaterialFillColors(this.materialName), this.getMaterialFillRatios(this.materialName), ftl_x, ftl_y, ftr_x, ftr_y);
-				
+				if (i != 0) //this.depthArray.length-1)
+				{
+					g.beginLinearGradientFill(this.getMaterialFillColors(this.materialName), this.getMaterialFillRatios(this.materialName), ftl_x, ftl_y, btr_x, ftl_y);
+				} else
+				{				
+					g.beginLinearGradientFill(this.getMaterialFillColorsShadow(this.materialName), this.getMaterialFillRatios(this.materialName), ftl_x, ftl_y, btr_x, ftl_y);
+				}
 				g.moveTo(ftr_x, ftr_y);
 				g.lineTo(ftl_x, ftl_y);
 				g.lineTo(fbl_x, fbl_y);
@@ -116,10 +123,10 @@
 				g.lineTo(ftr_x, ftr_y);
 				g.endStroke();
 				g.endFill();
+
 				g.setStrokeStyle(1);
 				g.beginLinearGradientStroke(this.getMaterialStrokeColors(highlightColor), this.getMaterialStrokeRatios(highlightColor), ftr_x, ftr_y, btr_x, btr_y);
-				g.beginLinearGradientFill(this.getMaterialFillColors(this.materialName), this.getMaterialFillRatios(this.materialName), btr_x, btr_y, fbl_x, btr_y);
-				
+				g.beginLinearGradientFill(this.getMaterialFillColorsShadow(this.materialName), this.getMaterialFillRatios(this.materialName), btr_x, btr_y, fbl_x, btr_y);		
 				g.moveTo(btr_x, btr_y);
 				g.lineTo(ftr_x, ftr_y);
 				g.lineTo(fbr_x, fbr_y);
@@ -170,6 +177,38 @@
 			}
 		}
 	}
+	/** Necessary to ensure that all blocks are connected */
+	p.allBlocksConnected = function ()
+	{
+		var firstBlockFound = false;
+		var endBlockFound = false;
+		for (var i = 0; i < this.depthArray.length; i++)
+		{
+			if (this.depthArray[i] == 1)
+			{
+				if (!firstBlockFound)
+				{
+					firstBlockFound = true;
+				} else 
+				{
+					if (endBlockFound) return false;
+				}
+			} else
+			{
+				if (firstBlockFound)
+				{
+					endBlockFound = true;
+				} 
+			}
+		}
+		if (firstBlockFound)
+		{
+			return true;
+		} else
+		{
+			return false;
+		}
+	}
 	
 	p.highlightCorrect = function ()
 	{
@@ -199,6 +238,23 @@
 		} else if (m == "Plastic")
 		{
 			return ["#F074AC", "#EB008B", "#EB008B", "#F074AC", "#EB008B", "#EB008B", "#F074AC"];
+		}
+	}
+	/** Get a gradient fill for given material type */
+	p.getMaterialFillColorsShadow = function (m)
+	{
+		if (m == "DWood")
+		{
+			return ["#4D1603", "#5D2905", "#440B08", "#5D2905", "#440B08", "#4C0402", "#440B08"];
+		} else if (m == "LWood")
+		{
+			return ["#CBBFA0", "#CAAB72", "#CAB380", "#B89F71", "#C0A371", "#CBBEA2", "#C9B28A"];
+		} else if (m == "Metal")
+		{
+			return ["#8B8C8E", "#686C70", "#8F8E92", "#6E7074", "#77797C", "#93868A", "#8B8C8E"];
+		} else if (m == "Plastic")
+		{
+			return ["#C0447C", "#BB005B", "#BB005B", "#C0447C", "#BB005B", "#BB005B", "#C0447C"];
 		}
 	}
 	p.getMaterialFillRatios = function (m)
