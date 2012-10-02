@@ -309,53 +309,7 @@
 		// get some markers to use for placing objects
 
 	}
-	p.redraw2 = function()
-	{
-		// draw back of grid
-		this.g.setStrokeStyle(0.5);
-		this.g.beginStroke("rgba(0,0,0,1.0)");
-		this.g.beginFill("rgba(245,245,245,1.0)");
-		this.g.moveTo(this.tr_x, this.tr_y);
-		this.g.lineTo(this.tl_x, this.tl_y);
-		this.g.lineTo(this.bl_x, this.bl_y);
-		this.g.lineTo(this.br_x, this.br_y);
-		this.g.lineTo(this.tr_x, this.tr_y);
-		this.g.endFill();
-		//this.g.drawRect(0, 0, -this.width_units*this.unit_width_px, this.height_units*this.unit_height_px);
-		var i;
-		for (i = 0; i <= this.height_units; i++)
-		{
-			this.g.moveTo(this.tr_x, i * this.unit_height_px);
-			this.g.lineTo(this.tl_x, i * this.unit_height_px);
-		}
-
-		for (i = 0; i <= this.width_units; i++)
-		{
-			this.g.moveTo(i * -this.unit_width_px, this.tl_y);
-			this.g.lineTo(i * -this.unit_width_px, this.bl_y);	
-		}
-		
-		this.g.beginFill("rgba(245,245,245,1.0)");
-		this.g.moveTo(this.br_x, this.br_y);
-		this.g.lineTo(this.bl_x, this.bl_y);
-		this.g.lineTo(this.fl_x, this.fl_y);
-		this.g.lineTo(this.fr_x, this.fr_y);
-		this.g.lineTo(this.br_x, this.br_y);
-		this.g.endFill();
-		// draw bottom of grid
-		for (i = 0; i <= this.depth_units; i++)
-		{
-			this.g.moveTo(this.br_x - i * this.unit_depth_px*Math.sin(this.view_sideAngle), this.bl_y + i * this.unit_depth_px*Math.sin(this.view_topAngle));
-			this.g.lineTo(this.bl_x - i * this.unit_depth_px*Math.sin(this.view_sideAngle), this.bl_y + i * this.unit_depth_px*Math.sin(this.view_topAngle));
-		}
-		for (i = 0; i <= this.width_units; i++)
-		{
-			this.g.moveTo(this.br_x - i * this.unit_width_px, this.br_y );
-			this.g.lineTo(this.fr_x - i * this.unit_width_px, this.fr_y );
-		}
-		this.g.endStroke();
-	}
-
+	
 	/** Releases object from the hold of this container */
 	p.releaseBlock = function (o)
 	{

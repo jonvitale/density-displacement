@@ -190,42 +190,7 @@
 		}
 	}
 
-	p.getMassArray2d = function ()
-	{
-		if (this.massArray2d == undefined)
-		{
-			var massArray2d = this.massArray2d = new Array();
-			var left_x = this.getLeftmostColumn();
-			var right_x = this.getRightmostColumn();
-			var top_y = this.getHighestRow();
-			var bottom_y = this.getLowestRow();
-
-			// go through rows and columns adding up mass in depths
-			var i, j, k, d;
-			for (i = left_x; i <= right_x; i++)
-			{
-				massArray2d[i - left_x] = new Array();
-				for (j = top_y; j <= bottom_y; j++)
-				{
-					var mass = 0;
-					for (k = 0; k < this.blockArray3d[i][j].length; k++)
-					{
-						if (this.blockArray3d[i][j][k] != "")
-						{
-							mass += this.materialNameMassMapping[this.blockArray3d[i][j][k]];
-						}
-					}
-					massArray2d[i - left_x][j - top_y] = mass;
-				}
-			} 
-			return this.massArray2d;
-			
-		} else
-		{
-			return this.massArray2d;
-		}	
-	}
-
+	
 	p.getArray2d = function ()
 	{
 		if (this.array2d == undefined)
@@ -909,53 +874,6 @@
 		*/
 	}
 
-	/** Setup dragging bounds.  Prerequisite for dragging */
-	p.setBounds = function (rect)
-	{
-		this.areBoundsSet = true;
-		this.min_x = rect.x;
-		this.min_y = rect.y;
-		this.max_x = rect.x+rect.width - this.viewable_width;
-		this.max_y = rect.y+rect.height - this.viewable_height;
-		(function(target)
-		{
-			target.onPress = function (evt)
-			{
-				this.parent.addChild(this);
-				var offset = {x:this.x-evt.stageX, y:this.y-evt.stageY}
-				evt.onMouseMove = function (ev)
-				{
-					var newX = ev.stageX+offset.x;
-					var newY = ev.stageY+offset.y;
-					if (newX < this.target.min_x)
-					{
-						this.target.x = this.target.min_x;
-					} else if (newX > this.target.max_x)
-					{
-						this.target.x = this.target.max_x;
-					} else
-					{
-						this.target.x = newX;
-					}
-					if (newY < this.target.min_y)
-					{
-						this.target.y = this.target.min_y;
-					} else if (newY > this.target.max_y)
-					{
-						this.target.y = this.target.max_y;
-					} else
-					{
-						this.target.y = newY;
-					} 
-					update = true;
-				}
-				evt.onMouseUp = function (ev)
-				{
-					//placeObjectInContainer(this.target);					
-				}
-			}
-		}(BlockCompShape.prototype));
-	}
-
+	
 	window.BlockCompShape = BlockCompShape;
 }(window));

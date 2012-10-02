@@ -1,12 +1,12 @@
 (function (window)
 {
 
-	function b2Actor (compShape)
+	function Blockb2Actor (compShape)
 	{
 		this.initialize (compShape);
 	}
 
-	var p = b2Actor.prototype = new Container();
+	var p = Blockb2Actor.prototype = new Container();
 	// public properties
 	p.mouseEventsEnabled = true;
 	p.Container_initialize = p.initialize;
@@ -103,5 +103,5 @@
 	}
 	
 	
-	window.b2Actor = b2Actor;
+	window.Blockb2Actor = Blockb2Actor;
 }(window));

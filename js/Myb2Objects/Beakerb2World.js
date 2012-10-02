@@ -527,6 +527,7 @@
 		this.b2world.Step(1/Ticker.getFPS(), 10, 10);
 		this.redraw();
 		if (DEBUG) this.b2world.DrawDebugData();
+		//console.log(this, this.getNumChildren());
 		this.b2world.ClearForces();
 	}
 

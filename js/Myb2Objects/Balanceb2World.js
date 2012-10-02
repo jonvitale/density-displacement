@@ -533,6 +533,7 @@
 		this.rightPanShape.rotation = this.rightPan.GetAngle() * 180 / Math.PI;
 
 		this.b2world.Step(1/Ticker.getFPS(), 10, 10);
+		//console.log(this, this.getNumChildren());
 		if (DEBUG) this.b2world.DrawDebugData();
 	}
 	

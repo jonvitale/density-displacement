@@ -64,7 +64,7 @@
 	p._tick = function()
 	{
 		this.Container_tick();
-
+		//console.log(this, this.getNumChildren());
 	}
 
 	p.redraw = function()
@@ -77,7 +77,7 @@
 	////////////////////// CLASS SPECIFIC ////////////////////
 	p.addObjectToLibrary = function (compShape)
 	{
-		var actor = new b2Actor(compShape); 
+		var actor = new Blockb2Actor(compShape); 
 		this.library.addObject(actor);
 		actor.onPress = this.actorPressHandler.bind(this);
 		actor.orig_parent = this.library;
