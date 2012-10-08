@@ -1,9 +1,9 @@
 (function (window)
 {
 
-	function Beakerb2World (width_px, height_px, world_dx, world_dy, beaker_width_px, beaker_height_px, beaker_depth_px, view_sideAngle, view_topAngle, water_volume_perc, fluid_density)
+	function Beakerb2World (width_px, height_px, world_dx, world_dy, beaker_width_px, beaker_height_px, beaker_depth_px, view_sideAngle, view_topAngle, fluid_density, water_volume_perc, spilloff_volume_perc)
 	{
-		this.initialize (width_px, height_px, world_dx, world_dy, beaker_width_px, beaker_height_px, beaker_depth_px, view_sideAngle, view_topAngle, water_volume_perc, fluid_density);
+		this.initialize (width_px, height_px, world_dx, world_dy, beaker_width_px, beaker_height_px, beaker_depth_px, view_sideAngle, view_topAngle, fluid_density, water_volume_perc, spilloff_volume_perc);
 	} 
 
 	var p = Beakerb2World.prototype = new Container();
@@ -15,10 +15,10 @@
 	p.WALL_THICKNESS = 4;
 	p.BEAKER_WALL_THICKNESS = 2;
 	p.NUM_RULER_TICKS = 10;
-
-	// constants
+	p.DRAINING_PER_SECOND = 0.5;
+	p.ALLOW_FILL_INTERIOR = false;
 	
-	p.initialize = function (width_px, height_px, world_dx, world_dy, beaker_width_px, beaker_height_px, beaker_depth_px, view_sideAngle, view_topAngle, water_volume_perc, fluid_density)
+	p.initialize = function (width_px, height_px, world_dx, world_dy, beaker_width_px, beaker_height_px, beaker_depth_px, view_sideAngle, view_topAngle, fluid_density, water_volume_perc, spilloff_volume_perc)
 	{
 		this.Container_initialize();
 		this.width_px = width_px;
@@ -33,10 +33,18 @@
 		this.beaker_height_px = beaker_height_px;
 		this.beaker_depth_px = beaker_depth_px;
 		this.beaker_bottom_dy = 5;
+		this.beaker_volume = this.beaker_width_px/SCALE * this.beaker_depth_px/SCALE * this.beaker_height_px/SCALE;
 		this.water_volume_perc = water_volume_perc;
 		this.fluid_density = fluid_density;
-		this.init_beaker_water_y = (1 - water_volume_perc) * this.beaker_height_px;
-		this.beaker_water_y = this.init_beaker_water_y;
+		this.init_water_y = (1 - water_volume_perc) * this.beaker_height_px;
+		this.water_y = this.init_water_y;
+		if (typeof(spilloff_volume_perc) == "undefined"){this.spilloff_volume_perc = 1}else{this.spilloff_volume_perc = spilloff_volume_perc}
+		this.init_water_volume = water_volume_perc * this.beaker_volume;
+		this.water_volume = this.init_water_volume;
+		this.contents_volume = this.water_volume;
+		this.max_water_volume = this.spilloff_volume_perc * this.water_volume;
+		this.min_water_y = this.beaker_height_px - this.beaker_height_px * this.spilloff_volume_perc
+		this.beaker_x = 40 + beaker_width_px/2;
 
 		g = this.g = new Graphics();
 		this.shape = new Shape(g);
@@ -78,15 +86,15 @@
 		this.addChild(this.rulerShape);
 		this.addChild(this.addShape);
 		
-		this.frontShape.x = this.width_px/2; this.frontShape.y = this.height_px - this.beaker_bottom_dy - this.beaker_height_px;
-		this.frontWaterShape.x = this.width_px/2; this.frontWaterShape.y = this.height_px - this.beaker_bottom_dy - this.beaker_height_px;
-		this.frontWaterLineShape.x = this.width_px/2; this.frontWaterLineShape.y = this.height_px - this.beaker_bottom_dy - this.beaker_height_px;
+		this.frontShape.x = this.beaker_x; this.frontShape.y = this.height_px - this.beaker_bottom_dy - this.beaker_height_px;
+		this.frontWaterShape.x = this.beaker_x; this.frontWaterShape.y = this.height_px - this.beaker_bottom_dy - this.beaker_height_px;
+		this.frontWaterLineShape.x = this.beaker_x; this.frontWaterLineShape.y = this.height_px - this.beaker_bottom_dy - this.beaker_height_px;
 		this.backShape.x = this.frontShape.x + this.width_from_depth; this.backShape.y = this.frontShape.y - this.height_from_depth;
 		this.backWaterShape.x = this.frontWaterShape.x + this.width_from_depth; this.backWaterShape.y = this.frontWaterShape.y - this.height_from_depth;
 		this.backWaterLineShape.x = this.frontWaterLineShape.x + this.width_from_depth; this.backWaterLineShape.y = this.frontWaterLineShape.y - this.height_from_depth;
 				
-		this.rulerShape.x = this.width_px/2 + -this.beaker_width_px/2;
-		this.pointerShape.x = this.width_px/2 + this.beaker_width_px/2+2;
+		this.rulerShape.x = this.beaker_x + -this.beaker_width_px/2;
+		this.pointerShape.x = this.beaker_x + this.beaker_width_px/2+2;
 		this.pointerText.x = this.pointerShape.x + 10;
 		
 		// draw water line
@@ -158,9 +166,27 @@
 		g.lineTo(this.beaker_width_px/2 + this.width_from_depth, this.beaker_height_px-this.height_from_depth);
 		g.lineTo(this.beaker_width_px/2, this.beaker_height_px);
 		g.lineTo(this.beaker_width_px/2, 0);
+		
 		g.endFill();
 		g.endStroke();
+		// if the spillof level is below the top of the rim, place a "hole" on the side
+		if (this.spilloff_volume_perc < 1 )
+		{
+			var strawDiameter = 10;
+			var strawLength = 100;
+			var strawIncline = 20 * Math.PI/180;
+			var p1 = new Point(this.beaker_width_px/2 + this.width_from_depth/2 - 2, this.min_water_y - this.height_from_depth/2 - strawDiameter);
+			var p2 = new Point(p1.x + strawLength*Math.cos(strawIncline), p1.y + strawLength*Math.sin(strawIncline));
+			g.beginLinearGradientFill(["rgba(127,127,127,1.0)", "rgba(200,200,200,1.0)","rgba(225,225,255,1.0)", "rgba(200,200,200,1.0)", "rgba(127,127,127,1.0)"], [0, 0.1, 0.5, 0.9, 1], p1.x, p1.y, p1.x - strawDiameter*Math.sin(strawIncline), p1.y + strawDiameter*Math.cos(strawIncline));
+			g.moveTo(p1.x, p1.y);
+			g.lineTo(p2.x, p2.y);
+			g.lineTo(p2.x, p2.y+strawDiameter);
+			g.lineTo(p1.x, p1.y+strawDiameter);
+			g.lineTo(p1.x, p1.y);
 
+			//g.drawEllipse(this.beaker_width_px/2 + this.width_from_depth/2 - 2, this.min_water_y - this.height_from_depth/2 - 10, 4, 10);
+			g.endFill(); 		
+		}
 		// draw a ruler
 		g = this.rulerGraphics;
 		g.clear();
@@ -176,7 +202,7 @@
 			g.lineTo(10, ry);
 			vstr = Math.round(((this.height_px - this.beaker_bottom_dy) - ry) / SCALE);
 			text = new Text(vstr, "1.0em Bold Arial", "#888");
-			text.x = this.width_px/2 - this.beaker_width_px/2 - 12;
+			text.x = this.beaker_x - this.beaker_width_px/2 - 12;
 			text.y = ry + 4; 
 			this.addChild(text);
 		}
@@ -276,7 +302,7 @@
 		beakerFloorFixture.shape.SetAsBox(this.beaker_width_px / 2 / SCALE, this.BEAKER_WALL_THICKNESS / 2 / SCALE);
 		var beakerFloorBodyDef = new b2BodyDef;
 		beakerFloorBodyDef.type = b2Body.b2_staticBody;
-		beakerFloorBodyDef.position.x = (this.world_dx + this.width_px / 2) / SCALE;
+		beakerFloorBodyDef.position.x = (this.world_dx + this.beaker_x) / SCALE;
 		beakerFloorBodyDef.position.y = (this.world_dy + this.height_px - this.beaker_bottom_dy + this.BEAKER_WALL_THICKNESS / 2) / SCALE;
 		var beakerFloor = this.beakerFloor = this.b2world.CreateBody(beakerFloorBodyDef);
 		beakerFloor.CreateFixture(beakerFloorFixture);
@@ -290,7 +316,7 @@
 		beakerLeftWallFixture.shape.SetAsBox(this.BEAKER_WALL_THICKNESS / 2 / SCALE, this.beaker_height_px / 2 / SCALE);
 		var beakerLeftWallBodyDef = new b2BodyDef;
 		beakerLeftWallBodyDef.type = b2Body.b2_staticBody;
-		beakerLeftWallBodyDef.position.x = (this.world_dx + this.width_px / 2 - this.beaker_width_px / 2 - 2*this.BEAKER_WALL_THICKNESS) / SCALE;
+		beakerLeftWallBodyDef.position.x = (this.world_dx + this.beaker_x - this.beaker_width_px / 2 - 2*this.BEAKER_WALL_THICKNESS) / SCALE;
 		beakerLeftWallBodyDef.position.y = (this.world_dy + this.height_px - this.beaker_bottom_dy - this.beaker_height_px / 2) / SCALE;
 		var beakerLeftWall = this.beakerLeftWall = this.b2world.CreateBody(beakerLeftWallBodyDef); 
 		beakerLeftWall.CreateFixture(beakerLeftWallFixture); 
@@ -304,7 +330,7 @@
 		beakerRightWallFixture.shape.SetAsBox(this.BEAKER_WALL_THICKNESS / 2 / SCALE, this.beaker_height_px / 2 / SCALE);
 		var beakerRightWallBodyDef = new b2BodyDef;
 		beakerRightWallBodyDef.type = b2Body.b2_staticBody;
-		beakerRightWallBodyDef.position.x = (this.world_dx + this.width_px / 2 + this.beaker_width_px / 2 + 2*this.BEAKER_WALL_THICKNESS) / SCALE;
+		beakerRightWallBodyDef.position.x = (this.world_dx + this.beaker_x + this.beaker_width_px / 2 + 2*this.BEAKER_WALL_THICKNESS) / SCALE;
 		beakerRightWallBodyDef.position.y = (this.world_dy + this.height_px - this.beaker_bottom_dy - this.beaker_height_px / 2) / SCALE;
 		var beakerRightWall = this.beakerRightWall = this.b2world.CreateBody(beakerRightWallBodyDef);
 		beakerRightWall.CreateFixture(beakerRightWallFixture);
@@ -314,34 +340,17 @@
 		controller.density = this.fluid_density;
 		var normal = new b2Vec2(); normal.Set(0, -1);
 		controller.normal = normal;
-		var offset = -(this.world_dy + this.height_px - this.beaker_bottom_dy - this.beaker_height_px + this.beaker_water_y) / SCALE;
+		var offset = -(this.world_dy + this.height_px - this.beaker_bottom_dy - this.beaker_height_px + this.water_y) / SCALE;
 		controller.SetInitialOffset(offset);
 		controller.surfaceArea = this.beaker_width_px / SCALE * this.beaker_depth_px / SCALE;
-		// water line fixture, use as sensor for first entering water
-		/*
-		var waterFixture = new b2FixtureDef;
-		//waterFixture.isSensor = true;
-		waterFixture.density = 1.0;
-		waterFixture.filter.categoryBits = 2;
-		waterFixture.filter.maskBits = 2;
-		waterFixture.shape = new b2PolygonShape;
-		waterFixture.shape.SetAsBox(this.beaker_width_px / 2 / SCALE, this.beaker_height_px * this.water_volume_perc / 2 / SCALE);
-		var waterBodyDef = new b2BodyDef;
-		waterBodyDef.type = b2Body.b2_dynamicBody;
-		waterBodyDef.position.x = (this.world_dx + this.width_px / 2 ) / SCALE;
-		waterBodyDef.position.y = floorBodyDef.position.y - (this.beaker_height_px * this.water_volume_perc / 2 ) / SCALE;
-		console.log(waterBodyDef.position);
-		var waterBody = this.waterBody = this.b2world.CreateBody(waterBodyDef);
-		waterBody.CreateFixture(waterFixture);
-		*/
-
+		
 		// contact listener
 		var contactListener = new b2ContactListener;
 		contactListener.BeginContact = this.BeginContact.bind(this);
 		this.b2world.SetContactListener(contactListener);
 		
-		this.justAdded = null;
-
+		this.justAddedBody = null;
+		
 		if (DEBUG)
 		{
 			var debugDraw = this.debugDraw = new b2DebugDraw;
@@ -362,9 +371,9 @@
 	    Both objects must be on the stage, i.e. must have parents */
 	p.hitTestObject = function (o)
 	{
-		if (o.width_px_left != undefined && o.width_px_right != undefined && o.height_px_above != undefined && o.height_px_below != undefined)
+		if (typeof(o.width_px_left) != "undefined" && typeof(o.width_px_right) != "undefined" && typeof(o.height_px_above) != "undefined" && typeof(o.height_px_below) != "undefined")
 		{
-			if (o.parent != undefined && this.parent != undefined)
+			if (typeof(o.parent) != "undefined" && this.parent != "undefined")
 			{
 				var gp = o.parent.localToGlobal(o.x, o.y);
 				var lp = this.globalToLocal(gp.x, gp.y);
@@ -386,7 +395,7 @@
 		}
 
 	}
-	p.addObject = function (o, x, y)
+	p.addActor = function (o, x, y)
 	{
 
 		o.x = x;
@@ -399,21 +408,10 @@
 		bodyDef.position.x = (this.x + x) / SCALE;
 		bodyDef.position.y = (this.y + y) / SCALE;
 		var body = o.body = this.b2world.CreateBody(bodyDef);
-	
-		// figure out where to place this object based on it's relative position to other actors.
-		/*
-		var count_top_of = 0;
-		for (var i = 0; i < this.actors.length; i++)
-		{
-			if (body.GetWorldCenter().x > this.actors[i].body.GetWorldCenter().x) count_right_of++;
-		} 
-		this.addChildAt(o, this.NUM_BACK_OBJECTS+count_right_of);
-		*/
+
 		this.addChildAt(o, this.NUM_BACK_OBJECTS + this.actors.length);
 
-		
 		var area = 0;
-		body.emptySpaces = 0;
 		var volume = 0;
 		for (i = 0; i < o.fixDefs.length; i++)
 		{
@@ -423,8 +421,8 @@
 			f.totalSpaces = fixDef.totalSpaces;
 			f.materialSpaces = fixDef.materialSpaces;
 			f.exteriorSpaces = fixDef.exteriorSpaces;
-			f.interiorSpaces = fixDef.interiorSpaces;
-			f.protectedSpaces = fixDef.protectedSpaces;
+			if (typeof(fixDef.interiorSpaces) != "undefined"){f.interiorSpaces = fixDef.interiorSpaces;}else{f.interiorSpaces = 0;}
+			if (typeof(fixDef.protectedSpaces) != "undefined"){f.protectedSpaces = fixDef.protectedSpaces;}else{f.protectedSpaces = 0;}
 			// set density for the length of the entire depth
 			f.SetDensity(f.materialDensity * f.materialSpaces);
 
@@ -433,14 +431,11 @@
 			var lowerBound = f.GetAABB().lowerBound;
 			var upperBound = f.GetAABB().upperBound;
 			area += Math.abs((upperBound.x - lowerBound.x) * (upperBound.y - lowerBound.y));
-			if (f.emptySpaces != undefined) body.emptySpaces += f.emptySpaces;
+			if (typeof(f.emptySpaces) != "undefined") body.emptySpaces += f.emptySpaces;
 		}
 		this.actors.push(o);
-		// set a flag so we can look for initial contact with this object
-		this.justAdded = body;
-
+		
 		// put aabb, i.e. upper and lower limit onto the body and area
-		body.depth_units = o.compShape.depth_units;
 		body.local_width_right = o.width_px_right / SCALE;
 		body.local_height_below = o.height_px_below / SCALE;
 		body.area = area;
@@ -448,15 +443,19 @@
 		body.fullySubmerged = false;
 		body.fullyEmerged = true;
 		body.soaked = false;
-		body.SetSleepingAllowed(false);
+		if (typeof(bodyDef.IsFixedRotation) != "undefined" && bodyDef.IsFixedRotation) body.SetFixedRotation(true);
+		//body.SetSleepingAllowed(false);
 		body.ResetMassData();
 		// add only if within confines of beaker
-		if (body.GetPosition().x >= this.beakerLeftWall.GetPosition().x - this.WALL_THICKNESS/2/SCALE && body.GetPosition().x + body.local_width_right <= this.beakerRightWall.GetPosition().x + this.WALL_THICKNESS/2/SCALE);
+		if (body.GetPosition().x >= this.beakerLeftWall.GetPosition().x - this.WALL_THICKNESS/2/SCALE && body.GetPosition().x + body.local_width_right <= this.beakerRightWall.GetPosition().x + this.WALL_THICKNESS/2/SCALE)
 		{
 			this.controller.AddBody(body);
-	}	}
+			// set a reference so we can look for initial contact with this object
+			this.justAddedBody = body;
+		}	
+	}
 
-	p.removeObject = function (o)
+	p.removeActor = function (o)
 	{
 		this.removeChild(o);
 		this.actors.splice(this.actors.indexOf(this), 1);
@@ -469,17 +468,16 @@
 	p.BeginContact = function (contact)
 	{
 		//console.log("here");
-		// When the object just added makes contact, set linear damping high to avoid too much motion.
-		if (this.justAdded != null)
+		// When the object just added makes contact, wake up anything it makes contact with
 		{
-			if (contact.GetFixtureA().m_body == this.justAdded)
+			if (contact.GetFixtureA().m_body == this.justAddedBody)
 			{	
-				
-			} else if (contact.GetFixtureB().m_body == this.justAdded)
+				contact.GetFixtureB().m_body.SetAwake(true);
+			} else if (contact.GetFixtureB().m_body == this.justAddedBody)
 			{
-				
+				contact.GetFixtureA().m_body.SetAwake(true);
 			} 
-			this.justAdded = null;
+			
 
 		}
 	}
@@ -489,10 +487,65 @@
 	{
 		this.Container_tick();
 		
-		// update water height
+		// is any newly added body now asleep, if so it is no longer newly added
+		// also we will wait until the bodies to stop moving before adjusting the final spilloff amount
+		var water_diff_y, water_dy, offset;
+
+		if (this.justAddedBody != null && !this.justAddedBody.IsAwake())
+		{
+			this.justAddedBody = null;
+
+			if (this.water_y < this.min_water_y && this.spilloff_volume_perc < 1.0)
+			{
+				this.draining = true;
+				// setup spilloff
+				this.spilloff_container = new RectLiquidShape(SCALE, SCALE, SCALE, 5, 5, 5, 4, 1.0, this.view_sideAngle, this.view_topAngle, 1.0, true, false);
+				this.addChild(this.spilloff_container);
+				this.spilloff_container.x = this.beaker_x + this.beaker_width_px;
+				this.spilloff_container.y = this.height_px;// - this.beaker_bottom_dy;
+			}
+		}
 		
-		var a = new b2Vec2(); a.Set(this.beakerLeftWall.GetWorldCenter().x + this.BEAKER_WALL_THICKNESS / 2 / SCALE, this.beakerFloor.GetWorldCenter().y + ( -this.beaker_height_px + this.beaker_water_y) / SCALE);
-		var zerop = new b2Vec2(); zerop.Set(0,0);
+		if (this.draining)
+		{
+			if (this.water_y < this.min_water_y)
+			{
+				water_diff_y = this.min_water_y - this.water_y;
+				if (water_diff_y > this.DRAINING_PER_SECOND/Ticker.getFPS())
+				{
+					water_dy = this.DRAINING_PER_SECOND/Ticker.getFPS();
+					this.spilloff_container.fillWithVolume(water_dy/SCALE*this.beaker_width_px/SCALE*this.beaker_depth_px/SCALE);
+					this.controller.ChangeOffset(-water_dy/SCALE);
+				} else
+				{  // we are done
+					water_dy = this.min_water_y - this.water_y;
+					this.water_volume = this.max_water_volume;
+					this.spilloff_container.fillWithVolume(water_dy/SCALE*this.beaker_width_px/SCALE*this.beaker_depth_px/SCALE);
+					this.controller.ChangeOffset(-water_dy/SCALE);
+					
+					// remove the spilloff container from the stage, put it in a new b2Actor
+					var lpoint = new Point(this.spilloff_container.x, this.spilloff_container.y);
+					this.removeChild(this.spilloff_container);
+					this.spilloff_container.x = 0;
+					this.spilloff_container.y = 0;
+
+					var actor = new Liquidb2Actor(this.spilloff_container); 
+					this.addActor(actor, lpoint.x, lpoint.y);
+					// put an event listener on the parent of this, the ObjectTestingPanel
+					actor.onPress = this.parent.actorPressHandler.bind(this.parent);
+					actor.orig_parent = this;
+						
+		
+					//actor.onPress = this.actorPressHandler.bind(this);
+					
+					this.draining = false;				
+				}
+				
+			}
+		}
+
+
+		var a = new b2Vec2(); a.Set(this.beakerLeftWall.GetWorldCenter().x + this.BEAKER_WALL_THICKNESS / 2 / SCALE, this.beakerFloor.GetWorldCenter().y + ( -this.beaker_height_px + this.water_y) / SCALE);
 		for(var i = 0; i < this.actors.length; i++)
 		{
 
@@ -501,28 +554,28 @@
 			
 			var body = this.actors[i].body;
 			
-			var world_zerop = body.GetWorldPoint(zerop);
 			// did we get fully submerged?
-			/*
-			if (world_zerop.y > a.y)
+			if (this.ALLOW_FILL_INTERIOR)
 			{
-				if (!body.soaked)
+				if (body.GetPosition().y > a.y)
 				{
-					// change density of each fixture to include mass of water
-					for (f = body.GetFixtureList(); f; f = f.GetNext())
+					if (!body.soaked)
 					{
-						f.SetDensity(f.materialDensity * f.materialSpaces + (f.interiorSpaces) * this.fluid_density);
+						// change density of each fixture to include mass of water
+						for (f = body.GetFixtureList(); f; f = f.GetNext())
+						{
+							f.SetDensity(f.materialDensity * f.materialSpaces + (f.interiorSpaces) * this.fluid_density);
+						}
+						body.soaked = true; // A permanent flag if the object is ever fully submerged
 					}
-					body.soaked = true; // A permanent flag if the object is ever fully submerged
+					body.ResetMassData();
+					body.fullySubmerged = true;	
 				}
-				body.ResetMassData();
-				body.fullySubmerged = true;	
 			}
-			*/
 		}	
 
 		// convert the buoyant controller's offset to pixels
-		this.beaker_water_y = -this.controller.offset * SCALE - this.world_dy - this.height_px + this.beaker_bottom_dy + this.beaker_height_px;
+		this.water_y = -this.controller.offset * SCALE - this.world_dy - this.height_px + this.beaker_bottom_dy + this.beaker_height_px;
 		
 		this.b2world.Step(1/Ticker.getFPS(), 10, 10);
 		this.redraw();
@@ -537,11 +590,11 @@
 		var g = this.backWaterGraphics;
 		g.clear();
 		g.beginLinearGradientFill(["rgba(100,100,255,0.3)", "rgba(150,150,255,0.3)","rgba(200,200,255,0.3)", "rgba(150,150,255,0.3)", "rgba(100,100,255,0.3)"], [0, 0.1, 0.5, 0.9, 1], -this.beaker_width_px/2, 0, this.beaker_width_px/2, 0);
-		g.drawRect(-this.beaker_width_px/2, this.beaker_water_y, this.beaker_width_px, this.beaker_height_px  - this.beaker_water_y);
+		g.drawRect(-this.beaker_width_px/2, this.water_y, this.beaker_width_px, this.beaker_height_px  - this.water_y);
 		g.endFill();
 		g.beginLinearGradientFill(["rgba(100,100,255,0.3)", "rgba(150,150,255,0.3)","rgba(200,200,255,0.3)", "rgba(150,150,255,0.3)", "rgba(100,100,255,0.3)"], [0, 0.1, 0.5, 0.9, 1], -this.beaker_width_px/2-this.width_from_depth, 0, -this.beaker_width_px/2, 0);
-		g.moveTo(-this.beaker_width_px/2, this.beaker_water_y);
-		g.lineTo(-this.beaker_width_px/2-this.width_from_depth, this.beaker_water_y + this.height_from_depth);
+		g.moveTo(-this.beaker_width_px/2, this.water_y);
+		g.lineTo(-this.beaker_width_px/2-this.width_from_depth, this.water_y + this.height_from_depth);
 		g.lineTo(-this.beaker_width_px/2-this.width_from_depth, this.beaker_height_px + this.height_from_depth);
 		g.lineTo(-this.beaker_width_px/2, this.beaker_height_px);
 		g.endFill();
@@ -550,61 +603,26 @@
 		var g = this.frontWaterGraphics;
 		g.clear();
 		g.beginLinearGradientFill(["rgba(100,100,255,0.4)", "rgba(150,150,255,0.4)","rgba(200,200,255,0.4)", "rgba(150,150,255,0.4)", "rgba(100,100,255,0.4)"], [0, 0.1, 0.5, 0.9, 1], -this.beaker_width_px/2, 0, this.beaker_width_px/2, 0);
-		g.drawRect(-this.beaker_width_px/2, this.beaker_water_y, this.beaker_width_px, this.beaker_height_px - this.beaker_water_y);
+		g.drawRect(-this.beaker_width_px/2, this.water_y, this.beaker_width_px, this.beaker_height_px - this.water_y);
 		g.endFill();
 		g.beginLinearGradientFill(["rgba(100,100,255,0.5)", "rgba(150,150,255,0.5)","rgba(175,175,255,0.5)", "rgba(175,175,255,0.5)", "rgba(100,100,255,0.5)"], [0, 0.1, 0.5, 0.9, 1], this.beaker_width_px/2, 0, this.beaker_width_px/2+this.width_from_depth, 0);
-		g.moveTo(this.beaker_width_px/2, this.beaker_water_y);
-		g.lineTo(this.beaker_width_px/2+this.width_from_depth, this.beaker_water_y - this.height_from_depth);
+		g.moveTo(this.beaker_width_px/2, this.water_y);
+		g.lineTo(this.beaker_width_px/2+this.width_from_depth, this.water_y - this.height_from_depth);
 		g.lineTo(this.beaker_width_px/2+this.width_from_depth, this.beaker_height_px- this.height_from_depth);
 		g.lineTo(this.beaker_width_px/2, this.beaker_height_px);
 		g.endFill();
 		//this.backWaterLineShape.x = 0;
-		this.backWaterLineShape.y = -this.height_from_depth + this.height_px - this.beaker_bottom_dy  - this.beaker_height_px + this.beaker_water_y;
-		this.frontWaterLineShape.y = this.height_px - this.beaker_bottom_dy  - this.beaker_height_px + this.beaker_water_y;
+		this.backWaterLineShape.y = -this.height_from_depth + this.height_px - this.beaker_bottom_dy  - this.beaker_height_px + this.water_y;
+		this.frontWaterLineShape.y = this.height_px - this.beaker_bottom_dy  - this.beaker_height_px + this.water_y;
 
 		// draw a pointer to the current position 
 		//this.pointerShape.x = this.beaker_width_px/2+2;
 		this.pointerShape.y = this.frontWaterLineShape.y;
-		this.pointerText.text = Math.round( (this.beaker_height_px - this.beaker_water_y) / SCALE * 100) / 100;
+		this.pointerText.text = Math.round( (this.beaker_height_px - this.water_y) / SCALE * 100) / 100;
 		
 		this.pointerText.y = this.pointerShape.y + 5;
 	}
 	
-	//// PHYSICS-RELATED FUNCTIONS
-	/** What percent of this object is in the fluid */
-	p.updatePercentInFluid = function(o)
-	{
-		//var beaker_water_y = this.init_beaker_water_y;
-		var beaker_water_y = this.beaker_water_y;
-		
-		/*
-		if (o.y - o.viewable_height/2 > beaker_water_y)
-		{
-			if (o.percentInFluid == 0) {o.impact = true} else {o.impact = false;}
-			o.percentInFluid = 1;
-		} else if (o.y + o.viewable_height/2 < beaker_water_y)
-		{
-			o.impact = false;
-			o.percentInFluid = 0;
-		} else
-		{
-			if (o.percentInFluid == 0) {o.impact = true} else {o.impact = false;}
-			o.percentInFluid = (o.y + o.viewable_height/2 - beaker_water_y)/o.viewable_height;
-		}
-		return o.percentInFluid;
-		*/
-	}
-	p.updateWaterHeight = function()
-	{
-		/*
-		this.volume_unit_objects_water = 0;
-		if (this.object != null)	
-			this.volume_unit_objects_water += this.object.volume * this.updatePercentInFluid(this.object);
-		
-		this.total_volume = this.water_volume+this.volume_unit_objects_water;
-		this.beaker_water_y = this.height_px - this.total_volume/this.volume_unit * this.height_px;
-		*/
-	}
 	
 	window.Beakerb2World = Beakerb2World;
 }(window));

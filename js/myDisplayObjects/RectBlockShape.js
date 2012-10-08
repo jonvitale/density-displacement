@@ -212,7 +212,7 @@
 	}
 	p.redraw = function(highlightColor)
 	{
-		if (highlightColor == undefined){highlightColor = this.materialName;}
+		if (typeof(highlightColor) == "undefined"){highlightColor = this.materialName;}
 		var g = this.g;
 		g.clear();
 		var i, j, point;

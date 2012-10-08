@@ -44,7 +44,7 @@
 		this.getLowestRow();
 		this.getLeftmostColumn();
 		this.getRightmostColumn();
-		this.getArray2d();
+		this.update_array2d();
 		// draw figure
 		this.redraw();
 
@@ -79,7 +79,7 @@
 ////////////////////// UTILITY FUNCTIONS FOR THE ARRAY ///////////////////
 	p.getLowestRow = function ()
 	{
-		if (this.lowestRow == undefined)	
+		if (typeof(this.lowestRow) == "undefined")	
 		{
 			// start at bottom and find the lowest row with any blocks in it
 			var i, j, k
@@ -107,7 +107,7 @@
 	}
 	p.getHighestRow = function ()
 	{
-		if (this.highestRow == undefined)
+		if ( typeof(this.highestRow) == "undefined")
 		{	
 			// start at bottom and find the lowest row with any blocks in it
 			var i, j, k
@@ -135,7 +135,7 @@
 	}
 	p.getLeftmostColumn = function ()
 	{
-		if (this.leftmostColumn == undefined)
+		if (typeof(this.leftmostColumn) == "undefined")
 		{	
 			// start at bottom and find the lowest row with any blocks in it
 			var i, j, k
@@ -163,7 +163,7 @@
 	}
 	p.getRightmostColumn = function ()
 	{
-		if (this.rightmostColumn == undefined)
+		if (typeof(this.rightmostColumn) == "undefined")
 		{
 			// start at bottom and find the lowest row with any blocks in it
 			var i, j, k
@@ -191,9 +191,9 @@
 	}
 
 	
-	p.getArray2d = function ()
+	p.update_array2d = function ()
 	{
-		if (this.array2d == undefined)
+		if (typeof(this.array2d) == "undefined")
 		{
 			var array2d = this.array2d = new Array();
 			var spaces3d = this.classifyOpenSpaces();
@@ -573,7 +573,7 @@
 	p.redraw = function(r)
 	{
 		var rotation;
-		if (r != undefined) {rotation = r} else {rotation = 0}
+		if (typeof(r) != "undefined") {rotation = r} else {rotation = 0}
 		rotation = (rotation + 360 * 10) % 360;
 		//this.rotation = 330;
 		//rotation = 330;	

@@ -29,9 +29,9 @@ Box2D.inherit(Myb2BuoyancyController, Box2D.Dynamics.Controllers.b2Controller);
       var offset = this.initial_offset;
       for (var i = this.m_bodyList; i; i = i.nextBody) {
          var body = i.body;
-         if (body.IsAwake() == false) {
-            continue;
-         }
+         //if (body.IsAwake() == false) {
+           // continue;
+        // }
          var areac = new b2Vec2();
          var massc = new b2Vec2();
          var area = 0.0;
@@ -67,14 +67,16 @@ Box2D.inherit(Myb2BuoyancyController, Box2D.Dynamics.Controllers.b2Controller);
          massc.x /= mass;
          massc.y /= mass;
          if (mass < Number.MIN_VALUE) continue;
-         var buoyancyForce = this.gravity.GetNegative();
-         buoyancyForce.Multiply(this.density * mass);
-         body.ApplyForce(buoyancyForce, massc);
-         var dragForce = body.GetLinearVelocityFromWorldPoint(massc);
-         dragForce.Subtract(this.velocity);
-         dragForce.Multiply((-this.linearDrag * mass));
-         body.ApplyForce(dragForce, massc);
-         body.ApplyTorque((-body.GetInertia() / body.GetMass() * mass * body.GetAngularVelocity() * this.angularDrag));
+         if (body.IsAwake()) {                 
+            var buoyancyForce = this.gravity.GetNegative();
+            buoyancyForce.Multiply(this.density * mass);
+            body.ApplyForce(buoyancyForce, massc);
+            var dragForce = body.GetLinearVelocityFromWorldPoint(massc);
+            dragForce.Subtract(this.velocity);
+            dragForce.Multiply((-this.linearDrag * mass));
+            body.ApplyForce(dragForce, massc);
+            body.ApplyTorque((-body.GetInertia() / body.GetMass() * mass * body.GetAngularVelocity() * this.angularDrag));
+         }
       }
    }
 
@@ -94,4 +96,11 @@ Box2D.inherit(Myb2BuoyancyController, Box2D.Dynamics.Controllers.b2Controller);
    {
       this.offset = offset;
       this.initial_offset = offset;
+   }
+
+   Myb2BuoyancyController.prototype.ChangeOffset = function(doffset)
+   {
+      
+      this.initial_offset += doffset;
+      this.offset += doffset;
    }

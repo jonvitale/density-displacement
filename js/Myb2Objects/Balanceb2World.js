@@ -419,9 +419,9 @@
 	    Both objects must be on the stage, i.e. must have parents */
 	p.hitTestObject = function (o)
 	{
-		if (o.width_px_left != undefined && o.width_px_right != undefined && o.height_px_above != undefined && o.height_px_below != undefined)
+		if (typeof(o.width_px_left) != "undefined" && typeof(o.width_px_right) != "undefined" && typeof(o.height_px_above) != "undefined" && typeof(o.height_px_below) != "undefined")
 		{
-			if (o.parent != undefined && this.parent != undefined)
+			if (typeof(o.parent) != "undefined" && typeof(this.parent) != "undefined")
 			{
 				var gp = o.parent.localToGlobal(o.x, o.y);
 				var lp = this.globalToLocal(gp.x, gp.y);
@@ -443,7 +443,7 @@
 		}
 
 	}
-	p.addObject = function (o, x, y)
+	p.addActor = function (o, x, y)
 	{
 		o.x = x;
 		o.y = y;
@@ -478,7 +478,7 @@
 		this.justAdded = body;
 	}
 
-	p.removeObject = function (o)
+	p.removeActor = function (o)
 	{
 		this.removeChild(o);
 		this.actors.splice(this.actors.indexOf(this), 1);

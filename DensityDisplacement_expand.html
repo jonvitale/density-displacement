@@ -36,55 +36,20 @@
 		<script src="js/myDisplayObjects/Point3D.js"></script>
 		<script src="js/myDisplayObjects/BlockCompShape.js"></script>
 		<script src="js/myDisplayObjects/RectBlockShape.js"></script>
+		<script src="js/myDisplayObjects/RectLiquidShape.js"></script>
 		<script src="js/myDisplayObjects/TextContainer.js"></script>
 		
 		<script src="js/Myb2Objects/Myb2BuoyancyController.js"></script>
 		<script src="js/Myb2Objects/Beakerb2World.js"></script>
 		<script src="js/Myb2Objects/Balanceb2World.js"></script>
 		<script src="js/Myb2Objects/Blockb2Actor.js"></script>
+		<script src="js/Myb2Objects/Liquidb2Actor.js"></script>
 		<script src="js/builder/VolumeViewer.js"></script>
 		<script src="js/builder/MaterialsMenu.js"></script>
 		<script src="js/builder/ObjectBuildingPanel.js"></script>
 		
 		<script src="js/testing/ObjectLibrary.js"></script>
 		<script src="js/testing/ObjectTestingPanel.js"></script>
-
-		<script>
-			var STAGE_WIDTH = 810;
-			var STAGE_HEIGHT = 680;
-			var UNIT_TO_PIXEL = 20;
-			var METER_TO_UNIT = 100;
-			var PADDING = 8;
-			var canvas;
-			var stage;
-			var stageManager;
-			
-			/// EASEL JS FUNCTIONALITY
-			function init()
-			{
-				canvas = document.getElementById("canvas");
-				stage = new Stage(canvas);
-				stage.needs_to_update = true;
-				stageManager = new StageManager(stage);
-				// setup buttons for volume viewer	
-				element = new DOMElement(document.getElementById("makeObjectForm"));
-				stageManager.addToStage(element, "makeObjectForm");
-				element = new DOMElement(document.getElementById("builder_view_sideAngle_slider"));
-				stageManager.addToStage(element, "builder_view_sideAngle_slider");
-				element = new DOMElement(document.getElementById("builder_view_topAngle_slider"));
-				stageManager.addToStage(element, "builder_view_topAngle_slider");
-				Ticker.setFPS(24);
-				Ticker.addListener(window);
-			}
-			function tick() { stageManager.tick();}
-
-			// BUTTON INTERACTION 
-			function createObject() {
-				stageManager.makeObject(); 
-			}
-			function updateBuilder_view_sideAngle(d) {stageManager.updateBuilder_view_sideAngle(d);}
-			function updateBuilder_view_topAngle(d) {stageManager.updateBuilder_view_topAngle(d);}
-		</script>
 	</head>
 	<body onload="init()">
 		<form id = "makeObjectForm" class="overForm">

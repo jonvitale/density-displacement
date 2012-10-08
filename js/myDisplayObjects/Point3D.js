@@ -35,7 +35,7 @@
            return new Point3D(x, y, this.z);
        }
     
-    p.unrotateX = function(point, rad)
+    p.un_rotateX = function(point, rad)
     {
         var x, y;
     }

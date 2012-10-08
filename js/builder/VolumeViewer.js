@@ -437,7 +437,7 @@
 				o.highlightDefault();
 			}
 		}
-		
+		return o.placed;
 	}
 	p.setBlock = function(o)
 	{
@@ -449,9 +449,11 @@
 			}
 			 this.blockArray2d[o.x_index][o.y_index] = o;
 			 o.highlightDefault();
+			 return true;
 		} else if (o.incorrect)
 		{
 			this.removeChild(o);
+			return false;
 		}
 	}
 	p.clearBlock = function (o)

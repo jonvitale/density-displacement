@@ -20,21 +20,43 @@
         var DEBUG = true;
         var SCALE = 20;
         var PADDING = 10;
-
-	/*$(function() {
-		$( "#slider-vertical" ).slider({
-			orientation: "vertical",
-			range: "min",
-			min: 0,
-			max: 100,
-			value: 60,
-			slide: function( event, ui ) {
-				$( "#amount" ).val( ui.value );
+        var MATERIAL_TYPES = ["full", "center3", "center1", "ends"];
+	
+        var STAGE_WIDTH = 810;
+			var STAGE_HEIGHT = 680;
+			var UNIT_TO_PIXEL = 20;
+			var METER_TO_UNIT = 100;
+			var PADDING = 8;
+			var canvas;
+			var stage;
+			var stageManager;
+			
+			/// EASEL JS FUNCTIONALITY
+			function init()
+			{
+				canvas = document.getElementById("canvas");
+				stage = new Stage(canvas);
+				stage.needs_to_update = true;
+				stageManager = new StageManager(stage);
+				// setup buttons for volume viewer	
+				element = new DOMElement(document.getElementById("makeObjectForm"));
+				stageManager.addToStage(element, "makeObjectForm");
+				element = new DOMElement(document.getElementById("builder_view_sideAngle_slider"));
+				stageManager.addToStage(element, "builder_view_sideAngle_slider");
+				element = new DOMElement(document.getElementById("builder_view_topAngle_slider"));
+				stageManager.addToStage(element, "builder_view_topAngle_slider");
+				Ticker.setFPS(24);
+				Ticker.addListener(window);
 			}
-		});
-		$( "#amount" ).val( $( "#slider-vertical" ).slider( "value" ) );
-	});
-	*/
+			function tick() { stageManager.tick();}
+
+			// BUTTON INTERACTION 
+			function createObject() {
+				stageManager.makeObject(); 
+			}
+			function updateBuilder_view_sideAngle(d) {stageManager.updateBuilder_view_sideAngle(d);}
+			function updateBuilder_view_topAngle(d) {stageManager.updateBuilder_view_topAngle(d);}
+	
 (function (window)
 {
 
@@ -46,12 +68,13 @@
 		this.stage.needs_to_update = true;
 
 		this.materialNameDisplayMapping = {"DWood":"Wood A", "LWood":"Wood B", "Metal":"Metal", "Plastic":"Plastic"}
+		this.materialNameMaxMapping = {"DWood":[2, 1, 1, 1], "LWood":[1, 1, 1, 1], "Metal":[1, 1, 1, 1], "Plastic":[1, 1, 1, 1]}
 		//this.materialNameMassMapping = {"DWood": 1.25, "LWood": 0.75, "Metal": 1.5, "Plastic": 0.625}
 		this.materialNameMassMapping = {"DWood": 1.25, "LWood": 0.75, "Metal": 1.5, "Plastic": 0.5}
 		this.view_sideAngle = 10*Math.PI/180;
 		this.view_topAngle = 20*Math.PI/180;
 		// setup builder
-		this.builder = new ObjectBuildingPanel(STAGE_WIDTH, 200, this.materialNameDisplayMapping, this.view_sideAngle, this.view_topAngle);
+		this.builder = new ObjectBuildingPanel(STAGE_WIDTH, 200, this.materialNameDisplayMapping, this.materialNameMaxMapping, this.view_sideAngle, this.view_topAngle);
 		this.stage.addChild(this.builder);
 
 		this.tester = new ObjectTestingPanel(STAGE_WIDTH, STAGE_HEIGHT-this.builder.height_px, this.builder.vv.width_px, this.builder.vv.height_px, this.builder.vv.width_from_depth, this.builder.vv.height_from_depth, this.view_sideAngle, this.view_topAngle);

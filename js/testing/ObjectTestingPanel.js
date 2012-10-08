@@ -30,7 +30,6 @@
 		this.shape = new Shape(this.g);
 		this.addChild(this.shape);
 
-		// the list of material names
 		//library
 		this.library = new ObjectLibrary(this.width_px, this.max_shape_height_px, this.max_shape_width_px, this.max_shape_height_px, width_from_depth, height_from_depth);
 		this.addChild(this.library);
@@ -42,12 +41,12 @@
 		this.balanceWorld.x = 0;
 		this.balanceWorld.y = this.library.y + this.library.height_px + PADDING;
 		//beakerWorld
-		var beaker_world_width_px = (max_shape_width_px-width_from_depth)*2;
+		var beaker_world_width_px = this.width_px - this.balanceWorld.width_px;
 		var beaker_world_height_px = (max_shape_height_px-height_from_depth)*3
 		var beaker_width_px = this.max_shape_width_px-width_from_depth;
 		var beaker_height_px = beaker_world_height_px*2/3;
 		var beaker_depth_px = this.max_shape_width_px - this.width_from_depth;
-		this.beakerWorld = new Beakerb2World(beaker_world_width_px, beaker_world_height_px, this.balanceWorld.x + PADDING + this.balanceWorld.width_px , this.library.y + this.library.height_px + PADDING, beaker_width_px, beaker_height_px, beaker_depth_px, this.view_sideAngle, this.view_topAngle, 0.5, 1.0) ;
+		this.beakerWorld = new Beakerb2World(beaker_world_width_px, beaker_world_height_px, this.balanceWorld.x + PADDING + this.balanceWorld.width_px , this.library.y + this.library.height_px + PADDING, beaker_width_px, beaker_height_px, beaker_depth_px, this.view_sideAngle, this.view_topAngle, 1.0,0.5, 0.50) ;
 		this.addChild(this.beakerWorld);
 		this.beakerWorld.x = this.balanceWorld.x + PADDING + this.balanceWorld.width_px;
 		this.beakerWorld.y = this.library.y + this.library.height_px + PADDING;
@@ -75,9 +74,9 @@
 
 	
 	////////////////////// CLASS SPECIFIC ////////////////////
-	p.addObjectToLibrary = function (compShape)
+	p.addObjectToLibrary = function (o)
 	{
-		var actor = new Blockb2Actor(compShape); 
+		var actor = new Blockb2Actor(o); 
 		this.library.addObject(actor);
 		actor.onPress = this.actorPressHandler.bind(this);
 		actor.orig_parent = this.library;
@@ -85,7 +84,7 @@
 	}	
 
 	
-	/** */
+	/** Removes object from its current parent, allows movement based on current*/
 	p.actorPressHandler = function (evt)
 	{
 		var gp = evt.target.parent.localToGlobal(evt.target.x, evt.target.y);
@@ -96,10 +95,10 @@
 			evt.target.parent.removeObject(evt.target);
 		} else if (evt.target.parent instanceof Balanceb2World)
 		{
-			evt.target.parent.removeObject(evt.target);
+			evt.target.parent.removeActor(evt.target);
 		} else if (evt.target.parent instanceof Beakerb2World)
 		{
-			evt.target.parent.removeObject(evt.target);
+			evt.target.parent.removeActor(evt.target);
 		}
 		var lp = this.globalToLocal(gp.x, gp.y);
 		this.addChild(evt.target);
@@ -149,13 +148,11 @@
 			if (parent.balanceWorld.hitTestObject(this.target))
 			{
 				var wpoint = parent.balanceWorld.globalToLocal(ev.stageX+offset.x, ev.stageY+offset.y);
-				parent.balanceWorld.addObject(this.target, wpoint.x, wpoint.y);
-				//this.target.addToWorld(parent.balanceWorld, wpoint.x, wpoint.y);
+				parent.balanceWorld.addActor(this.target, wpoint.x, wpoint.y);
 			} else if (parent.beakerWorld.hitTestObject(this.target))
 			{
 				var wpoint = parent.beakerWorld.globalToLocal(ev.stageX+offset.x, ev.stageY+offset.y);
-				parent.beakerWorld.addObject(this.target, wpoint.x, wpoint.y);
-				//this.target.addToWorld(parent.balanceWorld, wpoint.x, wpoint.y);
+				parent.beakerWorld.addActor(this.target, wpoint.x, wpoint.y);
 			}else
 			{
 				parent.library.addObject(this.target);
