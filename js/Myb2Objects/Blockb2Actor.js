@@ -59,9 +59,9 @@
 					fixDef.filter.categoryBits = 1;
 					fixDef.filter.maskBits = 3;
 					var vec = new b2Vec2();
-					vec.Set (((i+0.5)*skin.unit_width_px)/SCALE, ((j+0.5)*skin.unit_width_px)/SCALE);
+					vec.Set (((i+0.5)*skin.unit_width_px)/GLOBAL_PARAMETERS.SCALE, ((j+0.5)*skin.unit_width_px)/GLOBAL_PARAMETERS.SCALE);
 					fixDef.shape = new b2PolygonShape;
-					fixDef.shape.SetAsOrientedBox(skin.unit_width_px/2/SCALE, (skin.unit_height_px/2/SCALE), vec, 0.0);
+					fixDef.shape.SetAsOrientedBox(skin.unit_width_px/2/GLOBAL_PARAMETERS.SCALE, (skin.unit_height_px/2/GLOBAL_PARAMETERS.SCALE), vec, 0.0);
 					// we need information about how many open spaces are in this fixture
 					fixDef.totalSpaces = skin.array2d[i][j].totalSpaces;
 					fixDef.materialSpaces = skin.array2d[i][j].materialSpaces;
@@ -80,8 +80,8 @@
 	{
 		if (this.body != null && typeof(this.body) != "undefined" && typeof(this.parent) != "undefined" && this.parent != null)
 		{
-			this.x = (this.body.GetPosition().x) * SCALE  - this.parent.x;
-			this.y = (this.body.GetPosition().y ) * SCALE - this.parent.y;
+			this.x = (this.body.GetPosition().x) * GLOBAL_PARAMETERS.SCALE  - this.parent.x;
+			this.y = (this.body.GetPosition().y ) * GLOBAL_PARAMETERS.SCALE - this.parent.y;
 			this.rotation = this.body.GetAngle() * (180 / Math.PI);
 			if (Math.abs (this.viewing_rotation - this.rotation) > 10)
 			{

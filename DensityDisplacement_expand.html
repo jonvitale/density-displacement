@@ -29,16 +29,16 @@
 		<script type="text/javascript" src="libs/easeljs/filters/ColorMatrix.js"></script>
 		<script type="text/javascript" src="libs/easeljs/filters/ColorMatrixFilter.js"></script>
 		
-
 		<script type="text/javascript" src="libs/Box2dWeb-2.1.a.3.min.js"></script>
-
-		<script src="js/StageManager.js"></script>
+		<script type="text/javascript">
+			var parameters_link = "js/DensityParameters_oil.json";
+		</script>
+		<script src="js/DensityMain.js"></script>
 		<script src="js/myDisplayObjects/Point3D.js"></script>
 		<script src="js/myDisplayObjects/BlockCompShape.js"></script>
 		<script src="js/myDisplayObjects/RectBlockShape.js"></script>
 		<script src="js/myDisplayObjects/RectLiquidShape.js"></script>
-		<script src="js/myDisplayObjects/TextContainer.js"></script>
-		
+		<script src="js/myDisplayObjects/TextContainer.js"></script>		
 		<script src="js/Myb2Objects/Myb2BuoyancyController.js"></script>
 		<script src="js/Myb2Objects/Beakerb2World.js"></script>
 		<script src="js/Myb2Objects/Balanceb2World.js"></script>
@@ -46,12 +46,15 @@
 		<script src="js/Myb2Objects/Liquidb2Actor.js"></script>
 		<script src="js/builder/VolumeViewer.js"></script>
 		<script src="js/builder/MaterialsMenu.js"></script>
-		<script src="js/builder/ObjectBuildingPanel.js"></script>
-		
+		<script src="js/builder/ObjectBuildingPanel.js"></script>		
 		<script src="js/testing/ObjectLibrary.js"></script>
 		<script src="js/testing/ObjectTestingPanel.js"></script>
+
+		
 	</head>
-	<body onload="init()">
+	<body>
+
+
 		<form id = "makeObjectForm" class="overForm">
 			<input type="button" id="makeObject" value="Create" onclick="createObject()" class="button"/>
 		</form> 

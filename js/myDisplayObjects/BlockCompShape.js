@@ -5,9 +5,9 @@
 	*   depthArray: an array of binary values indicating if a cube is in a space, back-to-front. example [1, 0, 0, 0, 1]
 	*	view_topAngle, view_sideAngle: the angle which the object is being viewed (radians).  0, 0, is front and center
 	*/
-	var BlockCompShape = function(unit_width_px, unit_height_px, unit_depth_px, blockArray3d, materialNameMassMapping, view_sideAngle, view_topAngle, materialName)
+	var BlockCompShape = function(unit_width_px, unit_height_px, unit_depth_px, blockArray3d, materialName)
 	{
-		this.initialize(unit_width_px, unit_height_px, unit_depth_px, blockArray3d, materialNameMassMapping, view_sideAngle, view_topAngle, materialName);
+		this.initialize(unit_width_px, unit_height_px, unit_depth_px, blockArray3d, materialName);
 	} 
 	var p = BlockCompShape.prototype = new Container();
 	
@@ -16,7 +16,7 @@
 	p.Container_initialize = p.initialize;
 	p.Container_tick = p._tick;
 
-	p.initialize = function(unit_width_px, unit_height_px, unit_depth_px, blockArray3d, materialNameMassMapping, view_sideAngle, view_topAngle, materialName)
+	p.initialize = function(unit_width_px, unit_height_px, unit_depth_px, blockArray3d, materialName)
 	{
 		this.Container_initialize();
 		this.mouseEnabled = true;
@@ -28,9 +28,9 @@
 		this.height_units = blockArray3d[0].length;
 		this.depth_units = blockArray3d[0][0].length;
 		this.blockArray3d = blockArray3d;
-		this.materialNameMassMapping = materialNameMassMapping;
-		this.view_sideAngle = view_sideAngle;
-		this.view_topAngle = view_topAngle;
+		this.materialNameMassMapping = GLOBAL_PARAMETERS.materialNameMassMapping;
+		this.view_sideAngle = GLOBAL_PARAMETERS.view_sideAngle;
+		this.view_topAngle = GLOBAL_PARAMETERS.view_topAngle;
 		this.materialName = materialName;
 
 		this.DEBUG = false;

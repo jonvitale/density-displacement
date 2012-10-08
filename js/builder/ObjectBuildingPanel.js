@@ -2,9 +2,9 @@
 {
 	/** A space for displaying the names of materials, clickable/draggable materials
 	and a grid space for putting them together */
-	function ObjectBuildingPanel (width_px, height_px, materialNameDisplayMapping, materialNameMaxMapping, view_sideAngle, view_topAngle)
+	function ObjectBuildingPanel (width_px, height_px)
 	{
-		this.initialize(width_px, height_px, materialNameDisplayMapping, materialNameMaxMapping, view_sideAngle, view_topAngle);
+		this.initialize(width_px, height_px);
 	}
 	var p = ObjectBuildingPanel.prototype = new Container();
 	p.Container_initialize = ObjectBuildingPanel.prototype.initialize;
@@ -13,24 +13,20 @@
 	p.TEXT_COLOR = "rgba(0, 0, 200, 1.0)";
 
 	
-	p.initialize = function(width_px, height_px, materialNameDisplayMapping, materialNameMaxMapping, view_sideAngle, view_topAngle)
+	p.initialize = function(width_px, height_px)
 	{
 		this.Container_initialize();
 		this.width_px = width_px;
 		this.height_px = height_px;
-		this.materialNameDisplayMapping = materialNameDisplayMapping;
-		this.materialNameMaxMapping = materialNameMaxMapping;
-		this.view_sideAngle = view_sideAngle;
-		this.view_topAngle = view_topAngle;
-		this.default_view_sideAngle = this.view_sideAngle;
-		this.default_view_topAngle = this.view_topAngle;
-
+		this.view_sideAngle = GLOBAL_PARAMETERS.view_sideAngle;
+		this.view_topAngle = GLOBAL_PARAMETERS.view_topAngle;
+		
 		// create a current number of objects of each type for each material
 		this.materialNameCountMapping = {}
-		for (var key in this.materialNameMaxMapping)
+		for (var key in GLOBAL_PARAMETERS.materialNameMaxMapping)
 		{
 			this.materialNameCountMapping[key] = [];
-			for (var i = 0; i < this.materialNameMaxMapping[key].length; i++)
+			for (var i = 0; i < GLOBAL_PARAMETERS.materialNameMaxMapping[key].length; i++)
 			{
 				this.materialNameCountMapping[key][i] = 0;
 			}
@@ -42,13 +38,13 @@
 		this.addChild(this.shape);
 
 		// the list of material names
-		this.materialsMenu = new MaterialsMenu(this.width_px/8, this.height_px, this.materialNameDisplayMapping);
+		this.materialsMenu = new MaterialsMenu(this.width_px/8, this.height_px);
 		this.addChild(this.materialsMenu);
 		
-		this.vv = new VolumeViewer(20, 20, 20, 5, 5, 5, this.view_sideAngle, this.view_topAngle);
+		this.vv = new VolumeViewer(GLOBAL_PARAMETERS.SCALE, GLOBAL_PARAMETERS.SCALE, GLOBAL_PARAMETERS.SCALE, 5, 5, 5);
 		this.addChild(this.vv);
 		this.vv.x = this.width_px * 3 / 4;
-		this.vv.y = this.height_px / 2 - PADDING;
+		this.vv.y = this.height_px / 2 - GLOBAL_PARAMETERS.PADDING;
 		
 		this.block_space_width = this.width_px/2 - this.materialsMenu.x - this.materialsMenu.width_px;
 		this.block_space_height = this.height_px; 
@@ -60,17 +56,17 @@
 		this.g.setStrokeStyle(1);
 		this.g.beginStroke("rgba(180,180,180,1.0)");
 		this.g.beginFill("rgba(220,220,220,1.0)");
-		this.g.drawRect(this.width_px / 2, PADDING, this.width_px / 2 - PADDING, this.height_px - 2 * PADDING);
+		this.g.drawRect(this.width_px / 2, GLOBAL_PARAMETERS.PADDING, this.width_px / 2 - GLOBAL_PARAMETERS.PADDING, this.height_px - 2 * GLOBAL_PARAMETERS.PADDING);
 		this.g.endFill();
 		this.g.endStroke();
 
 		// a set of text to display the number of blocks that can be used
 		this.blockTexts = [];
-		for (i = 0; i < MATERIAL_TYPES.length; i++)
+		for (i = 0; i < GLOBAL_PARAMETERS.MATERIAL_TYPES.length; i++)
 		{
-			var text = new TextContainer("0", "20px Arial", "rgba(255,255,255,1.0)", this.block_space_width / MATERIAL_TYPES.length, 20, this.TEXT_COLOR, this.BACKGROUND_COLOR, 0, "right", "center");
-			text.x = this.materialsMenu.x + this.materialsMenu.width_px + i * this.block_space_width / MATERIAL_TYPES.length;
-			text.y = PADDING;
+			var text = new TextContainer("0", "20px Arial", "rgba(255,255,255,1.0)", this.block_space_width / GLOBAL_PARAMETERS.MATERIAL_TYPES.length, 20, this.TEXT_COLOR, this.BACKGROUND_COLOR, 0, "right", "center");
+			text.x = this.materialsMenu.x + this.materialsMenu.width_px + i * this.block_space_width / GLOBAL_PARAMETERS.MATERIAL_TYPES.length;
+			text.y = GLOBAL_PARAMETERS.PADDING;
 			this.addChild(text);
 			this.blockTexts.push(text);
 		}
@@ -134,7 +130,7 @@
 			this.blocks = new Array();
 		}
 		var depthArray;
-		for (i = 0; i < MATERIAL_TYPES.length; i++)
+		for (i = 0; i < GLOBAL_PARAMETERS.MATERIAL_TYPES.length; i++)
 		{
 			o = this.newBlock(materialName, i);
 			this.placeBlock(o, i);			
@@ -144,13 +140,13 @@
 	}
 	p.newBlock = function (materialName, i)
 	{
-		if (this.materialNameCountMapping[materialName][i] < this.materialNameMaxMapping[materialName][i])
+		if (this.materialNameCountMapping[materialName][i] < GLOBAL_PARAMETERS.materialNameMaxMapping[materialName][i])
 		{
-			if (MATERIAL_TYPES[i] == "full"){depthArray = [1,1,1,1,1];}
-			else if (MATERIAL_TYPES[i] == "center3"){depthArray = [0,1,1,1,0];}
-			else if (MATERIAL_TYPES[i] == "center1"){depthArray = [0,0,1,0,0];}
-			else if (MATERIAL_TYPES[i] == "ends"){depthArray = [1,0,0,0,1];}
-			var o = new RectBlockShape(20, 20, 20, depthArray, this.view_sideAngle, this.view_topAngle, materialName);
+			if (GLOBAL_PARAMETERS.MATERIAL_TYPES[i] == "full"){depthArray = [1,1,1,1,1];}
+			else if (GLOBAL_PARAMETERS.MATERIAL_TYPES[i] == "center3"){depthArray = [0,1,1,1,0];}
+			else if (GLOBAL_PARAMETERS.MATERIAL_TYPES[i] == "center1"){depthArray = [0,0,1,0,0];}
+			else if (GLOBAL_PARAMETERS.MATERIAL_TYPES[i] == "ends"){depthArray = [1,0,0,0,1];}
+			var o = new RectBlockShape(GLOBAL_PARAMETERS.SCALE, GLOBAL_PARAMETERS.SCALE, GLOBAL_PARAMETERS.SCALE, depthArray, this.view_sideAngle, this.view_topAngle, materialName);
 			this.blocks[i] = o;
 			o.onPress = this.blockPressHandler.bind(this);
 			this.addChild(o);
@@ -169,16 +165,16 @@
 	p.placeBlock = function (o, i)
 	{
 		if (o != null)
-		{	o.x = this.materialsMenu.width_px + i * this.width_px/3/MATERIAL_TYPES.length + (o.width_px);
-			o.y = i * this.height_px/2/MATERIAL_TYPES.length + 2 * PADDING + 20;	
+		{	o.x = this.materialsMenu.width_px + i * this.width_px/3/GLOBAL_PARAMETERS.MATERIAL_TYPES.length + (o.width_px);
+			o.y = i * this.height_px/2/GLOBAL_PARAMETERS.MATERIAL_TYPES.length + 2 * GLOBAL_PARAMETERS.PADDING + 20;	
 		}
 	}
 	p.updateCountText = function (materialName)
 	{
 		// update count
-		for (i = 0; i < this.materialNameMaxMapping[materialName].length; i++)
+		for (i = 0; i < GLOBAL_PARAMETERS.materialNameMaxMapping[materialName].length; i++)
 		{
-			this.blockTexts[i].setText(this.materialNameMaxMapping[materialName][i] - this.materialNameCountMapping[materialName][i]);
+			this.blockTexts[i].setText(GLOBAL_PARAMETERS.materialNameMaxMapping[materialName][i] - this.materialNameCountMapping[materialName][i]);
 		}
 	}
 	/** */
@@ -348,10 +344,10 @@
 		}
 		// remove object on screen
 		this.materialNameCountMapping = {}
-		for (var key in this.materialNameMaxMapping)
+		for (var key in GLOBAL_PARAMETERS.materialNameMaxMapping)
 		{
 			this.materialNameCountMapping[key] = [];
-			for (i = 0; i < this.materialNameMaxMapping[key].length; i++)
+			for (i = 0; i < GLOBAL_PARAMETERS.materialNameMaxMapping[key].length; i++)
 			{
 				this.materialNameCountMapping[key][i] = 0;
 			}

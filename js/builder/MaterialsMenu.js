@@ -1,9 +1,9 @@
 (function (window)
 {
 	/** Creates a menu with the names of the materials */
-	function MaterialsMenu (width_px, height_px, materialNameDisplayMapping)
+	function MaterialsMenu (width_px, height_px)
 	{
-		this.initialize(width_px, height_px, materialNameDisplayMapping);
+		this.initialize(width_px, height_px);
 	}
 	var p = MaterialsMenu.prototype = new Container();
 	p.Container_initialize = MaterialsMenu.prototype.initialize;
@@ -12,21 +12,21 @@
 	p.UNSELECTED_COLOR = "rgba(200,200,255,1.0)";
 	p.TEXT_COLOR = "rgba(0, 0, 200, 1.0)";
 
-	p.initialize = function(width_px, height_px, materialNameDisplayMapping)
+	p.initialize = function(width_px, height_px)
 	{
 		this.Container_initialize();
 		this.width_px = width_px;
 		this.height_px = height_px;
-		this.materialNameDisplayMapping = materialNameDisplayMapping;
+		this.materialNameDisplayMapping = GLOBAL_PARAMETERS.materialNameDisplayMapping;
 		this.rev_materialNameDisplayMapping = new Array();
 		this.materialCount = 0;
 		var key;
-		for (key in materialNameDisplayMapping)
+		for (key in this.materialNameDisplayMapping)
 		{
-			if (materialNameDisplayMapping.hasOwnProperty(key))
+			if (this.materialNameDisplayMapping.hasOwnProperty(key))
 			{
 			 	this.materialCount++;
-			 	this.rev_materialNameDisplayMapping[materialNameDisplayMapping[key]] = key;
+			 	this.rev_materialNameDisplayMapping[this.materialNameDisplayMapping[key]] = key;
 			}
 		}
 		//background

@@ -1,0 +1,16 @@
+{
+	"DEBUG" : false,
+	"SCALE" : 20,
+	"materialNameDisplayMapping" : {"DWood":"Wood A", "LWood":"Wood B", "Metal":"Metal", "Plastic":"Plastic"},
+	"materialNameMaxMapping" : {"DWood":[2, 1, 1, 1], "LWood":[1, 1, 1, 1], "Metal":[1, 1, 1, 1], "Plastic":[1, 1, 1, 1]},
+	"materialNameMassMapping" : {"DWood": 1.25, "LWood": 0.75, "Metal": 1.5, "Plastic": 0.5},
+	"view_sideAngle_degrees" : 10,
+	"view_topAngle_degrees" : 20,
+	"fluid_density" : 0.75,
+	"fluid_color" : "rgba(200,225,140,1.0)",
+	"fluid_stroke_color" : "rgba(180,200,100,1.0)",
+	"separation_width" : 4.0,
+	"separation_density" : 1.0,
+	"water_volume_perc" : 0.5,
+ 	"spilloff_volume_perc" : 0.5
+}

@@ -1,14 +1,14 @@
 (function (window)
 {
-	function VolumeViewer (unit_width_px, unit_height_px, unit_depth_px, width_units, height_units, depth_units, view_sideAngle, view_topAngle)
+	function VolumeViewer (unit_width_px, unit_height_px, unit_depth_px, width_units, height_units, depth_units)
 	{
 		
-		this.initialize(unit_width_px, unit_height_px, unit_depth_px, width_units, height_units, depth_units, view_sideAngle, view_topAngle);
+		this.initialize(unit_width_px, unit_height_px, unit_depth_px, width_units, height_units, depth_units);
 	}
 	var p = VolumeViewer.prototype = new Container();
 	p.Container_initialize = VolumeViewer.prototype.initialize;
 
-	p.initialize = function(unit_width_px, unit_height_px, unit_depth_px, width_units, height_units, depth_units, view_sideAngle, view_topAngle)
+	p.initialize = function(unit_width_px, unit_height_px, unit_depth_px, width_units, height_units, depth_units)
 	{
 		this.unit_width_px = unit_width_px;
 		this.unit_height_px = unit_height_px;
@@ -16,8 +16,8 @@
 		this.width_units = width_units;
 		this.depth_units = depth_units;
 		this.height_units = height_units;
-		this.view_topAngle = view_topAngle;
-		this.view_sideAngle = view_sideAngle;
+		this.view_topAngle = GLOBAL_PARAMETERS.view_topAngle;
+		this.view_sideAngle = GLOBAL_PARAMETERS.view_sideAngle;
 		this.width_px_3d = unit_width_px * width_units;
 		this.height_px_3d = unit_height_px * height_units;
 		this.depth_px_3d = unit_depth_px * depth_units;

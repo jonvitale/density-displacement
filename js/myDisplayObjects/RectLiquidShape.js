@@ -1,9 +1,9 @@
 (function (window)
 {
 
-	var RectLiquidShape = function(unit_width_px, unit_height_px, unit_depth_px, width_units, height_units, depth_units, separation_width, separation_density, view_sideAngle, view_topAngle, fluid_density, useCompleteDepth, useCompleteWidth)
+	var RectLiquidShape = function(unit_width_px, unit_height_px, unit_depth_px, width_units, height_units, depth_units, useCompleteDepth, useCompleteWidth)
 	{
-		this.initialize(unit_width_px, unit_height_px, unit_depth_px, width_units, height_units, depth_units, separation_width, separation_density, view_sideAngle, view_topAngle, fluid_density, useCompleteDepth, useCompleteWidth);
+		this.initialize(unit_width_px, unit_height_px, unit_depth_px, width_units, height_units, depth_units, useCompleteDepth, useCompleteWidth);
 	}
 	var p = RectLiquidShape.prototype = new Container();
 	
@@ -16,7 +16,7 @@
 	*	This liquid shape can either use a container to space out each cube or not.  Separator width defines the size of this spacing between cubes.
 	*   If separators are used they can either appear in complete rows (on depth dimension) or full width x depth.
 	*/	
-	p.initialize = function(unit_width_px, unit_height_px, unit_depth_px, width_units, height_units, depth_units, separation_width, separation_density, view_sideAngle, view_topAngle, fluid_density, useCompleteDepth, useCompleteWidth)
+	p.initialize = function(unit_width_px, unit_height_px, unit_depth_px, width_units, height_units, depth_units, useCompleteDepth, useCompleteWidth)
 	{
 		this.Container_initialize();
 
@@ -27,17 +27,12 @@
 		this.depth_units = depth_units;
 		this.height_units = height_units;
 		// separation separates the cubes of liquid from each other, zero means that the liquid is adjacent
-		this.separation_width = separation_width;
-		this.separation_density = separation_density;
 		this.separation_rgba_fill = "rgba(255,255,255,1.0)";
 		this.separation_rgba_stroke = "rgba(155,155,155,1.0)";
-		this.unit_width_px = unit_width_px + 2*separation_width;
-		this.unit_height_px = unit_height_px + 1*separation_width;
-		this.unit_depth_px = unit_depth_px + 2*separation_width;
+		this.unit_width_px = unit_width_px + 2*GLOBAL_PARAMETERS.separation_width;
+		this.unit_height_px = unit_height_px + 1*GLOBAL_PARAMETERS.separation_width;
+		this.unit_depth_px = unit_depth_px + 2*GLOBAL_PARAMETERS.separation_width;
 		
-		this.view_topAngle = view_topAngle;
-		this.view_sideAngle = view_sideAngle;
-		if (typeof(fluid_density) == "undefined"){ this.fluid_density = 1.0; } else {this.fluid_density = fluid_density;}
 		if (typeof(useCompleteDepth) == "undefined"){ this.useCompleteDepth = false;} else {this.useCompleteDepth = useCompleteDepth;} 
 		if (typeof(useCompleteWidth) == "undefined"){ this.useCompleteWidth = false;} else {this.useCompleteWidth = useCompleteWidth;}
 
@@ -45,8 +40,8 @@
 		this.shape = new Shape(g);
 		this.addChild(this.shape);
 
-		this.unit_volume = this.unit_width_px/SCALE * this.unit_depth_px/SCALE * this.unit_height_px/SCALE;
-		this.liquid_unit_volume = this.liquid_unit_width_px/SCALE * this.liquid_unit_depth_px/SCALE * this.liquid_unit_height_px/SCALE;
+		this.unit_volume = this.unit_width_px/GLOBAL_PARAMETERS.SCALE * this.unit_depth_px/GLOBAL_PARAMETERS.SCALE * this.unit_height_px/GLOBAL_PARAMETERS.SCALE;
+		this.liquid_unit_volume = this.liquid_unit_width_px/GLOBAL_PARAMETERS.SCALE * this.liquid_unit_depth_px/GLOBAL_PARAMETERS.SCALE * this.liquid_unit_height_px/GLOBAL_PARAMETERS.SCALE;
 
 		this.x_index = 0;
 		this.y_index = 0;
@@ -197,11 +192,11 @@
 					if (this.volumeArray3d[i][j][k] > 0)
 					{
 						materialSpaces ++;
-						mass += this.volumeArray3d[i][j][k] * this.fluid_density;
+						mass += this.volumeArray3d[i][j][k] * GLOBAL_PARAMETERS.fluid_density;
 						// add in mass for separators, left, right, front, back, below
-						mass += 2 * (this.liquid_unit_width_px+this.separation_width)/SCALE * (this.liquid_unit_height_px)/SCALE * this.separation_width/SCALE * this.separation_density;
-						mass += 2 * (this.liquid_unit_depth_px+this.separation_width)/SCALE * (this.liquid_unit_height_px)/SCALE * this.separation_width/SCALE * this.separation_density;
-						mass += (this.liquid_unit_width_px+2*this.separation_width)/SCALE * (this.liquid_unit_depth_px+2*this.separation_width)/SCALE * this.separation_width/SCALE * this.separation_density;
+						mass += 2 * (this.liquid_unit_width_px+GLOBAL_PARAMETERS.separation_width)/GLOBAL_PARAMETERS.SCALE * (this.liquid_unit_height_px)/GLOBAL_PARAMETERS.SCALE * GLOBAL_PARAMETERS.separation_width/GLOBAL_PARAMETERS.SCALE * GLOBAL_PARAMETERS.separation_density;
+						mass += 2 * (this.liquid_unit_depth_px+GLOBAL_PARAMETERS.separation_width)/GLOBAL_PARAMETERS.SCALE * (this.liquid_unit_height_px)/GLOBAL_PARAMETERS.SCALE * GLOBAL_PARAMETERS.separation_width/GLOBAL_PARAMETERS.SCALE * GLOBAL_PARAMETERS.separation_density;
+						mass += (this.liquid_unit_width_px+2*GLOBAL_PARAMETERS.separation_width)/GLOBAL_PARAMETERS.SCALE * (this.liquid_unit_depth_px+2*GLOBAL_PARAMETERS.separation_width)/GLOBAL_PARAMETERS.SCALE * GLOBAL_PARAMETERS.separation_width/GLOBAL_PARAMETERS.SCALE * GLOBAL_PARAMETERS.separation_density;
 						
 					}
 				}
@@ -219,11 +214,10 @@
 		var rotation;
 		if (typeof(r) != "undefined") {rotation = r} else {rotation = 0}
 		rotation = (rotation + 360 * 10) % 360;
-		var view_sideAngle = this.view_sideAngle * Math.cos(rotation * Math.PI / 180) - this.view_topAngle * Math.sin(rotation * Math.PI / 180);
-		var view_topAngle = this.view_topAngle * Math.cos(rotation * Math.PI / 180) +  this.view_sideAngle * Math.sin(rotation * Math.PI / 180);
+		var view_sideAngle = GLOBAL_PARAMETERS.view_sideAngle * Math.cos(rotation * Math.PI / 180) - GLOBAL_PARAMETERS.view_topAngle * Math.sin(rotation * Math.PI / 180);
+		var view_topAngle = GLOBAL_PARAMETERS.view_topAngle * Math.cos(rotation * Math.PI / 180) +  GLOBAL_PARAMETERS.view_sideAngle * Math.sin(rotation * Math.PI / 180);
 		
 		var btr_x, btr_y, btl_x, btl_y, bb_r, ftr_x, ftr_y, ftl_x, ftl_y, fbr_x, fbr_y, fbl_x, fbl_y;
-		
 		
 		var g = this.g;
 		g.clear();
@@ -237,8 +231,8 @@
 					//if (this.volumeArray3d[i][j][k] == 0) console.log("for x index", i, "compare", j, "to", this.max_y_index, (this.useCompleteWidth && j <= this.max_y_index));
 					if (this.volumeArray3d[i][j][k] > 0 || ((this.useCompleteDepth && i <= this.max_x_index && j <= this.max_y_index) || (this.useCompleteWidth && j <= this.max_y_index)))
 					{
-						fbl_x = i*(this.unit_width_px) + this.separation_width + k * this.unit_depth_px * Math.sin(view_sideAngle);
-						fbl_y = -j*this.unit_height_px - this.separation_width - k * this.unit_depth_px * Math.sin(view_topAngle);
+						fbl_x = i*(this.unit_width_px) + GLOBAL_PARAMETERS.separation_width + k * this.unit_depth_px * Math.sin(view_sideAngle);
+						fbl_y = -j*this.unit_height_px - GLOBAL_PARAMETERS.separation_width - k * this.unit_depth_px * Math.sin(view_topAngle);
 						bbl_x = fbl_x + this.liquid_unit_depth_px*Math.sin(view_sideAngle);
 						bbl_y = fbl_y - this.liquid_unit_depth_px*Math.sin(view_topAngle);
 
@@ -282,11 +276,10 @@
 						
 						if (view_topAngle < 0)
 						{
-							// draw bottom
-							
+							// draw bottom							
 							g.setStrokeStyle(1);
-							g.beginStroke("rgba(150, 150, 255, 0.5)");
-							g.beginFill("rgba(200, 200, 255, 1.0)");
+							g.beginStroke(GLOBAL_PARAMETERS.fluid_stroke_color);
+							g.beginFill(GLOBAL_PARAMETERS.fluid_color);
 							g.moveTo(bbr_x, bbr_y);
 							g.lineTo(bbl_x, bbl_y);
 							g.lineTo(fbl_x, fbl_y);
@@ -295,25 +288,26 @@
 							g.endStroke();
 							g.endFill();
 
-
-							g.setStrokeStyle(1);
-							g.beginStroke(this.separation_rgba_stroke);
-							g.beginFill(this.separation_rgba_fill);
-							g.moveTo(c_bbr_x, c_bbr_y);
-							g.lineTo(c_bbl_x, c_bbl_y);
-							g.lineTo(c_fbl_x, c_fbl_y);
-							g.lineTo(c_fbr_x, c_fbr_y);
-							g.lineTo(c_bbr_x, c_bbr_y);							
-							g.endFill();
-							g.endStroke();
-
+							if (GLOBAL_PARAMETERS.separation_width > 0)
+							{
+								g.setStrokeStyle(1);
+								g.beginStroke(this.separation_rgba_stroke);
+								g.beginFill(this.separation_rgba_fill);
+								g.moveTo(c_bbr_x, c_bbr_y);
+								g.lineTo(c_bbl_x, c_bbl_y);
+								g.lineTo(c_fbl_x, c_fbl_y);
+								g.lineTo(c_fbr_x, c_fbr_y);
+								g.lineTo(c_bbr_x, c_bbr_y);							
+								g.endFill();
+								g.endStroke();
+							}		
 						} else
 						{
 							// draw top
 							
 							g.setStrokeStyle(1);
-							g.beginStroke("rgba(150, 150, 255, 0.5)");
-							g.beginFill("rgba(200, 200, 255, 1.0)");
+							g.beginStroke(GLOBAL_PARAMETERS.fluid_stroke_color);
+							g.beginFill(GLOBAL_PARAMETERS.fluid_color);
 							g.moveTo(btr_x, btr_y);
 							g.lineTo(btl_x, btl_y);
 							g.lineTo(ftl_x, ftl_y);
@@ -322,42 +316,44 @@
 							g.endStroke();
 							g.endFill();
 							
-							// draw top of container in four trapezoids
-							g.setStrokeStyle(1);
-							g.beginStroke(this.separation_rgba_stroke);
-							g.beginFill(this.separation_rgba_fill);
-							g.moveTo(c_btr_x, c_btr_y);
-							g.lineTo(btr_x, btr_y);
-							g.lineTo(btl_x, btl_y);
-							g.lineTo(c_btl_x, c_btl_y);
-							g.lineTo(c_btr_x, c_btr_y);
-							
-							g.moveTo(c_ftr_x, c_ftr_y);
-							g.lineTo(ftr_x, ftr_y);
-							g.lineTo(btr_x, btr_y);
-							g.lineTo(c_btr_x, c_btr_y);
-							g.lineTo(c_ftr_x, c_ftr_y);
+							if (GLOBAL_PARAMETERS.separation_width > 0)
+							{
+								// draw top of container in four trapezoids
+								g.setStrokeStyle(1);
+								g.beginStroke(this.separation_rgba_stroke);
+								g.beginFill(this.separation_rgba_fill);
+								g.moveTo(c_btr_x, c_btr_y);
+								g.lineTo(btr_x, btr_y);
+								g.lineTo(btl_x, btl_y);
+								g.lineTo(c_btl_x, c_btl_y);
+								g.lineTo(c_btr_x, c_btr_y);
+								
+								g.moveTo(c_ftr_x, c_ftr_y);
+								g.lineTo(ftr_x, ftr_y);
+								g.lineTo(btr_x, btr_y);
+								g.lineTo(c_btr_x, c_btr_y);
+								g.lineTo(c_ftr_x, c_ftr_y);
 
-							g.moveTo(c_ftl_x, c_ftl_y);
-							g.lineTo(ftl_x, ftl_y);
-							g.lineTo(ftr_x, ftr_y);
-							g.lineTo(c_ftr_x, c_ftr_y);
-							g.lineTo(c_ftl_x, c_ftl_y);
+								g.moveTo(c_ftl_x, c_ftl_y);
+								g.lineTo(ftl_x, ftl_y);
+								g.lineTo(ftr_x, ftr_y);
+								g.lineTo(c_ftr_x, c_ftr_y);
+								g.lineTo(c_ftl_x, c_ftl_y);
 
-							g.moveTo(c_btl_x, c_btl_y);
-							g.lineTo(btl_x, btl_y);
-							g.lineTo(ftl_x, ftl_y);
-							g.lineTo(c_ftl_x, c_ftl_y);
-							g.lineTo(c_btl_x, c_btl_y);
-							
+								g.moveTo(c_btl_x, c_btl_y);
+								g.lineTo(btl_x, btl_y);
+								g.lineTo(ftl_x, ftl_y);
+								g.lineTo(c_ftl_x, c_ftl_y);
+								g.lineTo(c_btl_x, c_btl_y);
+							}							
 						}
 						
 						if (view_sideAngle < 0)
 						{
 							// draw left
 							g.setStrokeStyle(1);
-							g.beginStroke("rgba(150, 150, 255, 0.5)");
-							g.beginFill("rgba(200, 200, 255, 0.5)");
+							g.beginStroke(GLOBAL_PARAMETERS.fluid_stroke_color);
+							g.beginFill(GLOBAL_PARAMETERS.fluid_color);
 							g.moveTo(btl_x, btl_y);
 							g.lineTo(ftl_x, ftl_y);
 							g.lineTo(fbl_x, fbl_y);
@@ -366,15 +362,18 @@
 							g.endStroke();
 							g.endFill();
 
-							g.setStrokeStyle(1);
-							g.beginStroke(this.separation_rgba_stroke);
-							g.beginFill(this.separation_rgba_fill);
-							g.moveTo(c_btl_x, c_btl_y);
-							g.lineTo(c_ftl_x, c_ftl_y);
-							g.lineTo(c_fbl_x, c_fbl_y);
-							g.lineTo(c_bbl_x, c_bbl_y);
-							g.lineTo(c_btl_x, c_btl_y);
-							g.endFill();
+							if (GLOBAL_PARAMETERS.separation_width > 0)
+							{
+								g.setStrokeStyle(1);
+								g.beginStroke(this.separation_rgba_stroke);
+								g.beginFill(this.separation_rgba_fill);
+								g.moveTo(c_btl_x, c_btl_y);
+								g.lineTo(c_ftl_x, c_ftl_y);
+								g.lineTo(c_fbl_x, c_fbl_y);
+								g.lineTo(c_bbl_x, c_bbl_y);
+								g.lineTo(c_btl_x, c_btl_y);
+								g.endFill();
+							}
 							
 						}
 
@@ -382,8 +381,8 @@
 						{
 							// draw right
 							g.setStrokeStyle(1);
-							g.beginStroke("rgba(150, 150, 255, 0.5)");
-							g.beginFill("rgba(200, 200, 255, 0.5)");
+							g.beginStroke(GLOBAL_PARAMETERS.fluid_stroke_color);
+							g.beginFill(GLOBAL_PARAMETERS.fluid_color);
 							g.moveTo(btr_x, btr_y);
 							g.lineTo(ftr_x, ftr_y);
 							g.lineTo(fbr_x, fbr_y);
@@ -391,31 +390,34 @@
 							g.lineTo(btr_x, btr_y);
 							g.endFill();
 							g.endStroke();
-
-
-							g.setStrokeStyle(1);
-							g.beginStroke(this.separation_rgba_stroke);
-							g.beginFill(this.separation_rgba_fill);
-							g.moveTo(c_btr_x, c_btr_y);
-							g.lineTo(c_ftr_x, c_ftr_y);
-							g.lineTo(c_fbr_x, c_fbr_y);
-							g.lineTo(c_bbr_x, c_bbr_y);
-							g.lineTo(c_btr_x, c_btr_y);
-							g.endFill();
-							g.endStroke();
+							
+							if (GLOBAL_PARAMETERS.separation_width > 0)
+							{
+								g.setStrokeStyle(1);
+								g.beginStroke(this.separation_rgba_stroke);
+								g.beginFill(this.separation_rgba_fill);
+								g.moveTo(c_btr_x, c_btr_y);
+								g.lineTo(c_ftr_x, c_ftr_y);
+								g.lineTo(c_fbr_x, c_fbr_y);
+								g.lineTo(c_bbr_x, c_bbr_y);
+								g.lineTo(c_btr_x, c_btr_y);
+								g.endFill();
+								g.endStroke();
+							}
 							
 						}
 						
-						// draw front, but only if next block is missing
-						if (this.separation_width > 0 || k == 0 || this.volumeArray3d[i][j][k-1] <= 0)
-						{
+						
 							
-							if (view_sideAngle < 0)
-							{
+						if (view_sideAngle < 0 )
+						{
+							// draw front, but only if next block's volume is less than this
+								if (GLOBAL_PARAMETERS.separation_width > 0 || k == this.depth_units - 1 || this.volumeArray3d[i][j][k+1] <= this.volumeArray3d[i][j][k])
+								{
 								// draw back
 								g.setStrokeStyle(1);
-								g.beginStroke("rgba(150, 150, 255, 0.5)");
-								g.beginFill("rgba(200, 200, 255, 1.0)");
+								g.beginStroke(GLOBAL_PARAMETERS.fluid_stroke_color);
+								g.beginFill(GLOBAL_PARAMETERS.fluid_color);
 								g.moveTo(btr_x, btr_y);
 								g.lineTo(btl_x, btl_y);
 								g.lineTo(bbl_x, bbl_y);
@@ -423,23 +425,32 @@
 								g.lineTo(btr_x, btr_y);
 								g.endFill();
 
-								g.setStrokeStyle(1);
-								g.beginStroke(this.separation_rgba_stroke);
-								g.beginFill(this.separation_rgba_fill);
-								g.moveTo(c_btr_x, c_btr_y);
-								g.lineTo(c_btl_x, c_btl_y);
-								g.lineTo(c_bbl_x, c_bbl_y);
-								g.lineTo(c_bbr_x, c_bbr_y);
-								g.lineTo(c_btr_x, c_btr_y);
-								g.endFill();
-								g.endStroke();
+								if (GLOBAL_PARAMETERS.separation_width > 0)
+								{
+									g.setStrokeStyle(1);
+									g.beginStroke(this.separation_rgba_stroke);
+									g.beginFill(this.separation_rgba_fill);
+									g.moveTo(c_btr_x, c_btr_y);
+									g.lineTo(c_btl_x, c_btl_y);
+									g.lineTo(c_bbl_x, c_bbl_y);
+									g.lineTo(c_bbr_x, c_bbr_y);
+									g.lineTo(c_btr_x, c_btr_y);
+									g.endFill();
+									g.endStroke();
+								}
 							}	
-							else 
-							{
+						
+						} else if (view_sideAngle >= 0)
+						{
+							// draw front, but only if next block's volume is less than this
+							
+							if (GLOBAL_PARAMETERS.separation_width > 0 || k == 0 || this.volumeArray3d[i][j][k-1] <= this.volumeArray3d[i][j][k])
+							{	
 								// draw front
+								
 								g.setStrokeStyle(1);
-								g.beginStroke("rgba(150, 150, 255, 0.5)");
-								g.beginFill("rgba(200, 200, 255, 1.0)");
+								g.beginStroke(GLOBAL_PARAMETERS.fluid_stroke_color);
+								g.beginFill(GLOBAL_PARAMETERS.fluid_color);
 								g.moveTo(ftr_x, ftr_y);
 								g.lineTo(ftl_x, ftl_y);
 								g.lineTo(fbl_x, fbl_y);
@@ -447,19 +458,22 @@
 								g.lineTo(ftr_x, ftr_y);
 								g.endStroke();
 								g.endFill();
-
-								g.setStrokeStyle(1);
-								g.beginStroke(this.separation_rgba_stroke);
-								g.beginFill(this.separation_rgba_fill);
-								g.moveTo(c_ftr_x, c_ftr_y);
-								g.lineTo(c_ftl_x, c_ftl_y);
-								g.lineTo(c_fbl_x, c_fbl_y);
-								g.lineTo(c_fbr_x, c_fbr_y);
-								g.lineTo(c_ftr_x, c_ftr_y);
-								g.endFill();
-								g.endStroke();
+								
+								if (GLOBAL_PARAMETERS.separation_width > 0)
+								{
+									g.setStrokeStyle(1);
+									g.beginStroke(this.separation_rgba_stroke);
+									g.beginFill(this.separation_rgba_fill);
+									g.moveTo(c_ftr_x, c_ftr_y);
+									g.lineTo(c_ftl_x, c_ftl_y);
+									g.lineTo(c_fbl_x, c_fbl_y);
+									g.lineTo(c_fbr_x, c_fbr_y);
+									g.lineTo(c_ftr_x, c_ftr_y);
+									g.endFill();
+									g.endStroke();
+								}
 							}			
-						}						
+						}				
 					}
 				}
 			}
