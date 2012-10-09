@@ -96,9 +96,9 @@
 		this.backWaterShape.x = this.frontWaterShape.x + this.width_from_depth; this.backWaterShape.y = this.frontWaterShape.y - this.height_from_depth;
 		this.backWaterLineShape.x = this.frontWaterLineShape.x + this.width_from_depth; this.backWaterLineShape.y = this.frontWaterLineShape.y - this.height_from_depth;
 				
-		this.rulerShape.x = this.beaker_x + -this.beaker_width_px/2;
-		this.pointerShape.x = this.beaker_x - this.beaker_width_px/2 + 20;
-		this.pointerText.x = this.pointerShape.x - 32;
+		this.rulerShape.x = this.beaker_x + -this.beaker_width_px/2 - 10;
+		this.pointerShape.x = this.beaker_x - this.beaker_width_px/2;
+		this.pointerText.x = this.pointerShape.x - 33;
 		
 		// draw water line
 		g = this.backWaterLineGraphics;
@@ -207,7 +207,7 @@
 			g.lineTo(10, ry);
 			vstr = Math.round(((this.height_px - this.beaker_bottom_dy) - ry) / GLOBAL_PARAMETERS.SCALE);
 			text = new Text(vstr, "1.0em Bold Arial", "#888");
-			text.x = this.beaker_x - this.beaker_width_px/2 - 12;
+			text.x = this.beaker_x - this.beaker_width_px/2 - 33;
 			text.y = ry + 4; 
 			this.addChild(text);
 		}
@@ -221,10 +221,10 @@
 		g.beginStroke("rgba(100, 100, 100, 1)");
 		g.beginFill("rgba(255,255,255, 1.0)");
 		g.moveTo(0, 0);
-		g.lineTo(-10, -10);
-		g.lineTo(-40, -10);
-		g.lineTo(-40, 10);
-		g.lineTo(-10, 10);
+		g.lineTo(-8, -10);
+		g.lineTo(-36, -10);
+		g.lineTo(-36, 10);
+		g.lineTo(-8, 10);
 		g.lineTo(0, 0);
 		g.endFill();
 		g.endStroke();		
