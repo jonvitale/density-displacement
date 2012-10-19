@@ -6,8 +6,21 @@
 	backgroundColor: white
 	hAlign, vAlign: location of text within container - "left", "center", "right", "top", "bottom"
 	*/
-	var TextContainer = function(textString, font, textColor, width_px, height_px, backgroundColor, strokeColor, strokeSize, hAlign, vAlign)
+	var TextContainer = function(textString, font, textColor, width_px, height_px, backgroundColor, strokeColor, strokeSize, hAlign, vAlign, padding_x, padding_y, shapeType, orient_at_center)
 	{
+		this.initialize(textString, font, textColor, width_px, height_px, backgroundColor, strokeColor, strokeSize, hAlign, vAlign, padding_x, padding_y, shapeType, orient_at_center);
+	}
+	var p = TextContainer.prototype = new Container();
+	
+	// public properties
+	p.mouseEventsEnabled = true;
+	p.Container_initialize = p.initialize;
+	p.mouseEnabled = true;
+	p.Container_tick = p._tick;
+
+	p.initialize = function(textString, font, textColor, width_px, height_px, backgroundColor, strokeColor, strokeSize, hAlign, vAlign, padding_x, padding_y, shapeType, orient_at_center)
+	{
+		this.Container_initialize();
 		this.textString = textString;
 		this.font = font;
 		this.textColor = textColor;
@@ -18,30 +31,16 @@
 		this.strokeSize = (typeof strokeSize === "undefined") ? 0 : strokeSize;
 		this.hAlign = (typeof hAlign === "undefined") ? "center" : hAlign;
 		this.vAlign = (typeof vAlign === "undefined") ? "center" : vAlign;
-		this.initialize();
-	}
-	var p = TextContainer.prototype = new Container();
-	
-	// public properties
-	p.mouseEventsEnabled = true;
-	p.Container_initialize = p.initialize;
-		p.mouseEnabled = true;
-	p.Container_tick = p._tick;
-
-	p.initialize = function()
-	{
-		this.Container_initialize();
-
+		this.padding_x = (typeof padding_x === "undefined") ? 0 : padding_x;
+		this.padding_y = (typeof padding_y === "undefined") ? 0 : padding_y;
+		this.shapeType = (typeof shapeType === "undefined") ? "rect" : shapeType;
+		this.orient_at_center = (typeof orient_at_center === "undefined") ? false : orient_at_center;
+		
 		//background
 		this.g = new Graphics();
 		this.shape = new Shape(this.g);
 		this.shape.mouseEventsEnabled = true;
-		// set this object's mouse listeners to that of underlying shape
-		//this.onMouseOver = this.shape.onMouseOver;
-		//this.onMouseOut = this.shape.onMouseOut;
-		//this.onClick = this.shape.onClick;
-		//this.onDoubleClick = this.shape.onDoubleClick;
-
+		
 		this.addChild(this.shape);
 		// create text
 		this.text = new Text(this.textString, this.font, this.textColor);
@@ -52,16 +51,31 @@
 		// take max of text width and height and given width and height
 		this.width_px = Math.max(this.text.getMeasuredWidth(), this.width_px);
 		this.height_px = Math.max(this.text.getMeasuredLineHeight(), this.height_px);
+		this.original_width_px = this.width_px;
+		this.original_height_px = this.height_px;
 
-		// align text
-		if (this.hAlign == "left"){this.text.x = 0;}
-		else if (this.hAlign == "right"){this.text.x = this.width_px-this.text.getMeasuredWidth();}
-		else {this.text.x = (this.width_px-this.text.getMeasuredWidth())/2;}
+		if (this.orient_at_center)
+		{
+			// align text
+			if (this.hAlign == "left"){this.text.x = -this.width_px/2 + this.padding_x;}
+			else if (this.hAlign == "right"){this.text.x = -this.text.getMeasuredWidth()+this.padding_x;}
+			else {this.text.x = -this.text.getMeasuredWidth()/2+this.padding_x;}
 
-		if (this.vAlign == "top"){this.text.y = 0;}
-		else if (this.vAlign == "bottom"){this.text.y = this.height_px-this.text.getMeasuredLineHeight();}
-		else {this.text.y = (this.height_px-this.text.getMeasuredLineHeight())/2;}
-		
+			if (this.vAlign == "top"){this.text.y = -this.height_px/2 + this.padding_y;}
+			else if (this.vAlign == "bottom"){this.text.y = -this.text.getMeasuredLineHeight() + this.padding_y;}
+			else {this.text.y = -this.text.getMeasuredLineHeight()/2+this.padding_y;}		
+		} else
+		{
+			// align text
+			if (this.hAlign == "left"){this.text.x = this.padding_x;}
+			else if (this.hAlign == "right"){this.text.x = this.width_px-this.text.getMeasuredWidth()+this.padding_x;}
+			else {this.text.x = ( this.width_px-this.text.getMeasuredWidth())/2+this.padding_x;}
+
+			if (this.vAlign == "top"){this.text.y = this.padding_y;}
+			else if (this.vAlign == "bottom"){this.text.y = this.height_px-this.text.getMeasuredLineHeight()+this.padding_y;}
+			else {this.text.y = ( this.height_px-this.text.getMeasuredLineHeight())/2+this.padding_y;}
+			
+		}
 		this.redraw();
 	}
 
@@ -71,22 +85,42 @@
 	}
 	
 	//// UPDATING FUNCTIONS
-	p.setText = function(textString)
+	p.setText = function (textString, width_px, height_px)
 	{
 		this.textString = textString;
-		this.text.text = textString;
-		this.width_px = Math.max(this.text.getMeasuredWidth(), this.width_px);
-		this.height_px = Math.max(this.text.getMeasuredLineHeight(), this.height_px);
+		if (this.text != null) this.removeChild(this.text);
 
-		// align text
-		if (this.hAlign == "left"){this.text.x = 0;}
-		else if (this.hAlign == "right"){this.text.x = this.width_px-this.text.getMeasuredWidth();}
-		else {this.text.x = (this.width_px-this.text.getMeasuredWidth())/2;}
-
-		if (this.vAlign == "top"){this.text.y = 0;}
-		else if (this.vAlign == "bottom"){this.text.y = this.height_px-this.text.getMeasuredLineHeight();}
-		else {this.text.y = (this.height_px-this.text.getMeasuredLineHeight())/2;}
+		this.text = new Text(this.textString, this.font, this.textColor);
+		this.text.textBaseline = "top";
+		this.text.mouseEnabled = false;
+		this.addChild(this.text);
 		
+		this.width_px = typeof (width_px) === "undefined" ? this.original_width_px : width_px;
+		this.height_px = typeof (height_px) === "undefined" ? this.original_height_px: height_px;
+		if (this.orient_at_center)
+		{
+			// align text
+			if (this.hAlign == "left"){this.text.x = -this.width_px/2 + this.padding_x;}
+			else if (this.hAlign == "right"){this.text.x = -this.text.getMeasuredWidth()+this.padding_x;}
+			else {this.text.x = -this.text.getMeasuredWidth()/2+this.padding_x;}
+
+			if (this.vAlign == "top"){this.text.y = -this.height_px/2 + this.padding_y;}
+			else if (this.vAlign == "bottom"){this.text.y = -this.text.getMeasuredLineHeight() + this.padding_y;}
+			else {this.text.y = -this.text.getMeasuredLineHeight()/2+this.padding_y;}		
+		} else
+		{
+			// align text
+			if (this.hAlign == "left"){this.text.x = this.padding_x;}
+			else if (this.hAlign == "right"){this.text.x = this.width_px-this.text.getMeasuredWidth()+this.padding_x;}
+			else {this.text.x = ( this.width_px-this.text.getMeasuredWidth())/2+this.padding_x;}
+
+			if (this.vAlign == "top"){this.text.y = this.padding_y;}
+			else if (this.vAlign == "bottom"){this.text.y = this.height_px-this.text.getMeasuredLineHeight()+this.padding_y;}
+			else {this.text.y = ( this.height_px-this.text.getMeasuredLineHeight())/2+this.padding_y;}
+			
+		}
+
+		this.redraw();
 	}
 
 	p.setBackgroundColor = function(c)
@@ -97,14 +131,26 @@
 
 	p.redraw = function ()
 	{
+		var offset;
+		if (this.orient_at_center)
+		{
+			offset = new Point (-this.width_px/2, -this.height_px/2);		
+		} else
+		{
+			offset = new Point (0, 0);
+		}
+
+		this.g.clear();
 		// draw background shape
 		if (this.strokeSize > 0)
 		{
-			this.g.setStrokeSize(this.strokeSize);
+			this.g.setStrokeStyle(this.strokeSize);
 			this.g.beginStroke(this.strokeColor);
 		}
 		this.g.beginFill(this.backgroundColor);
-		this.g.drawRect(0, 0, this.width_px, this.height_px);
+		if (this.shapeType == "rect"){ this.g.drawRect(offset.x, offset.y, this.width_px, this.height_px);}
+		else if (this.shapeType == "ellipse"){this.g.drawEllipse(offset.x, offset.y, this.width_px, this.height_px);}
+		else if (this.shapeType == "roundRect"){this.g.drawRoundRect(offset.x, offset.y, this.width_px, this.height_px, this.width_px/2, this.height_px/2);}
 		this.g.endFill();
 		if (this.strokeSize > 0) this.g.endStroke();
 
