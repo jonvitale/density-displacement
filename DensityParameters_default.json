@@ -1,0 +1,77 @@
+{
+	"DEBUG" : true,
+	"SCALE" : 20,
+	"MATERIAL_COUNT" : 4,
+	"materials" :
+	{
+		"DWood":
+		{
+			"displayName":"Wood A",
+			"mass":1.25,
+			"fillColors":["#7D4613", "#8D5925", "#743B18", "#8D5925", "#743B18", "#7C4412", "#743B18"],
+			"fillRatios":[0, 0.236, 0.4607, 0.6292, 0.7697, 0.8708, 0.9944],
+			"fillShadowColors":["#4D1603", "#5D2905", "#440B08", "#5D2905", "#440B08", "#4C0402", "#440B08"],
+			"fillShadowRatios":[0, 0.236, 0.4607, 0.6292, 0.7697, 0.8708, 0.9944],
+			"strokeColors":["#3B0400", "#3B0400"],
+			"strokeRatios":[0, 1],
+			"blockTypes":["full", "center3", "center1", "ends"],
+			"blockMax":[10, 10, 10, 10],
+			"blockCount":[0, 0, 0, 0],
+			"isContainer":false		
+		},
+		"LWood":
+		{
+			"displayName":"Wood B",
+			"mass":0.625,
+			"fillColors":["#FBEFD0", "#FADBA2", "#FAE3B0", "#E8CFA1", "#F0D3A1", "#FBEED2", "#F9E2BA"],
+			"fillRatios":[0, 0.236, 0.4607, 0.6292, 0.7697, 0.8708, 0.9944],
+			"fillShadowColors":["#CBBFA0", "#CAAB72", "#CAB380", "#B89F71", "#C0A371", "#CBBEA2", "#C9B28A"],
+			"fillShadowRatios":[0, 0.236, 0.4607, 0.6292, 0.7697, 0.8708, 0.9944],
+			"strokeColors":["#AB854C", "#AB854C"],
+			"strokeRatios":[0, 1],
+			"blockTypes":["full", "center3", "center1", "ends"],
+			"blockMax":[10, 10, 10, 10],
+			"blockCount":[0, 0, 0, 0],
+			"isContainer":false				
+		},
+		"Metal":
+		{
+			"displayName":"Metal",
+			"mass":1.5,
+			"fillColors":["#BBBCBE", "#989CA0", "#BFBEC2", "#9EA0A4", "#A7A9AC", "#C3C6CA", "#BBBCBE"],
+			"fillRatios":[0, 0.236, 0.4607, 0.6292, 0.7697, 0.8708, 0.9944],
+			"fillShadowColors":["#8B8C8E", "#686C70", "#8F8E92", "#6E7074", "#77797C", "#93868A", "#8B8C8E"],
+			"fillShadowRatios":[0, 0.236, 0.4607, 0.6292, 0.7697, 0.8708, 0.9944],
+			"strokeColors":["#5F6163", "#5F6163"],
+			"strokeRatios":[0, 1],
+			"blockTypes":["full", "center3", "center1", "ends"],
+			"blockMax":[10, 10, 10, 10],
+			"blockCount":[0, 0, 0, 0],
+			"isContainer":false					
+		},
+		"Plastic":
+		{
+			"displayName":"Plastic",
+			"mass":0.5,
+			"fillColors":["#F074AC", "#EB008B", "#EB008B", "#F074AC", "#EB008B", "#EB008B", "#F074AC"],
+			"fillRatios":[0, 0.236, 0.4607, 0.6292, 0.7697, 0.8708, 0.9944],
+			"fillShadowColors":["#C0447C", "#BB005B", "#BB005B", "#C0447C", "#BB005B", "#BB005B", "#C0447C"],
+			"fillShadowRatios":[0, 0.236, 0.4607, 0.6292, 0.7697, 0.8708, 0.9944],
+			"strokeColors":["#AB004B", "#AB004B"],
+			"strokeRatios":[0, 1],
+			"blockTypes":["full", "center3", "center1", "ends"],
+			"blockMax":[10, 10, 10, 10],
+			"blockCount":[0, 0, 0, 0],
+			"isContainer":false				
+		}
+	},
+	"view_sideAngle_degrees" : 10,
+	"view_topAngle_degrees" : 20,
+	"fluid_density" : 1.0,
+	"fluid_color" : "rgba(180,180,255,1.0)",
+	"fluid_stroke_color" : "rgba(160,160,255,1.0)",
+	"separation_width" : 0,
+	"separation_density" : 1.0,
+	"water_volume_perc" : 0.5,
+ 	"spilloff_volume_perc" : 0.6
+}

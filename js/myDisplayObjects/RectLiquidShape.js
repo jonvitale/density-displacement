@@ -411,7 +411,7 @@
 							
 						if (view_sideAngle < 0 )
 						{
-							// draw front, but only if next block's volume is less than this
+							// draw back, but only if next block's volume is less than this
 								if (GLOBAL_PARAMETERS.separation_width > 0 || k == this.depth_units - 1 || this.volumeArray3d[i][j][k+1] <= this.volumeArray3d[i][j][k])
 								{
 								// draw back
@@ -442,7 +442,7 @@
 						
 						} else if (view_sideAngle >= 0)
 						{
-							// draw front, but only if next block's volume is less than this
+							// draw back, but only if next block's volume is less than this
 							
 							if (GLOBAL_PARAMETERS.separation_width > 0 || k == 0 || this.volumeArray3d[i][j][k-1] <= this.volumeArray3d[i][j][k])
 							{	

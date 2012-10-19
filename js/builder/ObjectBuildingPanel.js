@@ -21,17 +21,6 @@
 		this.view_sideAngle = GLOBAL_PARAMETERS.view_sideAngle;
 		this.view_topAngle = GLOBAL_PARAMETERS.view_topAngle;
 		
-		// create a current number of objects of each type for each material
-		this.materialNameCountMapping = {}
-		for (var key in GLOBAL_PARAMETERS.materialNameMaxMapping)
-		{
-			this.materialNameCountMapping[key] = [];
-			for (var i = 0; i < GLOBAL_PARAMETERS.materialNameMaxMapping[key].length; i++)
-			{
-				this.materialNameCountMapping[key][i] = 0;
-			}
-		}
-		
 		//background
 		this.g = new Graphics();
 		this.shape = new Shape(this.g);
@@ -62,10 +51,10 @@
 
 		// a set of text to display the number of blocks that can be used
 		this.blockTexts = [];
-		for (i = 0; i < GLOBAL_PARAMETERS.MATERIAL_TYPES.length; i++)
+		for (i = 0; i < GLOBAL_PARAMETERS.MATERIAL_COUNT; i++)
 		{
-			var text = new TextContainer("0", "20px Arial", "rgba(255,255,255,1.0)", this.block_space_width / GLOBAL_PARAMETERS.MATERIAL_TYPES.length, 20, this.TEXT_COLOR, this.BACKGROUND_COLOR, 0, "right", "center");
-			text.x = this.materialsMenu.x + this.materialsMenu.width_px + i * this.block_space_width / GLOBAL_PARAMETERS.MATERIAL_TYPES.length;
+			var text = new TextContainer("0", "20px Arial", this.BACKGROUND_COLOR, this.block_space_width / GLOBAL_PARAMETERS.MATERIAL_COUNT, 20, this.TEXT_COLOR, this.TEXT_COLOR, 0, "right", "center", -4, 0);
+			text.x = this.materialsMenu.x + this.materialsMenu.width_px + i * this.block_space_width / GLOBAL_PARAMETERS.MATERIAL_COUNT;
 			text.y = GLOBAL_PARAMETERS.PADDING;
 			this.addChild(text);
 			this.blockTexts.push(text);
@@ -73,7 +62,6 @@
 
 		this.blocks = [];
 		this.drawMaterial(this.materialsMenu.currentMaterialName);
-
 
 		stage.ready_to_update = true;
 	}
@@ -130,7 +118,7 @@
 			this.blocks = new Array();
 		}
 		var depthArray;
-		for (i = 0; i < GLOBAL_PARAMETERS.MATERIAL_TYPES.length; i++)
+		for (i = 0; i < GLOBAL_PARAMETERS.materials[materialName].blockTypes.length; i++)
 		{
 			o = this.newBlock(materialName, i);
 			this.placeBlock(o, i);			
@@ -140,13 +128,13 @@
 	}
 	p.newBlock = function (materialName, i)
 	{
-		if (this.materialNameCountMapping[materialName][i] < GLOBAL_PARAMETERS.materialNameMaxMapping[materialName][i])
+		if (GLOBAL_PARAMETERS.materials[materialName].blockCount[i] < GLOBAL_PARAMETERS.materials[materialName].blockMax[i])
 		{
-			if (GLOBAL_PARAMETERS.MATERIAL_TYPES[i] == "full"){depthArray = [1,1,1,1,1];}
-			else if (GLOBAL_PARAMETERS.MATERIAL_TYPES[i] == "center3"){depthArray = [0,1,1,1,0];}
-			else if (GLOBAL_PARAMETERS.MATERIAL_TYPES[i] == "center1"){depthArray = [0,0,1,0,0];}
-			else if (GLOBAL_PARAMETERS.MATERIAL_TYPES[i] == "ends"){depthArray = [1,0,0,0,1];}
-			var o = new RectBlockShape(GLOBAL_PARAMETERS.SCALE, GLOBAL_PARAMETERS.SCALE, GLOBAL_PARAMETERS.SCALE, depthArray, this.view_sideAngle, this.view_topAngle, materialName);
+			if (GLOBAL_PARAMETERS.materials[materialName].blockTypes[i] == "full"){depthArray = [1,1,1,1,1];}
+			else if (GLOBAL_PARAMETERS.materials[materialName].blockTypes[i] == "center3"){depthArray = [0,1,1,1,0];}
+			else if (GLOBAL_PARAMETERS.materials[materialName].blockTypes[i] == "center1"){depthArray = [0,0,1,0,0];}
+			else if (GLOBAL_PARAMETERS.materials[materialName].blockTypes[i] == "ends"){depthArray = [1,0,0,0,1];}
+			var o = new RectBlockShape(GLOBAL_PARAMETERS.SCALE, GLOBAL_PARAMETERS.SCALE, GLOBAL_PARAMETERS.SCALE, depthArray, this.view_sideAngle, this.view_topAngle, materialName, GLOBAL_PARAMETERS.materials[materialName]);
 			this.blocks[i] = o;
 			o.onPress = this.blockPressHandler.bind(this);
 			this.addChild(o);
@@ -165,16 +153,16 @@
 	p.placeBlock = function (o, i)
 	{
 		if (o != null)
-		{	o.x = this.materialsMenu.width_px + i * this.width_px/3/GLOBAL_PARAMETERS.MATERIAL_TYPES.length + (o.width_px);
-			o.y = i * this.height_px/2/GLOBAL_PARAMETERS.MATERIAL_TYPES.length + 2 * GLOBAL_PARAMETERS.PADDING + 20;	
+		{	o.x = this.materialsMenu.width_px + i * this.width_px/3/GLOBAL_PARAMETERS.MATERIAL_COUNT + (o.width_px);
+			o.y = i * this.height_px/2/GLOBAL_PARAMETERS.MATERIAL_COUNT + 2 * GLOBAL_PARAMETERS.PADDING + 20;	
 		}
 	}
 	p.updateCountText = function (materialName)
 	{
 		// update count
-		for (i = 0; i < GLOBAL_PARAMETERS.materialNameMaxMapping[materialName].length; i++)
+		for (i = 0; i < GLOBAL_PARAMETERS.materials[materialName].blockMax.length; i++)
 		{
-			this.blockTexts[i].setText(GLOBAL_PARAMETERS.materialNameMaxMapping[materialName][i] - this.materialNameCountMapping[materialName][i]);
+			this.blockTexts[i].setText(GLOBAL_PARAMETERS.materials[materialName].blockMax[i] - GLOBAL_PARAMETERS.materials[materialName].blockCount[i]);
 		}
 	}
 	/** */
@@ -244,7 +232,7 @@
 				if (source_parent instanceof VolumeViewer)
 				{
 					// if this object is on the volume viewer, and already been replaced, then remove it from display
-					o.orig_parent.materialNameCountMapping[o.materialName][o.depthArray_index]--;
+					GLOBAL_PARAMETERS.materials[o.materialName].blockCount[o.depthArray_index]--;
 					o.orig_parent.updateCountText(o.materialName);
 					// if there is already an object in this spot we don't need to add a new one
 					if (parent.blocks[o.depthArray_index] == null)
@@ -271,7 +259,7 @@
 					} else
 					{
 						// no, we need to add this object back to the ObjectBuildingPanel
-						o.orig_parent.materialNameCountMapping[o.materialName][o.depthArray_index]++;
+						GLOBAL_PARAMETERS.materials[o.materialName].blockCount[o.depthArray_index]++;
 						var no = o.orig_parent.newBlock(o.materialName, o.depthArray_index);
 						o.orig_parent.placeBlock(no, o.depthArray_index);
 					}
@@ -285,7 +273,7 @@
 						var i = o.orig_parent.blocks.indexOf(o);
 						if (i >= 0)
 						{
-							o.orig_parent.materialNameCountMapping[o.materialName][i]++;
+							GLOBAL_PARAMETERS.materials[o.materialName].blockCount[i]++;
 							o.orig_parent.updateCountText(o.materialName);
 							var no = o.orig_parent.newBlock(o.materialName, i);
 							o.orig_parent.placeBlock(no, i);
@@ -312,9 +300,11 @@
 	p.saveObject = function()
 	{
 		// go through the 2d array of volume viewer and replace objects with their depth arrays
-		var blockArray3d = new Array();
+		var savedObject = {};
+		var blockArray3d = [];
 		var blockArray2d = this.vv.blockArray2d;
 		var i_rev, i, j, k, blockCount=0;
+		var isContainer = true;
 
 		for (i = 0; i < blockArray2d.length; i++)
 		{
@@ -330,6 +320,7 @@
 						if (blockArray2d[i][j].depthArray[k] == 1)
 						{
 							blockArray3d[i_rev][j][k] = blockArray2d[i][j].materialName;
+							if (!GLOBAL_PARAMETERS.materials[blockArray2d[i][j].materialName].isContainer) isContainer = false;
 						} else 
 						{
 							blockArray3d[i_rev][j][k] = "";
@@ -342,21 +333,23 @@
 				}
 			}
 		}
-		// remove object on screen
-		this.materialNameCountMapping = {}
-		for (var key in GLOBAL_PARAMETERS.materialNameMaxMapping)
+		savedObject.blockArray3d = blockArray3d;
+		savedObject.isContainer = isContainer;
+
+		// clean up
+		// reset counts of blocks, remove object on screen
+		for (var key in GLOBAL_PARAMETERS.materials)
 		{
-			this.materialNameCountMapping[key] = [];
-			for (i = 0; i < GLOBAL_PARAMETERS.materialNameMaxMapping[key].length; i++)
+			for (i = 0; i < GLOBAL_PARAMETERS.materials[key].blockMax.length; i++)
 			{
-				this.materialNameCountMapping[key][i] = 0;
+				GLOBAL_PARAMETERS.materials[key].blockCount[i] = 0;
 			}
 		}
 		this.drawMaterial(this.materialsMenu.currentMaterialName);
 
 		this.vv.clearBlocks();
 		//console.log(blockArray3d);
-		return blockArray3d;
+		return savedObject;
 	}
 
 	window.ObjectBuildingPanel = ObjectBuildingPanel;

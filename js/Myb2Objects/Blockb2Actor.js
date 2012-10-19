@@ -17,6 +17,7 @@
 	{
 		this.Container_initialize();
 		this.skin = skin;
+		this.isContainer = this.skin.isContainer;
 
 		this.addChild(this.skin);
 		this.width_px_left = skin.width_px_left;
@@ -46,6 +47,7 @@
 		var i, j;
 		var skin = this.skin;
 		// go from bottom up.
+		this.fixDefs = [];
 		for (j = 0; j < skin.array2d[0].length; j++)
 		{
 			for (i = 0; i < skin.array2d.length; i++)
@@ -53,6 +55,7 @@
 				if (skin.array2d[i][j].mass > 0)
 				{
 					var fixDef = new b2FixtureDef;
+					console.log(skin.array2d[i][j].mass);
 					fixDef.density = skin.array2d[i][j].mass*1;
 					fixDef.friction = 0.5;
 					fixDef.restitution = 0.2;
@@ -69,7 +72,6 @@
 					fixDef.interiorSpaces = skin.array2d[i][j].interiorSpaces;
 					fixDef.protectedSpaces = skin.array2d[i][j].protectedSpaces;
 					fixDef.materialDensity = skin.array2d[i][j].mass / skin.array2d[i][j].materialSpaces;
-					console.log("solid material density", fixDef.materialDensity);
 					this.fixDefs.push(fixDef);	
 				}						
 			}

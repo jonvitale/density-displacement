@@ -11,7 +11,7 @@ Box2D.inherit(Myb2BuoyancyController, Box2D.Dynamics.Controllers.b2Controller);
       this.initial_offset = this.offset;
       this.density = 0;
       this.velocity = new b2Vec2(0, 0);
-      this.linearDrag = 2;
+      this.linearDrag = 4;
       this.angularDrag = 1;
       this.useDensity = false;
       this.useWorldGravity = true;
@@ -27,11 +27,17 @@ Box2D.inherit(Myb2BuoyancyController, Box2D.Dynamics.Controllers.b2Controller);
          this.gravity = this.GetWorld().GetGravity().Copy();
       }
       var offset = this.initial_offset;
+      // find out if any are awake
+      var any_awake = false;
+      for (var i = this.m_bodyList; i; i = i.nextBody) {
+         if (i.body.IsAwake()) {any_awake = true; break;}
+      }
       for (var i = this.m_bodyList; i; i = i.nextBody) {
          var body = i.body;
          //if (body.IsAwake() == false) {
            // continue;
         // }
+         if (any_awake && body.IsAwake() == false) body.SetAwake(true);
          var areac = new b2Vec2();
          var massc = new b2Vec2();
          var area = 0.0;
@@ -56,12 +62,10 @@ Box2D.inherit(Myb2BuoyancyController, Box2D.Dynamics.Controllers.b2Controller);
             // adjust offset based on the amount of object submerged
             if (this.surfaceArea > 0)
             {
-               //console.log("offset", this.initial_offset, this.offset, mass / this.surfaceArea);
-               offset += sarea * shapeDensity / this.surfaceArea;
-              
+              offset += sarea * shapeDensity / this.surfaceArea;              
             }
          }
-         this.offset = offset;
+         
          areac.x /= area;
          areac.y /= area;
          massc.x /= mass;
@@ -78,6 +82,8 @@ Box2D.inherit(Myb2BuoyancyController, Box2D.Dynamics.Controllers.b2Controller);
             body.ApplyTorque((-body.GetInertia() / body.GetMass() * mass * body.GetAngularVelocity() * this.angularDrag));
          }
       }
+      this.offset = offset;
+         
    }
 
    Myb2BuoyancyController.prototype.Draw = function (debugDraw) {

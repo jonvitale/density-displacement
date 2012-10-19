@@ -5,9 +5,9 @@
 	*   depthArray: an array of binary values indicating if a cube is in a space, back-to-front. example [1, 0, 0, 0, 1]
 	*	view_topAngle, view_sideAngle: the angle which the object is being viewed (radians).  0, 0, is front and center
 	*/
-	var BlockCompShape = function(unit_width_px, unit_height_px, unit_depth_px, blockArray3d, materialName)
+	var BlockCompShape = function(unit_width_px, unit_height_px, unit_depth_px, savedObject)
 	{
-		this.initialize(unit_width_px, unit_height_px, unit_depth_px, blockArray3d, materialName);
+		this.initialize(unit_width_px, unit_height_px, unit_depth_px, savedObject);
 	} 
 	var p = BlockCompShape.prototype = new Container();
 	
@@ -16,7 +16,7 @@
 	p.Container_initialize = p.initialize;
 	p.Container_tick = p._tick;
 
-	p.initialize = function(unit_width_px, unit_height_px, unit_depth_px, blockArray3d, materialName)
+	p.initialize = function(unit_width_px, unit_height_px, unit_depth_px, savedObject)
 	{
 		this.Container_initialize();
 		this.mouseEnabled = true;
@@ -24,15 +24,13 @@
 		this.unit_width_px = unit_width_px;
 		this.unit_height_px = unit_height_px;
 		this.unit_depth_px = unit_depth_px;
-		this.width_units = blockArray3d.length;
-		this.height_units = blockArray3d[0].length;
-		this.depth_units = blockArray3d[0][0].length;
-		this.blockArray3d = blockArray3d;
-		this.materialNameMassMapping = GLOBAL_PARAMETERS.materialNameMassMapping;
+		this.blockArray3d = savedObject.blockArray3d;
+		this.width_units = this.blockArray3d.length;
+		this.height_units = this.blockArray3d[0].length;
+		this.depth_units = this.blockArray3d[0][0].length;
 		this.view_sideAngle = GLOBAL_PARAMETERS.view_sideAngle;
 		this.view_topAngle = GLOBAL_PARAMETERS.view_topAngle;
-		this.materialName = materialName;
-
+	
 		this.DEBUG = false;
 
 		// composition vars
@@ -48,10 +46,6 @@
 		// draw figure
 		this.redraw();
 
-		// MOVE SHAPE SO THAT THE TOP-LEFT CORNER OF THE FRONT FACE IS 0,0
-		//this.shape.x += (this.blockArray3d[1][1].length*Math.sin(this.view_sideAngle) + -this.leftmostColumn+1) * this.unit_width_px;// + (this.rightmostColumn+1 - this.leftmostColumn) /2 ) * this.unit_width_px;
-		//this.shape.y += (-this.blockArray3d[1][1].length*Math.sin(this.view_topAngle) - this.highestRow) *  this.unit_height_px;;// + (this.lowestRow+1 - this.highestRow) / 2) * this.unit_height_px;
-		
 		this.width_px_left = 0;
 		this.width_px_right = (this.rightmostColumn + 1 - this.leftmostColumn) * this.unit_width_px;
 		this.height_px_above = this.blockArray3d[1][1].length*Math.sin(this.view_topAngle) * this.unit_depth_px;
@@ -218,7 +212,7 @@
 					{
 						if (this.blockArray3d[i][j][k] != "")
 						{
-							mass += this.materialNameMassMapping[this.blockArray3d[i][j][k]];
+							mass += GLOBAL_PARAMETERS.materials[this.blockArray3d[i][j][k]].mass;
 						}
 
 						if (spaces3d[i][j][k] == "B")
@@ -616,7 +610,7 @@
 				{
 					row = rowarr[j];			
 					
-					var materialName = this.blockArray3d[col][row][k];
+					var material = GLOBAL_PARAMETERS.materials[this.blockArray3d[col][row][k]];
 					
 					// is there a cube at this depth?
 					if (this.blockArray3d[col][row][k] != "")
@@ -661,8 +655,11 @@
 						{
 							// draw bottom
 							g.setStrokeStyle(1);
-							g.beginLinearGradientStroke(this.getMaterialStrokeColors(materialName), this.getMaterialStrokeRatios(materialName), fbl_x, fbl_y, bbr_x, fbl_y);
-							g.beginLinearGradientFill(this.getMaterialFillColors(materialName), this.getMaterialFillRatios(materialName), fbl_x, fbl_y, bbr_x, fbl_y);
+							//g.beginLinearGradientStroke(this.getMaterialStrokeColors(materialName), this.getMaterialStrokeRatios(materialName), fbl_x, fbl_y, bbr_x, fbl_y);
+							//g.beginLinearGradientFill(this.getMaterialFillColors(materialName), this.getMaterialFillRatios(materialName), fbl_x, fbl_y, bbr_x, fbl_y);
+							g.beginLinearGradientStroke(material.strokeColors, material.strokeRatios, fbl_x, fbl_y, bbr_x, fbl_y);
+							g.beginLinearGradientFill(material.fillColors, material.fillRatios, fbl_x, fbl_y, bbr_x, fbl_y);
+					
 							g.moveTo(bbr_x, bbr_y);
 							g.lineTo(bbl_x, bbl_y);
 							g.lineTo(fbl_x, fbl_y);
@@ -674,8 +671,10 @@
 						{
 							// draw top
 							g.setStrokeStyle(1);
-							g.beginLinearGradientStroke(this.getMaterialStrokeColors(materialName), this.getMaterialStrokeRatios(materialName), ftl_x, ftl_y, btr_x, ftl_y);
-							g.beginLinearGradientFill(this.getMaterialFillColors(materialName), this.getMaterialFillRatios(materialName), ftl_x, ftl_y, btr_x, ftl_y);
+							//g.beginLinearGradientStroke(this.getMaterialStrokeColors(materialName), this.getMaterialStrokeRatios(materialName), ftl_x, ftl_y, btr_x, ftl_y);
+							//g.beginLinearGradientFill(this.getMaterialFillColors(materialName), this.getMaterialFillRatios(materialName), ftl_x, ftl_y, btr_x, ftl_y);
+							g.beginLinearGradientStroke(material.strokeColors, material.strokeRatios, ftl_x, ftl_y, btr_x, ftl_y);
+							g.beginLinearGradientFill(material.fillColors, material.fillRatios, ftl_x, ftl_y, btr_x, ftl_y);
 							g.moveTo(btr_x, btr_y);
 							g.lineTo(btl_x, btl_y);
 							g.lineTo(ftl_x, ftl_y);
@@ -690,8 +689,10 @@
 						{
 							// draw left
 							g.setStrokeStyle(1);
-							g.beginLinearGradientStroke(this.getMaterialStrokeColors(materialName), this.getMaterialStrokeRatios(materialName), ftl_x, ftl_y, btl_x, btl_y);
-							g.beginLinearGradientFill(this.getMaterialFillColorsShadow(materialName), this.getMaterialFillRatios(materialName), btl_x, btl_y, fbl_x, btl_y);						
+							//g.beginLinearGradientStroke(this.getMaterialStrokeColors(materialName), this.getMaterialStrokeRatios(materialName), ftl_x, ftl_y, btl_x, btl_y);
+							//g.beginLinearGradientFill(this.getMaterialFillColorsShadow(materialName), this.getMaterialFillRatios(materialName), btl_x, btl_y, fbl_x, btl_y);						
+							g.beginLinearGradientStroke(material.strokeColors, material.strokeRatios, ftl_x, ftl_y, btl_x, btl_y);
+							g.beginLinearGradientFill(material.fillShadowColors, material.fillShadowRatios, ftl_x, ftl_y, btl_x, btl_y);
 							g.moveTo(btl_x, btl_y);
 							g.lineTo(ftl_x, ftl_y);
 							g.lineTo(fbl_x, fbl_y);
@@ -704,8 +705,10 @@
 						{
 							// draw right
 							g.setStrokeStyle(1);
-							g.beginLinearGradientStroke(this.getMaterialStrokeColors(materialName), this.getMaterialStrokeRatios(materialName), ftr_x, ftr_y, btr_x, btr_y);
-							g.beginLinearGradientFill(this.getMaterialFillColorsShadow(materialName), this.getMaterialFillRatios(materialName), btr_x, btr_y, fbr_x, btr_y);						
+							//g.beginLinearGradientStroke(this.getMaterialStrokeColors(materialName), this.getMaterialStrokeRatios(materialName), ftr_x, ftr_y, btr_x, btr_y);
+							//g.beginLinearGradientFill(this.getMaterialFillColorsShadow(materialName), this.getMaterialFillRatios(materialName), btr_x, btr_y, fbr_x, btr_y);						
+							g.beginLinearGradientStroke(material.strokeColors, material.strokeRatios, ftr_x, ftr_y, btr_x, btr_y);
+							g.beginLinearGradientFill(material.fillShadowColors, material.fillShadowRatios, ftr_x, ftr_y, btr_x, btr_y);
 							g.moveTo(btr_x, btr_y);
 							g.lineTo(ftr_x, ftr_y);
 							g.lineTo(fbr_x, fbr_y);
@@ -733,9 +736,14 @@
 
 						// draw front
 						g.setStrokeStyle(1);
-						g.beginLinearGradientStroke(this.getMaterialStrokeColors(materialName), this.getMaterialStrokeRatios(materialName), ftl_x, ftl_y, ftr_x, ftr_y);
-						if (k != 0) {g.beginLinearGradientFill(this.getMaterialFillColors(materialName), this.getMaterialFillRatios(materialName), ftl_x, ftl_y, ftr_x, ftl_y);}
-						else {g.beginLinearGradientFill(this.getMaterialFillColorsShadow(materialName), this.getMaterialFillRatios(materialName), ftl_x, ftl_y, ftr_x, ftl_y);}
+						//g.beginLinearGradientStroke(this.getMaterialStrokeColors(materialName), this.getMaterialStrokeRatios(materialName), ftl_x, ftl_y, ftr_x, ftr_y);
+						//if (k != 0) {g.beginLinearGradientFill(this.getMaterialFillColors(materialName), this.getMaterialFillRatios(materialName), ftl_x, ftl_y, ftr_x, ftl_y);}
+						//else {g.beginLinearGradientFill(this.getMaterialFillColorsShadow(materialName), this.getMaterialFillRatios(materialName), ftl_x, ftl_y, ftr_x, ftl_y);}
+						g.beginLinearGradientStroke(material.strokeColors, material.strokeRatios, ftl_x, ftl_y, ftr_x, ftr_y);
+						if (k != 0){ g.beginLinearGradientFill(material.fillColors, material.fillRatios, ftl_x, ftl_y, ftr_x, ftr_y);}
+						else {g.beginLinearGradientFill(material.fillShadowColors, material.fillRatios, ftl_x, ftl_y, ftr_x, ftr_y);}
+						
+					
 						g.moveTo(ftr_x, ftr_y);
 						g.lineTo(ftl_x, ftl_y);
 						g.lineTo(fbl_x, fbl_y);
@@ -764,116 +772,5 @@
 		stage.needs_to_update = true;
 	}
 
-
-	p.highlightCorrect = function ()
-	{
-		this.redraw("correct");
-	}
-	p.highlightIncorrect = function()
-	{
-		this.redraw("incorrect")
-	}
-	p.highlightDefault = function()
-	{
-		this.redraw(this.materialName);
-	}
-
-	/** Get a gradient fill for given material type */
-	p.getMaterialFillColors = function (m)
-	{
-		if (m == "DWood")
-		{
-			return ["#7D4613", "#8D5925", "#743B18", "#8D5925", "#743B18", "#7C4412", "#743B18"];
-		} else if (m == "LWood")
-		{
-			return ["#FBEFD0", "#FADBA2", "#FAE3B0", "#E8CFA1", "#F0D3A1", "#FBEED2", "#F9E2BA"];
-		} else if (m == "Metal")
-		{
-			return ["#BBBCBE", "#989CA0", "#BFBEC2", "#9EA0A4", "#A7A9AC", "#C3C6CA", "#BBBCBE"];
-		} else if (m == "Plastic")
-		{
-			return ["#F074AC", "#EB008B", "#EB008B", "#F074AC", "#EB008B", "#EB008B", "#F074AC"];
-		}
-	}
-	/** Get a gradient fill for given material type */
-	p.getMaterialFillColorsShadow = function (m)
-	{
-		if (m == "DWood")
-		{
-			return ["#4D1603", "#5D2905", "#440B08", "#5D2905", "#440B08", "#4C0402", "#440B08"];
-		} else if (m == "LWood")
-		{
-			return ["#CBBFA0", "#CAAB72", "#CAB380", "#B89F71", "#C0A371", "#CBBEA2", "#C9B28A"];
-		} else if (m == "Metal")
-		{
-			return ["#8B8C8E", "#686C70", "#8F8E92", "#6E7074", "#77797C", "#93868A", "#8B8C8E"];
-		} else if (m == "Plastic")
-		{
-			return ["#C0447C", "#BB005B", "#BB005B", "#C0447C", "#BB005B", "#BB005B", "#C0447C"];
-		}
-	}
-	p.getMaterialFillRatios = function (m)
-	{
-		if (m == "DWood")
-		{
-			return [0, 0.236, 0.4607, 0.6292, 0.7697, 0.8708, 0.9944];
-		} else if (m == "LWood")
-		{
-			return [0, 0.236, 0.4607, 0.6292, 0.7697, 0.8708, 0.9944];
-		} else if (m == "Metal")
-		{
-			return [0, 0.236, 0.4607, 0.6292, 0.7697, 0.8708, 0.9944];
-		} else if (m == "Plastic")
-		{
-			return [0, 0.236, 0.4607, 0.6292, 0.7697, 0.8708, 0.9944];
-		}
-	}
-	p.getMaterialStrokeColors = function (m)
-	{
-		if (m == "DWood")
-		{
-			return (["#3B0400", "#3B0400"]);
-			//return ["#7D4613", "#7C4412", "#743B18", "#7C4412", "#743B18", "#7C4412", "#743B18"];
-		} else if (m == "LWood")
-		{
-			return (["#AB854C", "#AB854C"]);
-			//return ["#F9E2BA", "#DFB17A", "#EDC78E", "#EAD4A7", "#E7C18D", "#F9E2BA", "#E9B980"];
-		} else if (m == "Metal")
-		{
-			return (["#5F6163", "#5F6163"]);
-			//return ["#C4C6C8", "#939598", "#9FA1A3", "#A7A9AC", "#A9ABAE", "#A7A9AC", "#D1D3D4"];
-		} else if (m == "Plastic")
-		{
-			return (["#AB004B", "#AB004B"]);
-			//return ["#C7158C", "#C7158C", "#C7158C", "#C7158C", "#C7158C", "#C7158C", "#C7158C"];
-		} else if (m == "correct")
-		{
-			return (["#00FF00", "#00FF00"]);
-		} else if (m == "incorrect")
-		{
-			return (["#FF0000", "#FF0000"]);
-		}
-	}
-	p.getMaterialStrokeRatios = function (m)
-	{
-		return [0, 1];
-		/*
-		if (m == "DWood")
-		{
-			return [0, 0.236, 0.4607, 0.6292, 0.7697, 0.8708, 0.9944];
-		} else if (m == "LWood")
-		{
-			return [0, 0.236, 0.4607, 0.6292, 0.7697, 0.8708, 0.9944];
-		} else if (m == "Metal")
-		{
-			return [0, 0.236, 0.4607, 0.6292, 0.7697, 0.8708, 0.9944];
-		} else if (m == "Plastic")
-		{
-			return [0, 0.236, 0.4607, 0.6292, 0.7697, 0.8708, 0.9944];
-		}
-		*/
-	}
-
-	
 	window.BlockCompShape = BlockCompShape;
 }(window));

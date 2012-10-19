@@ -38,10 +38,10 @@
 
 		// create a 2d array and fill with nulls (references)
 		var i, j, k, ti, tj, tk, index;
-		this.blockArray2d = new Array();		
+		this.blockArray2d = [];		
 		for (i = 0; i < this.width_units; i++)
 		{
-			this.blockArray2d[i] = new Array();
+			this.blockArray2d[i] = [];
 			for (j = 0; j < this.height_units; j++)
 			{
 				this.blockArray2d[i][j] = null;
@@ -96,6 +96,8 @@
 		this.bottomRight = new Point3D(-this.width_units/2, -this.height_units/2 + this.height_units, -this.depth_units/2);
 		this.bottomLeft = new Point3D(-this.width_units/2 + this.width_units, -this.height_units/2 + this.height_units, -this.depth_units/2);
 		this.backCenter = new Point3D(0, 0, -this.depth_units/2);
+
+		this.highest_index = this.height_units;
 
 		this.cubes_projected = this.cubes;
 		this.updateProjected();
@@ -388,18 +390,30 @@
 						}
 					}  else
 					{	
-						// is this block attached to another?
-						// bottom-left, bottom-center,...
-						if (x_index > 0 && y_index < this.height_units-1 && this.blockArray2d[x_index-1][y_index+1] != null && o.connectsToOther(this.blockArray2d[x_index-1][y_index+1])) {goodLocation = true;}
-						else if (y_index < this.height_units-1 && this.blockArray2d[x_index][y_index+1] != null && o.connectsToOther(this.blockArray2d[x_index][y_index+1])) {goodLocation = true;}
-						else if (x_index < this.width_units-1 && y_index < this.height_units-1 && this.blockArray2d[x_index+1][y_index+1] != null && o.connectsToOther(this.blockArray2d[x_index+1][y_index+1])) {goodLocation = true;}
-						else if (x_index > 0 && this.blockArray2d[x_index-1][y_index] != null && o.connectsToOther(this.blockArray2d[x_index-1][y_index])) {goodLocation = true;}
-						else if (this.blockArray2d[x_index][y_index] != null && o.connectsToOther(this.blockArray2d[x_index][y_index])) {goodLocation = true;}
-						else if (x_index < this.width_units-1 && this.blockArray2d[x_index+1][y_index] != null && o.connectsToOther(this.blockArray2d[x_index+1][y_index])) {goodLocation = true;}
-						else if (x_index > 0 && y_index > 0 && this.blockArray2d[x_index-1][y_index-1] != null && o.connectsToOther(this.blockArray2d[x_index-1][y_index-1])) {goodLocation = true;}
-						else if (y_index > 0 && this.blockArray2d[x_index][y_index-1] != null && o.connectsToOther(this.blockArray2d[x_index][y_index-1])) {goodLocation = true;}
-						else if (x_index < this.width_units-1 && y_index > 0 && this.blockArray2d[x_index+1][y_index-1] != null && o.connectsToOther(this.blockArray2d[x_index+1][y_index-1])) {goodLocation = true;}
-						else {goodLocation = false;}
+						// separate rules for container
+						if (GLOBAL_PARAMETERS.materials[o.materialName].isContainer)
+						{
+							// is this block attached to another, and is the block below the same size or smaller
+							if (y_index < this.height_units-1 && this.blockArray2d[x_index][y_index+1] != null && o.connectsToOtherContainer(this.blockArray2d[x_index][y_index+1], "below")) {goodLocation = true;}
+							else if (x_index > 0 && this.blockArray2d[x_index-1][y_index] != null && o.connectsToOtherContainer(this.blockArray2d[x_index-1][y_index], "left")) {goodLocation = true;}
+							else if (x_index < this.width_units-1 && this.blockArray2d[x_index+1][y_index] != null && o.connectsToOtherContainer(this.blockArray2d[x_index+1][y_index], "right")) {goodLocation = true;}
+							else if (y_index > 0 && this.blockArray2d[x_index][y_index-1] != null && o.connectsToOtherContainer(this.blockArray2d[x_index][y_index-1], "above")) {goodLocation = true;}
+							else {goodLocation = false;}
+						} else
+						{
+							// is this block attached to another?
+							// bottom-left, bottom-center,...
+							if (x_index > 0 && y_index < this.height_units-1 && this.blockArray2d[x_index-1][y_index+1] != null && o.connectsToOther(this.blockArray2d[x_index-1][y_index+1])) {goodLocation = true;}
+							else if (y_index < this.height_units-1 && this.blockArray2d[x_index][y_index+1] != null && o.connectsToOther(this.blockArray2d[x_index][y_index+1])) {goodLocation = true;}
+							else if (x_index < this.width_units-1 && y_index < this.height_units-1 && this.blockArray2d[x_index+1][y_index+1] != null && o.connectsToOther(this.blockArray2d[x_index+1][y_index+1])) {goodLocation = true;}
+							else if (x_index > 0 && this.blockArray2d[x_index-1][y_index] != null && o.connectsToOther(this.blockArray2d[x_index-1][y_index])) {goodLocation = true;}
+							//else if (this.blockArray2d[x_index][y_index] != null && o.connectsToOther(this.blockArray2d[x_index][y_index])) {goodLocation = true;}
+							else if (x_index < this.width_units-1 && this.blockArray2d[x_index+1][y_index] != null && o.connectsToOther(this.blockArray2d[x_index+1][y_index])) {goodLocation = true;}
+							else if (x_index > 0 && y_index > 0 && this.blockArray2d[x_index-1][y_index-1] != null && o.connectsToOther(this.blockArray2d[x_index-1][y_index-1])) {goodLocation = true;}
+							else if (y_index > 0 && this.blockArray2d[x_index][y_index-1] != null && o.connectsToOther(this.blockArray2d[x_index][y_index-1])) {goodLocation = true;}
+							else if (x_index < this.width_units-1 && y_index > 0 && this.blockArray2d[x_index+1][y_index-1] != null && o.connectsToOther(this.blockArray2d[x_index+1][y_index-1])) {goodLocation = true;}
+							else {goodLocation = false;}
+						}
 					}					
 				} else
 				{
@@ -408,11 +422,13 @@
 				// if in a good location highlight and set boolean properties
 				if (goodLocation)
 				{
+					this.updateBlockRelations(o, x_index, y_index, true);
 					o.highlightCorrect();
 					o.correct = true;
-					o.incorrect = false;
+					o.incorrect = false;					
 				} else 
 				{
+					this.updateBlockRelations(o, x_index, y_index, false);
 					o.highlightIncorrect();
 					o.correct = false;
 					o.incorrect = true;
@@ -427,6 +443,7 @@
 			// if o is contained here add it to parent of this, object viewer
 			if (o.placed) 
 			{
+				this.updateBlockRelations(o, o.x_index, o.y_index, false);
 				var go = this.localToLocal(o.x, o.y, o.parent);
 				this.parent.addChild(o);
 				o.x = go.x; 
@@ -447,9 +464,9 @@
 			{
 				this.blockArray2d[o.x_index][o.y_index] = null;
 			}
-			 this.blockArray2d[o.x_index][o.y_index] = o;
-			 o.highlightDefault();
-			 return true;
+			this.blockArray2d[o.x_index][o.y_index] = o;
+			o.highlightDefault();
+			return true;
 		} else if (o.incorrect)
 		{
 			this.removeChild(o);
@@ -458,30 +475,115 @@
 	}
 	p.clearBlock = function (o)
 	{
+		this.updateBlockRelations(o, o.x_index, o.y_index, false);
 		this.blockArray2d[o.x_index][o.y_index] = null;
 		this.removeChild(o);
 	}
 
 	p.clearBlocks = function ()
 	{
-		var i;
+		var i, j;
 		for (i = this.getNumChildren()-1; i > 0; i--)
 		{
 			this.removeChildAt(i);
 		}
-		this.blockArray2d = new Array();
-		
+		this.blockArray2d = [];		
 		for (i = 0; i < this.width_units; i++)
 		{
-			this.blockArray2d[i] = new Array();
+			this.blockArray2d[i] = [];
 			for (j = 0; j < this.height_units; j++)
 			{
+				if (this.blockArray2d[i][j] != null)
+				{
+					this.updateBlockRelations(this.blockArray2d[i][j], i, j, false);
+				}
 				this.blockArray2d[i][j] = null;
 			}
 		}
 	}
 
-	
+	/** When a block is moved around, added or deleted we should be checking whether the spatial relations between blocks have been
+	altered, this can affect the way they are drawn, particularly with containers. 
+	*/
+	p.updateBlockRelations = function (o, x_index, y_index, successful)
+	{
+		var i;
+
+		if (successful)
+		{
+			// blocks adjacent to this block
+			if (x_index < this.width_units-1){ o.leftBlock = this.blockArray2d[x_index+1][y_index]; if(o.leftBlock !=null){ o.leftBlock.rightBlock = o; o.leftBlock.redraw();}}
+			if (x_index > 0){o.rightBlock = this.blockArray2d[x_index-1][y_index]; if(o.rightBlock !=null){ o.rightBlock.leftBlock = o; o.rightBlock.redraw();}}
+			if (y_index > 0){ o.aboveBlock = this.blockArray2d[x_index][y_index-1]; if(o.aboveBlock !=null){ o.aboveBlock.belowBlock = o; o.aboveBlock.redraw();}}
+			if (y_index < this.height_units-1){ o.belowBlock = this.blockArray2d[x_index][y_index+1]; if(o.belowBlock !=null){ o.belowBlock.aboveBlock = o; o.belowBlock.redraw();}} 
+		
+			// is this block higher than the rest?
+			if (y_index < this.highest_index)
+			{
+				// if there were already objects that were previously highest, adjust them
+				if (this.highest_index < this.height_units)
+				{
+					for (i = 0; i < this.width_units; i++)
+					{
+						this.blockArray2d[i][this.highest_index].isHighestBlock = false;
+						this.blockArray2d[i][this.highest_index].redraw();
+					}
+					o.isHighestBlock = true;
+					this.highest_index = y_index;
+				} else if (this.highest_index == this.height_units)
+				{
+					o.isHighestBlock = true;
+				} else
+				{
+					o.isHighestBlock = true;
+					this.highest_index = y_index;
+				}
+			}
+		} else
+		{
+			if (o.leftBlock != null){o.leftBlock.rightBlock = null; o.leftBlock.redraw(); o.leftBlock = null;}
+			if (o.rightBlock != null){o.rightBlock.leftBlock = null; o.rightBlock.redraw(); o.rightBlock = null;}
+			if (o.aboveBlock != null){o.aboveBlock.belowBlock = null; o.aboveBlock.redraw(); o.aboveBlock = null;}
+			if (o.belowBlock != null){o.belowBlock.aboveBlock = null; o.belowBlock.redraw(); o.belowBlock = null;}
+
+			if (y_index < this.highest_index)
+			{	
+				// means this was never set, so nothing to do
+			} else if (y_index == this.highest_index)
+			{
+				// find out if there are any more blocks at this height
+				var other_found = false;
+
+				for (i = 0; i < this.width_units; i++)
+				{
+					if (this.blockArray2d[i][this.highest_index] != null)
+					{
+						other_found = true;
+						o.isHighestBlock = false;
+						break;
+					}
+				}
+				
+				// if no other was found at this height, we must adjust the level down a notch
+				if (!other_found)
+				{
+					o.isHighestBlock = false;
+					this.highest_index++;
+					if (this.highest_index < this.height_units)
+					{
+						for (i = 0; i < this.width_units; i++)
+						{
+							if (this.blockArray2d[i][this.highest_index] != null)
+							{
+								this.blockArray2d[i][this.highest_index].isHighestBlock = true;
+								this.blockArray2d[i][this.highest_index].redraw();
+							}
+						}
+					}
+				}
+			}
+		}
+	}
 
 	window.VolumeViewer = VolumeViewer;
 }(window));

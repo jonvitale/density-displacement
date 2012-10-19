@@ -158,6 +158,7 @@
 		floor.CreateFixture(floorFixture);
 
 		//ceiling
+		/*
 		var ceilingFixture = new b2FixtureDef;
 		ceilingFixture.density = 1;
 		ceilingFixture.restitution = 0.2;
@@ -171,7 +172,8 @@
 		ceilingBodyDef.position.y = (this.world_dy + ( 10 ) / 2 ) / GLOBAL_PARAMETERS.SCALE;
 		var ceiling = this.b2world.CreateBody(ceilingBodyDef);
 		ceiling.CreateFixture(ceilingFixture);
-
+		*/
+		
 		var leftWallFixture = new b2FixtureDef;
 		leftWallFixture.density = 1;
 		leftWallFixture.restitution = 0.2;

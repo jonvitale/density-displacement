@@ -1,0 +1,62 @@
+{
+	"DEBUG" : true,
+	"SCALE" : 20,
+	"MATERIAL_COUNT" : 4,
+	"materials" :
+	{
+		"DWood":
+		{
+			"displayName":"Wood A",
+			"mass":1.25,
+			"fillColors":["#7D4613", "#8D5925", "#743B18", "#8D5925", "#743B18", "#7C4412", "#743B18"],
+			"fillRatios":[0, 0.236, 0.4607, 0.6292, 0.7697, 0.8708, 0.9944],
+			"fillShadowColors":["#4D1603", "#5D2905", "#440B08", "#5D2905", "#440B08", "#4C0402", "#440B08"],
+			"fillShadowRatios":[0, 0.236, 0.4607, 0.6292, 0.7697, 0.8708, 0.9944],
+			"strokeColors":["#3B0400", "#3B0400"],
+			"strokeRatios":[0, 1],
+			"blockTypes":["full", "center3", "center1", "ends"],
+			"blockMax":[10, 10, 10, 10],
+			"blockCount":[0, 0, 0, 0],
+			"isContainer":false		
+		},
+		"Metal":
+		{
+			"displayName":"Metal",
+			"mass":1.5,
+			"fillColors":["#BBBCBE", "#989CA0", "#BFBEC2", "#9EA0A4", "#A7A9AC", "#C3C6CA", "#BBBCBE"],
+			"fillRatios":[0, 0.236, 0.4607, 0.6292, 0.7697, 0.8708, 0.9944],
+			"fillShadowColors":["#8B8C8E", "#686C70", "#8F8E92", "#6E7074", "#77797C", "#93868A", "#8B8C8E"],
+			"fillShadowRatios":[0, 0.236, 0.4607, 0.6292, 0.7697, 0.8708, 0.9944],
+			"strokeColors":["#5F6163", "#5F6163"],
+			"strokeRatios":[0, 1],
+			"blockTypes":["full", "center3", "center1", "ends"],
+			"blockMax":[10, 10, 10, 10],
+			"blockCount":[0, 0, 0, 0],
+			"isContainer":false					
+		},
+		"Glass":
+		{
+			"displayName":"Glass",
+			"mass":1.0,
+			"fillColors":["rgba(127,127,127,0.2)", "rgba(200,200,200,0.2)","rgba(225,225,255,0.3)", "rgba(200,200,200,0.2)", "rgba(127,127,127,0.2)"],
+			"fillRatios":[0, 0.1, 0.5, 0.9, 1],
+			"fillShadowColors":["rgba(127,127,127,0.2)", "rgba(200,200,200,0.2)","rgba(225,225,255,0.3)", "rgba(200,200,200,0.2)", "rgba(127,127,127,0.2)"],
+			"fillShadowRatios":[0, 0.1, 0.5, 0.9, 1],
+			"strokeColors":["rgba(127,127,127,0.5)", "rgba(200,200,200,0.4)","rgba(255,255,255,0.3)", "rgba(200,200,200,0.4)", "rgba(127,127,127,0.5)"],
+			"strokeRatios":[0, 0.1, 0.5, 0.9, 1],
+			"blockTypes":["full", "center3", "center1"],
+			"blockMax":[10, 10, 10],
+			"blockCount":[0, 0, 0],
+			"isContainer":true				
+		}
+	},
+	"view_sideAngle_degrees" : 10,
+	"view_topAngle_degrees" : 20,
+	"fluid_density" : 1.0,
+	"fluid_color" : "rgba(180,180,255,1.0)",
+	"fluid_stroke_color" : "rgba(160,160,255,1.0)",
+	"separation_width" : 0,
+	"separation_density" : 1.0,
+	"water_volume_perc" : 0.5,
+ 	"spilloff_volume_perc" : 0.6
+}

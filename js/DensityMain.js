@@ -13,6 +13,7 @@
         , b2RevoluteJointDef = Box2D.Dynamics.Joints.b2RevoluteJointDef
         , b2DistanceJointDef = Box2D.Dynamics.Joints.b2DistanceJointDef
         , b2FrictionJointDef = Box2D.Dynamics.Joints.b2FrictionJointDef
+        , b2MouseJointDef = Box2D.Dynamics.Joints.b2MouseJointDef
         , b2ContactListener = Box2D.Dynamics.b2ContactListener
         , b2BuoyancyController = Box2D.Dynamics.Controllers.b2BuoyancyController;
         ;
@@ -27,13 +28,10 @@
        		"DEBUG" : true,
 	        "SCALE" : 20,
 	        "PADDING" : 10,
-	        "MATERIAL_TYPES" : ["full", "center3", "center1", "ends"],
 	        "STAGE_WIDTH" : 810,
 			"STAGE_HEIGHT" : 680,
 			"PADDING" : 8,
-			"materialNameDisplayMapping" : {"DWood":"Wood A", "LWood":"Wood B", "Metal":"Metal", "Plastic":"Plastic"},
-			"materialNameMaxMapping" : {"DWood":[2, 1, 1, 1], "LWood":[1, 1, 1, 1], "Metal":[1, 1, 1, 1], "Plastic":[1, 1, 1, 1]},
-			"materialNameMassMapping" : {"DWood": 1.25, "LWood": 0.75, "Metal": 1.5, "Plastic": 0.5},
+			"materials": null,
 			"view_sideAngle" : 10*Math.PI/180,
 			"view_topAngle" : 20*Math.PI/180,
 			"fluid_density" : 1.0,
@@ -42,26 +40,19 @@
 			"separation_width" : 4,
 			"separation_density" : 1.0,
 			"water_volume_perc" : 0.50,
+			"fill_spilloff_by_height": true,
 			"spilloff_volume_perc" : 0.50
         }
         
 		
 		// load parameters file to overwrite defaults
-		$.getJSON(parameters_link, function(data) {
-			if(typeof(data.DEBUG) != "undefined") GLOBAL_PARAMETERS.DEBUG = data.DEBUG;
-			if(typeof(data.SCALE) != "undefined") GLOBAL_PARAMETERS.SCALE = data.SCALE;
-			if(typeof(data.materialNameDisplayMapping) != "undefined") GLOBAL_PARAMETERS.materialNameDisplayMapping = data.materialNameDisplayMapping;
-			if(typeof(data.materialNameMaxMapping) != "undefined") GLOBAL_PARAMETERS.materialNameMaxMapping = data.materialNameMaxMapping;
-			if(typeof(data.materialNameMassMapping) != "undefined") GLOBAL_PARAMETERS.materialNameMassMapping = data.materialNameMassMapping;
-			if(typeof(data.view_sideAngle_degrees) != "undefined") GLOBAL_PARAMETERS.view_sideAngle = data.view_sideAngle_degrees*Math.PI/180;
-			if(typeof(data.view_topAngle_degrees) != "undefined") GLOBAL_PARAMETERS.view_topAngle = data.view_topAngle_degrees*Math.PI/180;
-			if(typeof(data.fluid_density) != "undefined") GLOBAL_PARAMETERS.fluid_density = data.fluid_density;
-			if(typeof(data.fluid_color) != "undefined") GLOBAL_PARAMETERS.fluid_color = data.fluid_color;
-			if(typeof(data.fluid_stroke_color) != "undefined") GLOBAL_PARAMETERS.fluid_stroke_color = data.fluid_stroke_color;
-			if(typeof(data.separation_width) != "undefined") GLOBAL_PARAMETERS.separation_width = data.separation_width;
-			if(typeof(data.separation_density) != "undefined") GLOBAL_PARAMETERS.separation_density = data.separation_density;
-			if(typeof(data.water_volume_perc) != "undefined") GLOBAL_PARAMETERS.water_volume_perc = data.water_volume_perc;
-			if(typeof(data.spilloff_volume_perc) != "undefined") GLOBAL_PARAMETERS.spilloff_volume_perc = data.spilloff_volume_perc;
+		$.getJSON("DensityParameters.json", function(data) {
+			for (var key in data)
+			{
+				GLOBAL_PARAMETERS[key] = data[key];
+			}
+			if (typeof(GLOBAL_PARAMETERS.view_sideAngle_degrees) != "undefined") GLOBAL_PARAMETERS.view_sideAngle = GLOBAL_PARAMETERS.view_sideAngle_degrees * Math.PI / 180;
+			if (typeof(GLOBAL_PARAMETERS.view_topAngle_degrees) != "undefined") GLOBAL_PARAMETERS.view_topAngle = GLOBAL_PARAMETERS.view_topAngle_degrees * Math.PI / 180;
 			init();
 		});     
 		
@@ -139,10 +130,17 @@
 		{
 			if (builder.validObject())
 			{
-				var blockArray3d = builder.saveObject();
-				var json = JSON.stringify(blockArray3d);
-				console.log(JSON.stringify(blockArray3d));
-				var compShape = new BlockCompShape(GLOBAL_PARAMETERS.SCALE, GLOBAL_PARAMETERS.SCALE, GLOBAL_PARAMETERS.SCALE, blockArray3d, GLOBAL_PARAMETERS.materialNameMassMapping);
+				var savedObject = builder.saveObject();
+				var json = JSON.stringify(savedObject);
+				console.log(JSON.stringify(savedObject));
+				var compShape; 
+				if (savedObject.isContainer)
+				{
+					compShape = new ContainerCompShape(GLOBAL_PARAMETERS.SCALE, GLOBAL_PARAMETERS.SCALE, GLOBAL_PARAMETERS.SCALE, savedObject);
+				} else
+				{
+					compShape = new BlockCompShape(GLOBAL_PARAMETERS.SCALE, GLOBAL_PARAMETERS.SCALE, GLOBAL_PARAMETERS.SCALE, savedObject);
+				}
 				tester.addObjectToLibrary(compShape);
 			} else 
 			{

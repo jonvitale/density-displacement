@@ -85,18 +85,19 @@
 	/** Removes object from its current parent, allows movement based on current*/
 	p.actorPressHandler = function (evt)
 	{
-		var gp = evt.target.parent.localToGlobal(evt.target.x, evt.target.y);
-		var offset = {x:gp.x-evt.stageX, y:gp.y-evt.stageY}
+		var source_parent = evt.target.parent;
+		var gp = source_parent.localToGlobal(evt.target.x, evt.target.y);
+		var offset = evt.target.globalToLocal(evt.stageX, evt.stageY);
 		// remove object from wherever it is and place it on this object
-		if (evt.target.parent instanceof ObjectLibrary)
+		if (source_parent instanceof ObjectLibrary)
 		{
-			evt.target.parent.removeObject(evt.target);
-		} else if (evt.target.parent instanceof Balanceb2World)
+			source_parent.removeObject(evt.target);
+		} else if (source_parent instanceof Balanceb2World)
 		{
-			evt.target.parent.removeActor(evt.target);
-		} else if (evt.target.parent instanceof Beakerb2World)
+			source_parent.removeActor(evt.target);
+		} else if (source_parent instanceof Beakerb2World)
 		{
-			evt.target.parent.removeActor(evt.target);
+			source_parent.removeActor(evt.target);
 		}
 		var lp = this.globalToLocal(gp.x, gp.y);
 		this.addChild(evt.target);
@@ -107,10 +108,10 @@
 		evt.onMouseMove = function (ev)
 		{
 			var parent = this.target.parent;
-			var lpoint = parent.globalToLocal(ev.stageX+offset.x, ev.stageY+offset.y);
+			var lpoint = parent.globalToLocal(ev.stageX-offset.x, ev.stageY-offset.y);
 			var newX = lpoint.x;
 			var newY = lpoint.y;
-				
+			
 			// place within bounds of this object
 			if (parent instanceof ObjectTestingPanel)
 			{
@@ -119,7 +120,7 @@
 					this.target.x = 0;
 				} else if (newX > parent.width_px)
 				{
-					this.target.x = ob.width_px;
+					this.target.x = parent.width_px;
 				} else
 				{
 					this.target.x = newX;
@@ -135,8 +136,11 @@
 					this.target.y = newY;
 				} 
 
-				//parent.vv.placeBlock(this.target);
-			} 
+				//parent.beakerWorld.placeObject(this.target, ev.stageX-offset.x, ev.stageY-offset.y);
+			} else if (parent instanceof Beakerb2World)
+			{
+				parent.placeObject(this.target, ev.stageX-offset.x, ev.stageY-offset.y);
+			}
 			stage.needs_to_update = true;
 		}
 		evt.onMouseUp = function (ev)
@@ -145,11 +149,11 @@
 			//
 			if (parent.balanceWorld.hitTestObject(this.target))
 			{
-				var wpoint = parent.balanceWorld.globalToLocal(ev.stageX+offset.x, ev.stageY+offset.y);
+				var wpoint = parent.balanceWorld.globalToLocal(ev.stageX-offset.x, ev.stageY-offset.y);
 				parent.balanceWorld.addActor(this.target, wpoint.x, wpoint.y);
 			} else if (parent.beakerWorld.hitTestObject(this.target))
 			{
-				var wpoint = parent.beakerWorld.globalToLocal(ev.stageX+offset.x, ev.stageY+offset.y);
+				var wpoint = parent.beakerWorld.globalToLocal(ev.stageX-offset.x, ev.stageY-offset.y);
 				parent.beakerWorld.addActor(this.target, wpoint.x, wpoint.y);
 			}else
 			{

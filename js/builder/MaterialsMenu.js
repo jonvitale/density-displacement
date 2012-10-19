@@ -17,70 +17,51 @@
 		this.Container_initialize();
 		this.width_px = width_px;
 		this.height_px = height_px;
-		this.materialNameDisplayMapping = GLOBAL_PARAMETERS.materialNameDisplayMapping;
-		this.rev_materialNameDisplayMapping = new Array();
+	
 		this.materialCount = 0;
-		var key;
-		for (key in this.materialNameDisplayMapping)
-		{
-			if (this.materialNameDisplayMapping.hasOwnProperty(key))
-			{
-			 	this.materialCount++;
-			 	this.rev_materialNameDisplayMapping[this.materialNameDisplayMapping[key]] = key;
-			}
-		}
+		this.displayNames = {};
+		this.tabArray = {};
+		this.rev_materialNameDisplayMapping = {};
+
 		//background
 		this.g = new Graphics();
 		this.shape = new Shape(this.g);
 		this.addChild(this.shape);
+		this.g.beginFill(this.UNSELECTED_COLOR);
+		this.g.drawRect(0, 0, this.width_px, this.height_px);
+		this.g.endFill();
 
-		// text
-		this.tabArray = new Array();
-		this.materialsDisplayArray = new Array();
-		var key, i, tab, text, materialDisplay;
-		i = 0;
-		for (key in this.materialNameDisplayMapping)
+		for (var key in GLOBAL_PARAMETERS.materials)
 		{
-			if (this.materialNameDisplayMapping.hasOwnProperty(key)) 
-			{
-				if (i==0)
-				{
-					this.defaultMaterialName = key;
-				}
-				tab = new TextContainer(this.materialNameDisplayMapping[key], "20px Arial", this.TEXT_COLOR, this.width_px, this.height_px/this.materialCount, this.UNSELECTED_COLOR, this.UNSELECTED_COLOR, 0, "center", "center");
-				tab.x = 0;
-				tab.y = i * (this.height_px/this.materialCount)+ (this.height_px/this.materialCount-tab.height_px)/2;
-				//tab.onMouseOver = this.mouseOverHandler.bind(this);
-				tab.onClick = this.clickHandler.bind(this);
-				this.tabArray[key] = tab;
-				this.addChild(tab);
-			}
-
-			i++;
+			if (this.materialCount == 0) this.defaultMaterialName = key;
+			this.displayNames[key] = GLOBAL_PARAMETERS.materials[key].displayName;
+			this.rev_materialNameDisplayMapping[this.displayNames[key]] = key;
+			var tab = new TextContainer(this.displayNames[key], "20px Arial", this.TEXT_COLOR, this.width_px, this.height_px/GLOBAL_PARAMETERS.MATERIAL_COUNT, this.UNSELECTED_COLOR, this.UNSELECTED_COLOR, 0, "center", "center");
+			tab.x = 0;
+			tab.y = this.materialCount * (this.height_px/GLOBAL_PARAMETERS.MATERIAL_COUNT) + (this.height_px/GLOBAL_PARAMETERS.MATERIAL_COUNT-tab.height_px)/2;
+			tab.onClick = this.clickHandler.bind(this);
+			this.tabArray[key] = tab;
+			this.addChild(tab);
+			this.materialCount++;
 		}
-
+		
 		// projected selection outline
 		this.projectedTextOutlineGraphics = new Graphics();
 		this.projectedTextOutlineShape = new Shape(this.projectedTextOutlineGraphics);
 		this.projectedTextOutlineShape.mouseEnabled = false;
 		this.addChild(this.projectedTextOutlineShape);
 		
-		this.g.beginFill(this.UNSELECTED_COLOR);
-		this.g.drawRect(0, 0, this.width_px, this.height_px);
-		this.g.endFill();
 
 		this.projectedTextOutlineGraphics.setStrokeStyle(1);
 		this.projectedTextOutlineGraphics.beginStroke(this.TEXT_COLOR);
-		this.projectedTextOutlineGraphics.drawRect(0, 0, this.width_px, this.height_px/this.materialCount);
+		this.projectedTextOutlineGraphics.drawRect(0, 0, this.width_px, this.height_px/GLOBAL_PARAMETERS.MATERIAL_COUNT);
 			
 		// select
 		this.currentMaterialName = this.defaultMaterialName;
-		this.addChild(this.materialsDisplayArray[this.currentMaterialName]);
 		this.projectedTextOutlineShape.x = 0;
 		this.projectedTextOutlineShape.y = 0;
 		this.tabArray[this.currentMaterialName].setBackgroundColor(this.SELECTED_COLOR);
-
-
+		
 		stage.ready_to_update = true;
 	}
 
