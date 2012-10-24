@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+	<head>
+		<meta charset="utf-8">
+		<title> Experimenting with Materials</title>
+		<link rel="stylesheet" href="libs/jquery-ui-1.9.0.custom.min.css"></script>
+		<script src="libs/jquery-1.7.1.min.js"></script>
+		<script src="libs/jquery-ui-1.9.0.custom.min.js"></script>
+		<script src="libs/easel.js"></script>
+		<script src="libs/Box2dWeb-2.1.a.3.min.js"></script>
+		<script src="js/GeneralObjects/Point3D.js"></script>
+		<script src="js/GeneralObjects/TextContainer.js"></script>		
+		<script src="js/BuilderObjects/VolumeViewer.js"></script>
+		<script src="js/BuilderObjects/MaterialsMenu.js"></script>
+		<script src="js/BuilderObjects/ObjectBuildingPanel.js"></script>		
+		<script src="js/BuilderObjects/RectBlockShape.js"></script>
+		<script src="js/BuilderObjects/RectLiquidShape.js"></script>
+		<script src="js/TestingObjects/ObjectLibrary.js"></script>
+		<script src="js/TestingObjects/ObjectTestingPanel.js"></script>
+		<script src="js/TestingObjects/BlockCompShape.js"></script>
+		<script src="js/TestingObjects/ContainerCompShape.js"></script>
+		<script src="js/B2Objects/Myb2BuoyancyController.js"></script>
+		<script src="js/B2Objects/Beakerb2World.js"></script>
+		<script src="js/B2Objects/Balanceb2World.js"></script>
+		<script src="js/B2Objects/Blockb2Actor.js"></script>
+		<script src="js/B2Objects/Liquidb2Actor.js"></script>
+		<script src="js/EventLogger.js"></script>
+		<script src="js/box2dModelMain.js"></script>
+		
+	</head>
+	<body>
+		<div>
+			<input type="submit" id="make-object" value="Create"/>
+			<div id="slider-topAngle" style="height: 100px;"></div>
+			<div id="slider-sideAngle" style="width: 100px;"></div>
+			<div id="refill-button-holder"></div>
+			<div id="library-button-holder"></div>
+			<canvas width=810 height=680 id="canvas" ></canvas>
+		</div>
+		<canvas width=700 height=600 id="debugcanvas2" ></canvas>
+		<canvas width=600 height=600 id="debugcanvas" ></canvas>
+	</body>	
+</html>
