@@ -2,9 +2,9 @@
 {
 	/** A space for displaying the names of materials, clickable/draggable materials
 	and a grid space for putting them together */
-	function ObjectTestingPanel (width_px, height_px, max_shape_width_px, max_shape_height_px, width_from_depth, height_from_depth)
+	function ObjectTestingPanel (width_px, height_px)
 	{
-		this.initialize(width_px, height_px, max_shape_width_px, max_shape_height_px, width_from_depth, height_from_depth);
+		this.initialize(width_px, height_px);
 	}
 	var p = ObjectTestingPanel.prototype = new Container();
 	p.Container_initialize = ObjectTestingPanel.prototype.initialize;
@@ -13,15 +13,15 @@
 	// constants
 	//p.MATERIAL_TYPES = ["full", "center3", "center1", "ends"];
 
-	p.initialize = function(width_px, height_px, max_shape_width_px, max_shape_height_px, width_from_depth, height_from_depth)
+	p.initialize = function(width_px, height_px)
 	{
 		this.Container_initialize();
 		this.width_px = width_px;
 		this.height_px = height_px;
-		this.max_shape_width_px = max_shape_width_px;
-		this.max_shape_height_px = max_shape_height_px;
-		this.width_from_depth = width_from_depth;
-		this.height_from_depth = height_from_depth;
+		this.width_from_depth = GLOBAL_PARAMETERS.MAX_DEPTH_UNITS * GLOBAL_PARAMETERS.SCALE * Math.sin(GLOBAL_PARAMETERS.view_sideAngle);
+		this.height_from_depth = GLOBAL_PARAMETERS.MAX_DEPTH_UNITS * GLOBAL_PARAMETERS.SCALE * Math.sin(GLOBAL_PARAMETERS.view_topAngle);
+		this.max_shape_width_px = this.width_from_depth +  GLOBAL_PARAMETERS.MAX_WIDTH_UNITS * GLOBAL_PARAMETERS.SCALE;
+		this.max_shape_height_px = this.height_from_depth +  GLOBAL_PARAMETERS.MAX_HEIGHT_UNITS * GLOBAL_PARAMETERS.SCALE;
 		
 		//background
 		this.g = new Graphics();
@@ -29,25 +29,35 @@
 		this.addChild(this.shape);
 
 		//library
-		this.library = new ObjectLibrary(this.width_px, this.max_shape_height_px, this.max_shape_width_px, this.max_shape_height_px, width_from_depth, height_from_depth);
+		this.library = new ObjectLibrary(this.width_px, this.max_shape_height_px, this.max_shape_width_px, this.max_shape_height_px, this.width_from_depth, this.height_from_depth);
 		this.addChild(this.library);
 		this.library.x = 0;
 		this.library.y = 0;
 		//balanceWorld
-		this.balanceWorld = new Balanceb2World((max_shape_width_px-width_from_depth)*4, (max_shape_height_px-height_from_depth)*3, 0, this.library.y + this.library.height_px + GLOBAL_PARAMETERS.PADDING, 5, 5);
-		this.addChild(this.balanceWorld);
-		this.balanceWorld.x = 0;
-		this.balanceWorld.y = this.library.y + this.library.height_px + GLOBAL_PARAMETERS.PADDING;
+		var current_x = 0;
+		var current_y = this.library.y + this.library.height_px + GLOBAL_PARAMETERS.PADDING;
+		if (GLOBAL_PARAMETERS.INCLUDE_BALANCE)
+		{
+			this.balanceWorld = new Balanceb2World((this.max_shape_width_px-this.width_from_depth)*4, (this.max_shape_height_px-this.height_from_depth)*3, current_x, current_y, 5, 5);
+			this.addChild(this.balanceWorld);
+			this.balanceWorld.x = current_x;
+			this.balanceWorld.y = current_y;
+			current_x = this.balanceWorld.x + GLOBAL_PARAMETERS.PADDING + this.balanceWorld.width_px;
+			current_y = this.library.y + this.library.height_px + GLOBAL_PARAMETERS.PADDING;
+		}
 		//beakerWorld
-		var beaker_world_width_px = this.width_px - this.balanceWorld.width_px;
-		var beaker_world_height_px = (max_shape_height_px-height_from_depth)*3
-		var beaker_width_px = this.max_shape_width_px-width_from_depth;
-		var beaker_height_px = beaker_world_height_px*2/3;
-		var beaker_depth_px = this.max_shape_width_px - this.width_from_depth;
-		this.beakerWorld = new Beakerb2World(beaker_world_width_px, beaker_world_height_px, this.balanceWorld.x + GLOBAL_PARAMETERS.PADDING + this.balanceWorld.width_px , this.library.y + this.library.height_px + GLOBAL_PARAMETERS.PADDING, beaker_width_px, beaker_height_px, beaker_depth_px) ;
-		this.addChild(this.beakerWorld);
-		this.beakerWorld.x = this.balanceWorld.x + GLOBAL_PARAMETERS.PADDING + this.balanceWorld.width_px;
-		this.beakerWorld.y = this.library.y + this.library.height_px + GLOBAL_PARAMETERS.PADDING;
+		if (GLOBAL_PARAMETERS.INCLUDE_BEAKER)
+		{
+			var beaker_world_width_px = (this.max_shape_width_px-this.width_from_depth)*4;
+			var beaker_world_height_px = (this.max_shape_height_px-this.height_from_depth)*3;
+			var beaker_width_px = this.max_shape_width_px-this.width_from_depth;
+			var beaker_height_px = beaker_world_height_px*2/3;
+			var beaker_depth_px = this.max_shape_width_px - this.width_from_depth;
+			this.beakerWorld = new Beakerb2World(beaker_world_width_px, beaker_world_height_px, current_x , current_y, beaker_width_px, beaker_height_px, beaker_depth_px) ;
+			this.addChild(this.beakerWorld);
+			this.beakerWorld.x = current_x;
+			this.beakerWorld.y = current_y;
+		}
 
 		this.g.beginFill("rgba(255,255,255,1.0)");
 		this.g.drawRect(0, 0, this.width_px, this.height_px);
@@ -72,7 +82,7 @@
 
 	
 	////////////////////// CLASS SPECIFIC ////////////////////
-	p.addObjectToLibrary = function (o)
+	p.createObjectForLibrary = function (o)
 	{
 		var actor = new Blockb2Actor(o); 
 		this.library.addObject(actor);
@@ -147,11 +157,11 @@
 		{
 			var parent = this.target.parent;
 			//
-			if (parent.balanceWorld.hitTestObject(this.target))
+			if (parent.balanceWorld != null && parent.balanceWorld.hitTestObject(this.target))
 			{
 				var wpoint = parent.balanceWorld.globalToLocal(ev.stageX-offset.x, ev.stageY-offset.y);
 				parent.balanceWorld.addActor(this.target, wpoint.x, wpoint.y);
-			} else if (parent.beakerWorld.hitTestObject(this.target))
+			} else if (parent.beakerWorld != null && parent.beakerWorld.hitTestObject(this.target))
 			{
 				var wpoint = parent.beakerWorld.globalToLocal(ev.stageX-offset.x, ev.stageY-offset.y);
 				parent.beakerWorld.addActor(this.target, wpoint.x, wpoint.y);

@@ -214,7 +214,7 @@
 					{
 						if (this.blockArray3d[i][j][k] != "")
 						{
-							mass += GLOBAL_PARAMETERS.materials[this.blockArray3d[i][j][k]].mass;
+							mass += GLOBAL_PARAMETERS.materials[this.blockArray3d[i][j][k]].density;
 						}
 
 						if (spaces3d[i][j][k] == "B")
@@ -576,7 +576,7 @@
 		var btr_x, btr_y, btl_x, btl_y, bb_r, ftr_x, ftr_y, ftl_x, ftl_y, fbr_x, fbr_y, fbl_x, fbl_y;
 		var g = this.g;
 		g.clear();
-		var i, j, k, row, col, ik;
+		var i, j, k, row, col, ik, i_shift, j_shift;
 		this.tr_x = NaN;
 		this.tr_y = NaN;
 
@@ -657,8 +657,8 @@
 						{
 							// draw bottom
 							g.setStrokeStyle(1);
-							g.beginLinearGradientStroke(material.strokeColors, material.strokeRatios, fbl_x, fbl_y, bbr_x, fbl_y);
-							g.beginLinearGradientFill(material.fillColors, material.fillRatios, fbl_x, fbl_y, bbr_x, fbl_y);
+							g.beginLinearGradientStroke(material.stroke_colors, material.stroke_ratios, fbl_x, fbl_y, bbr_x, fbl_y);
+							g.beginLinearGradientFill(material.fill_colors, material.fill_ratios, fbl_x, fbl_y, bbr_x, fbl_y);
 					
 							g.moveTo(bbr_x, bbr_y);
 							g.lineTo(bbl_x, bbl_y);
@@ -671,8 +671,8 @@
 						{
 							// draw top
 							g.setStrokeStyle(1);
-							g.beginLinearGradientStroke(material.strokeColors, material.strokeRatios, ftl_x, ftl_y, btr_x, ftl_y);
-							g.beginLinearGradientFill(material.fillColors, material.fillRatios, ftl_x, ftl_y, btr_x, ftl_y);
+							g.beginLinearGradientStroke(material.stroke_colors, material.stroke_ratios, ftl_x, ftl_y, btr_x, ftl_y);
+							g.beginLinearGradientFill(material.fill_colors, material.fill_ratios, ftl_x, ftl_y, btr_x, ftl_y);
 							g.moveTo(btr_x, btr_y);
 							g.lineTo(btl_x, btl_y);
 							g.lineTo(ftl_x, ftl_y);
@@ -687,8 +687,8 @@
 						{
 							// draw left
 							g.setStrokeStyle(1);
-							g.beginLinearGradientStroke(material.strokeColors, material.strokeRatios, ftl_x, ftl_y, btl_x, btl_y);
-							g.beginLinearGradientFill(material.fillShadowColors, material.fillShadowRatios, ftl_x, ftl_y, btl_x, btl_y);
+							g.beginLinearGradientStroke(material.stroke_colors, material.stroke_ratios, ftl_x, ftl_y, btl_x, btl_y);
+							g.beginLinearGradientFill(material.fill_colors_shadow, material.fill_ratios_shadow, ftl_x, ftl_y, btl_x, btl_y);
 							g.moveTo(btl_x, btl_y);
 							g.lineTo(ftl_x, ftl_y);
 							g.lineTo(fbl_x, fbl_y);
@@ -701,8 +701,8 @@
 						{
 							// draw right
 							g.setStrokeStyle(1);
-							g.beginLinearGradientStroke(material.strokeColors, material.strokeRatios, ftr_x, ftr_y, btr_x, btr_y);
-							g.beginLinearGradientFill(material.fillShadowColors, material.fillShadowRatios, ftr_x, ftr_y, btr_x, btr_y);
+							g.beginLinearGradientStroke(material.stroke_colors, material.stroke_ratios, ftr_x, ftr_y, btr_x, btr_y);
+							g.beginLinearGradientFill(material.fill_colors_shadow, material.fill_ratios_shadow, ftr_x, ftr_y, btr_x, btr_y);
 							g.moveTo(btr_x, btr_y);
 							g.lineTo(ftr_x, ftr_y);
 							g.lineTo(fbr_x, fbr_y);
@@ -730,9 +730,9 @@
 
 						// draw front
 						g.setStrokeStyle(1);
-						g.beginLinearGradientStroke(material.strokeColors, material.strokeRatios, ftl_x, ftl_y, ftr_x, ftr_y);
-						if (k != 0){ g.beginLinearGradientFill(material.fillColors, material.fillRatios, ftl_x, ftl_y, ftr_x, ftr_y);}
-						else {g.beginLinearGradientFill(material.fillShadowColors, material.fillRatios, ftl_x, ftl_y, ftr_x, ftr_y);}
+						g.beginLinearGradientStroke(material.stroke_colors, material.stroke_ratios, ftl_x, ftl_y, ftr_x, ftr_y);
+						if (k != 0){ g.beginLinearGradientFill(material.fill_colors, material.fill_ratios, ftl_x, ftl_y, ftr_x, ftr_y);}
+						else {g.beginLinearGradientFill(material.fill_colors_shadow, material.fill_ratios, ftl_x, ftl_y, ftr_x, ftr_y);}
 						
 					
 						g.moveTo(ftr_x, ftr_y);

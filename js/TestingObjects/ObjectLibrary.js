@@ -38,7 +38,6 @@
 		this.num_rows = Math.floor((this.height_px)/shape_height_px)
 		this.num_cols = Math.floor((this.width_px)/shape_width_px);
 
-		this.num_shapes = 0;
 		stage.ready_to_update = true;
 	}
 
@@ -53,22 +52,86 @@
 			this.shapes.push(o);
 
 			// add html buttons
-			var b_id = "library-button-" + this.num_shapes;
-			var htmlText = '<input type="submit" id="' + b_id + '" style="font-size:14px"/>';
+			var id = typeof o.skin.savedObject.id === "undefined" ? GLOBAL_PARAMETERS.total_objects_made : o.skin.savedObject.id;
+			o.skin.savedObject.id = id;
+			if (typeof o.skin.savedObject.is_deletable === "undefined") o.skin.savedObject.is_deletable = true;
+			
+			var b_id = "library-button-" + id;
+			if (typeof o.is_deletable)
+			var htmlText;
+			if (o.skin.savedObject.is_deletable){
+				htmlText = '<div id ="' + b_id + '" style="font-size:14px; position:absolute"><input type="submit"/><ul><li><a href="#">Duplicate</a></li><li><a href="#">Delete</a></li></ul></div>';
+			} else {
+				htmlText = '<div id ="' + b_id + '" style="font-size:14px; position:absolute"><input type="submit"/><ul><li><a href="#">Duplicate</a></li></ul></div>';				
+			}
+
 			$('#library-button-holder').append(htmlText);
-			var htmlElement = $("#"+b_id)
+			$('#library-button-holder').find("ul").menu().hide();
+			var htmlElement = $("#" + b_id)
+				.find("input")
 				.button({
                     label: "Actions",
                     icons: {
                         primary: 'ui-icon-triangle-1-s'
                     }
                 })
-				.bind('click', {parent: this}, this.buttonActions);
+                .click(function() {
+			        var menu = $(this).parent().find("ul").show().position({
+			      		my: "left top",
+                        at: "left bottom",
+                        of: this
+                    });
+                    $( document ).one( "click",function() {
+                         if ($(event.target).text() == "Duplicate")
+                        {
+                        	tester.library.duplicateObjectFromHTML($(event.target).parent().parent().parent());
+                        	
+                        } else if ($(event.target).text() == "Delete")
+                        {
+                        	tester.library.deleteObjectFromHTML($(event.target).parent().parent().parent());
+                        }
+                        menu.hide();
+                    });
+                    return false;
+			    });
+                
 			var element = new DOMElement(htmlElement[0]);
 			this.addChild(element);
-			element.x = o.x;
-			element.y = this.height_px - 20;
-			this.num_shapes++;
+			element.x = this.x + o.x;
+			element.y = this.y + this.height_px - 30;
+			o.html = htmlElement.parent();
+		}
+	}
+
+
+	p.duplicateObjectFromHTML = function (html)
+	{
+		for (var i = 0; i < this.shapes.length; i++)
+		{
+			if (this.shapes[i].html.attr("id") == html.attr("id"))
+			{
+				this.duplicateObject(this.shapes[i]);
+				return true;
+			}
+		}
+		return false;
+	}
+
+	p.duplicateObject = function (o)
+	{
+		// always make duplicates deletable
+		o.skin.savedObject.is_deletable = true;
+		createObject(o.skin.savedObject);
+	}
+
+	p.deleteObjectFromHTML = function (html)
+	{
+		for (var i = 0; i < this.shapes.length; i++)
+		{
+			if (this.shapes[i].html.attr("id") == html.attr("id"))
+			{
+				this.removeObject(this.shapes[i]);
+			}
 		}
 	}
 
@@ -76,6 +139,7 @@
 	{
 		var index = this.shapes.indexOf(o);
 		this.shapes.splice(index, 1);
+		this.removeChild(o);
 		// move shapes below up
 		var i;
 		for (i = index; i < this.shapes.length; i++)
@@ -85,12 +149,10 @@
 			s.x = (new_index % this.num_cols) * this.shape_width_px + this.shape_dx;
 			s.y = Math.floor(new_index / this.num_cols) * this.shape_height_px + this.shape_dy;
 		}
-
-	}
-
-	p.buttonActions = function (evt)
-	{
-		console.log(evt);
+		if (typeof o.html != "undefined" && o.html != null)
+		{
+			o.html.remove();
+		} 
 	}
 
 	p._tick = function()

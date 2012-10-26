@@ -13,7 +13,7 @@
 	p.Container_tick = p._tick;
 
 	/**
-	*	This liquid shape can either use a container to space out each cube or not.  Separator width defines the size of this spacing between cubes.
+	*	This liquid shape can either use a material_name to space out each cube or not.  Separator width defines the size of this spacing between cubes.
 	*   If separators are used they can either appear in complete rows (on depth dimension) or full width x depth.
 	*/	
 	p.initialize = function(unit_width_px, unit_height_px, unit_depth_px, width_units, height_units, depth_units, useCompleteDepth, useCompleteWidth)
@@ -251,7 +251,7 @@
 						btr_x = ftr_x + this.liquid_unit_depth_px*Math.sin(view_sideAngle);
 						btr_y = ftr_y - this.liquid_unit_depth_px*Math.sin(view_topAngle);
 
-						// for the containers of liquid		
+						// for the material_names of liquid		
 						c_fbl_x = i*(this.unit_width_px) + k * this.unit_depth_px * Math.sin(view_sideAngle);
 						c_fbl_y = -j*this.unit_height_px - k * this.unit_depth_px * Math.sin(view_topAngle);
 						c_ftl_x = c_fbl_x;
@@ -318,7 +318,7 @@
 							
 							if (GLOBAL_PARAMETERS.separation_width > 0)
 							{
-								// draw top of container in four trapezoids
+								// draw top of material_name in four trapezoids
 								g.setStrokeStyle(1);
 								g.beginStroke(this.separation_rgba_stroke);
 								g.beginFill(this.separation_rgba_fill);

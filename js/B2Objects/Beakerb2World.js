@@ -45,8 +45,9 @@
 		this.min_liquid_y = this.beaker_height_px - this.beaker_height_px * this.spilloff_volume_perc
 		this.beaker_x = 40 + beaker_width_px/2;
 
-		this.liquid_color = GLOBAL_PARAMETERS.liquid_color; //.replace("1.0", "0.5");
-		this.liquid_stroke_color = GLOBAL_PARAMETERS.liquid_stroke_color;//.replace("1.0", "0.5");
+		this.liquid = GLOBAL_PARAMETERS.liquids[GLOBAL_PARAMETERS.liquid_available];
+		this.liquid_color = this.liquid.fill_color; //.replace("1.0", "0.5");
+		this.liquid_stroke_color = this.liquid.stroke_color;//.replace("1.0", "0.5");
 
 		g = this.g = new Graphics();
 		this.shape = new Shape(g);
@@ -78,7 +79,6 @@
 		this.frontShape = new Shape(this.frontGraphics);
 		this.spoutGraphics = new Graphics();
 		this.spoutShape = new Shape(this.spoutGraphics);
-		this.releaseTextContainer = new TextContainer("Release", "20px Arial", "rgba(100,100,100,1.0)", 80, 35, "rgba(200, 200, 200, 1.0)", "rgba(100,100,100, 1.0)", 1, "center", "center", 0, 0, "ellipse", true);
 		this.rulerGraphics = new Graphics();
 		this.rulerShape = new Shape(this.rulerGraphics);
 		this.pointerGraphics = new Graphics();
@@ -92,7 +92,6 @@
 		this.addChild(this.frontWaterShape);
 		this.addChild(this.frontShape);
 		this.addChild(this.spoutShape);
-		this.addChild(this.releaseTextContainer);
 		this.addChild(this.rulerShape);
 		this.addChild(this.rulerShape);
 		this.addChild(this.addShape);
@@ -104,7 +103,6 @@
 		this.backWaterShape.x = this.frontWaterShape.x + this.width_from_depth; this.backWaterShape.y = this.frontWaterShape.y - this.height_from_depth;
 		this.backWaterLineShape.x = this.frontWaterLineShape.x + this.width_from_depth; this.backWaterLineShape.y = this.frontWaterLineShape.y - this.height_from_depth;
 		this.spoutShape.x = this.beaker_x + this.beaker_width_px/2 + this.width_from_depth/2; this.spoutShape.y = this.height_px - this.beaker_bottom_dy - this.spilloff_volume_perc * this.beaker_height_px - this.height_from_depth/2;		
-		this.releaseTextContainer.x = this.spoutShape.x + 50; this.releaseTextContainer.y = this.spoutShape.y - 40;
 		this.rulerShape.x = this.beaker_x + -this.beaker_width_px/2 - 10;
 		this.pointerShape.x = this.beaker_x - this.beaker_width_px/2;
 		this.pointerText.x = this.pointerShape.x - 33;
@@ -114,9 +112,7 @@
 		this.spout_change = false;
 		this.spout_point = new Point (this.spoutShape.x + 50, this.spoutShape.y + 50);
 		this.refill_button_drawn = false;
-		// buttons
-		this.releaseTextContainer.onClick = this.releaseClickHandler.bind(this);
-
+		this.release_button_drawn = false;
 
 		// draw liquid line
 		g = this.backWaterLineGraphics;
@@ -345,10 +341,11 @@
 
 		// draw spout first time
 		this.drawSpout();
+		this.drawReleaseButton();
 
 		// buoyancy controller
 		var controller = this.controller = this.b2world.AddController(new Myb2BuoyancyController());
-		controller.density = GLOBAL_PARAMETERS.liquid_density;
+		controller.density = this.liquid.density;
 		var normal = new b2Vec2(); normal.Set(0, -1);
 		controller.normal = normal;
 		var offset = -(this.world_dy + this.height_px - this.beaker_bottom_dy - this.beaker_height_px + this.liquid_y) / GLOBAL_PARAMETERS.SCALE;
@@ -377,46 +374,78 @@
 		this.actors = new Array();
 	}
 
-	/** When user clicks the release text, the spout opens and water drains */
-	p.releaseClickHandler = function (evt)
+	/**
+	*
+	*/
+	p.drawRefillButton = function ()
 	{
-		var obj = {};
-		obj.volume_above_spout = Math.round(1000*((this.beaker_height_px - this.liquid_y) - this.spilloff_volume_perc * this.beaker_height_px)/GLOBAL_PARAMETERS.SCALE * this.beaker_depth_px/GLOBAL_PARAMETERS.SCALE * this.beaker_width_px/GLOBAL_PARAMETERS.SCALE)/1000;
-		obj.available_volume_in_spilloff_container = this.spilloffContainer == null ? -1 : Math.round(1000*this.spilloffContainer.skin.available_volume)/1000;
-		if (typeof this.spilloffContainer != "undefined" && this.spilloffContainer != null) {
-			eventLogger.addEvent("button_press", "beaker-spilloff", [obj], [this.spilloffContainer.skin.savedObject]);
-		} else{
-			eventLogger.addEvent("button_press", "beaker-spilloff", [obj]);
-		}
-
-		this.spout_change = true;
-		if (!this.refill_button_drawn)
+		if (!this.refill_button_drawn && this.liquid_y > (this.init_liquid_y+.01))
 		{
-			$('#refill-button-holder').append('<input type="submit" id="refill-button" value="Refill" style="font-size:14px"/>');
-			var htmlElement = $('#refill-button-holder').find("input[id='refill-button']").button().bind('click', {parent: this}, this.refillBeaker);
+			$('#beaker-button-holder').append('<input type="submit" id="refill-button" value="Refill" style="font-size:14px; position:absolute"/>');
+			var htmlElement = $('#refill-button').button().bind('click', {parent: this}, this.refillBeaker);
 			var element = new DOMElement(htmlElement[0]);
 			this.addChild(element);
-			element.x = this.beaker_x;
-			element.y = 40;
+			element.x = this.beaker_x - 20;
+			element.y = 30;
 			this.refill_button_drawn = true;
 		}
 	}
-	/* Refills beaker to inital liquid level.  Removes the button */
-	p.refillBeaker = function (evt)
-	{
-		if (!evt.data.parent.draining)
+		/* Refills beaker to inital liquid level.  Removes the button */
+		p.refillBeaker = function (evt)
 		{
-			var liquid_dy = evt.data.parent.init_liquid_y - evt.data.parent.liquid_y;
-			evt.data.parent.liquid_volume = evt.data.parent.init_liquid_volume;
-			evt.data.parent.controller.ChangeOffset(-liquid_dy/GLOBAL_PARAMETERS.SCALE);
-						
-			// remove refill button
-			evt.data.parent.refill_button_drawn = false;
-			evt.data.parent.removeChild(evt.target);
-			$('#refill-button-holder').find("input[id='refill-button']").remove();
-			evt.data.parent.redraw();
+			if (!evt.data.parent.draining)
+			{
+				eventLogger.addEvent("button_press", "beaker-refill");
+				var liquid_dy = evt.data.parent.init_liquid_y - evt.data.parent.liquid_y;
+				evt.data.parent.liquid_volume = evt.data.parent.init_liquid_volume;
+				evt.data.parent.controller.ChangeOffset(-liquid_dy/GLOBAL_PARAMETERS.SCALE);
+							
+				// remove refill button
+				evt.data.parent.refill_button_drawn = false;
+				evt.data.parent.removeChild(evt.target);
+				$('#refill-button').remove();
+			}
+		}
+
+	/**
+	*
+	*/
+	p.drawReleaseButton = function ()
+	{
+		if (!this.refill_button_drawn && (this.beaker_height_px - this.liquid_y) - this.spilloff_volume_perc * this.beaker_height_px  > 0.01)
+		{
+			$('#beaker-button-holder').append('<input type="submit" id="release-button" value="Release" style="font-size:14px; position:absolute"/>');
+			var htmlElement = $('#beaker-button-holder').find("input[id='release-button']").button().bind('click', {parent: this}, this.releaseSpout);
+			var element = new DOMElement(htmlElement[0]);
+			this.addChild(element);
+			element.x = this.beaker_x + this.beaker_width_px/2 + 20;
+			element.y = this.height_px / 2;
+			this.release_button_drawn = true;
 		}
 	}
+
+		/** When user clicks the release text, the spout opens and water drains */
+		p.releaseSpout = function (evt)
+		{
+			if (!evt.data.parent.draining)
+			{
+				var obj = {};
+				obj.volume_above_spout = Math.round(1000*((evt.data.parent.beaker_height_px - evt.data.parent.liquid_y) - evt.data.parent.spilloff_volume_perc * evt.data.parent.beaker_height_px)/GLOBAL_PARAMETERS.SCALE * evt.data.parent.beaker_depth_px/GLOBAL_PARAMETERS.SCALE * evt.data.parent.beaker_width_px/GLOBAL_PARAMETERS.SCALE)/1000;
+				obj.available_volume_in_spilloff_container = evt.data.parent.spilloffContainer == null ? -1 : Math.round(1000*evt.data.parent.spilloffContainer.skin.available_volume)/1000;
+				if (obj.volume_above_spout > 0)
+				{
+					if (typeof evt.data.parent.spilloffContainer != "undefined" && evt.data.parent.spilloffContainer != null) {
+						eventLogger.addEvent("button_press", "beaker-spout", [obj], [evt.data.parent.spilloffContainer.skin.savedObject]);
+					} else{
+						eventLogger.addEvent("button_press", "beaker-spout", [obj]);
+					}
+
+					evt.data.parent.spout_change = true;
+					
+				}
+			}
+		}
+	
 	p.drawSpout = function ()
 	{
 		// if the spillof level is below the top of the rim, place a "hole" on the side
@@ -463,6 +492,7 @@
 		}
 	}
 
+	/** This is not working right now, but in the future may use this so that we can place the object in the world while dragging*/
 	p.placeObject = function (o, x, y)
 	{
 		if (this.hitTestObject(o))
@@ -511,6 +541,8 @@
 		}
 
 	}
+
+	/** Place an actor object in this world */
 	p.addActor = function (actor, x, y)
 	{
 		eventLogger.addEvent("place", "beaker-world", [actor.skin.savedObject]);
@@ -625,6 +657,7 @@
 	p.removeActor = function (actor)
 	{
 		eventLogger.addEvent("remove", "beaker-world", [actor.skin.savedObject]);
+		if (actor == this.spilloffContainer) this.spilloffContainer = null;
 		this.removeChild(actor);
 		this.actors.splice(this.actors.indexOf(this), 1);
 		this.b2world.DestroyBody(actor.body);
@@ -632,6 +665,7 @@
 		actor.world = null;	
 		actor.controlledByBuoyancy = false;
 	}
+
 
 	p.BeginContact = function (contact)
 	{
@@ -659,12 +693,10 @@
 		{
 			if (!this.spout_open)
 			{
-				this.releaseTextContainer.setText("", 10, 40);
 				this.spout_open = true;
 				this.draining = true;
 			} else
 			{
-				this.releaseTextContainer.setText("Release");
 				this.spout_open = false;
 				this.draining = false;
 			}
@@ -700,10 +732,10 @@
 						g = this.puddleGraphics;
 						this.puddle_width += liquid_dy;
 						g.clear();
-						g.beginFill(GLOBAL_PARAMETERS.liquid_color);
+						g.beginFill(this.liquid.fill_color);
 						g.drawRect(this.spout_point.x, this.spout_point.y, Math.min(2, this.puddle_width), this.height_px - this.beaker_bottom_dy - this.height_from_depth/2 - this.spout_point.y);
 						g.endFill();
-						g.beginFill(GLOBAL_PARAMETERS.liquid_color);
+						g.beginFill(this.liquid.fill_color);
 						g.drawEllipse(this.spout_point.x - 10*this.puddle_width*Math.cos(GLOBAL_PARAMETERS.view_topAngle), this.height_px - this.beaker_bottom_dy - this.height_from_depth/2 - Math.min(this.height_from_depth, 20*this.puddle_width*Math.sin(GLOBAL_PARAMETERS.view_topAngle))/2, 20*this.puddle_width*Math.cos(GLOBAL_PARAMETERS.view_topAngle), Math.min(this.height_from_depth, 20*this.puddle_width*Math.sin(GLOBAL_PARAMETERS.view_topAngle)));
 						g.endFill();
 					}
@@ -727,12 +759,19 @@
 						g = this.puddleGraphics;
 						this.puddle_width += liquid_dy;
 						g.clear();
-						g.beginFill(GLOBAL_PARAMETERS.liquid_color);
+						g.beginFill(this.liquid.fill_color);
 						g.drawEllipse(this.spout_point.x - 10*this.puddle_width*Math.cos(GLOBAL_PARAMETERS.view_topAngle), this.height_px - this.beaker_bottom_dy - this.height_from_depth/2 - Math.min(this.height_from_depth, 20*this.puddle_width*Math.sin(GLOBAL_PARAMETERS.view_topAngle))/2, 20*this.puddle_width*Math.cos(GLOBAL_PARAMETERS.view_topAngle), Math.min(this.height_from_depth, 20*this.puddle_width*Math.sin(GLOBAL_PARAMETERS.view_topAngle)));
 						g.endFill();
 					}
 					
-					this.draining = false;				
+					this.draining = false;	
+					// remove release button
+					if (this.release_button_drawn)
+					{
+						this.release_button_drawn = false;
+						this.removeChild($('#release-button')[0]);
+						$('#release-button').remove();	
+					}		
 				}
 				
 			}
@@ -770,7 +809,9 @@
 
 		// convert the buoyant controller's offset to pixels
 		this.liquid_y = -this.controller.offset * GLOBAL_PARAMETERS.SCALE - this.world_dy - this.height_px + this.beaker_bottom_dy + this.beaker_height_px;
-		
+		if (!this.refill_button_drawn && this.liquid_y > (this.init_liquid_y+0.01)) this.drawRefillButton();
+		if (!this.release_button_drawn && this.spilloff_volume_perc < 1.0 && (this.beaker_height_px - this.liquid_y) - this.spilloff_volume_perc * this.beaker_height_px > 0.01 ) this.drawReleaseButton();
+
 		this.b2world.Step(1/Ticker.getFPS(), 10, 10);
 		this.redraw();
 		if (GLOBAL_PARAMETERS.DEBUG) this.b2world.DrawDebugData();

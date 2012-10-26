@@ -17,8 +17,7 @@
 		this.Container_initialize();
 		this.width_px = width_px;
 		this.height_px = height_px;
-	
-		this.materialCount = 0;
+		
 		this.display_names = {};
 		this.tabArray = {};
 		this.rev_materialNameDisplayMapping = {};
@@ -31,20 +30,21 @@
 		this.g.drawRect(0, 0, this.width_px, this.height_px);
 		this.g.endFill();
 
-		for (var key in GLOBAL_PARAMETERS.materials)
+		//for (var key in GLOBAL_PARAMETERS.materials)
+		for (var i = 0; i < GLOBAL_PARAMETERS.materials_available.length; i++)
 		{
-			if (this.materialCount == 0) this.defaultMaterialName = key;
+			var key = GLOBAL_PARAMETERS.materials_available[i];
+			if (i == 0) this.default_material_name = key;
 			this.display_names[key] = GLOBAL_PARAMETERS.materials[key].display_name;
 			this.rev_materialNameDisplayMapping[this.display_names[key]] = key;
 			var tab = new TextContainer(this.display_names[key], "20px Arial", this.TEXT_COLOR, this.width_px, this.height_px/GLOBAL_PARAMETERS.MATERIAL_COUNT, this.UNSELECTED_COLOR, this.UNSELECTED_COLOR, 0, "center", "center");
 			tab.x = 0;
-			tab.y = this.materialCount * (this.height_px/GLOBAL_PARAMETERS.MATERIAL_COUNT) + (this.height_px/GLOBAL_PARAMETERS.MATERIAL_COUNT-tab.height_px)/2;
+			tab.y = i * (this.height_px/GLOBAL_PARAMETERS.MATERIAL_COUNT) + (this.height_px/GLOBAL_PARAMETERS.MATERIAL_COUNT-tab.height_px)/2;
 			tab.onClick = this.clickHandler.bind(this);
 			this.tabArray[key] = tab;
 			this.addChild(tab);
-			this.materialCount++;
 		}
-		
+			
 		// projected selection outline
 		this.projectedTextOutlineGraphics = new Graphics();
 		this.projectedTextOutlineShape = new Shape(this.projectedTextOutlineGraphics);
@@ -57,10 +57,10 @@
 		this.projectedTextOutlineGraphics.drawRect(0, 0, this.width_px, this.height_px/GLOBAL_PARAMETERS.MATERIAL_COUNT);
 			
 		// select
-		this.currentMaterialName = this.defaultMaterialName;
+		this.current_material_name = this.default_material_name;
 		this.projectedTextOutlineShape.x = 0;
 		this.projectedTextOutlineShape.y = 0;
-		this.tabArray[this.currentMaterialName].setBackgroundColor(this.SELECTED_COLOR);
+		this.tabArray[this.current_material_name].setBackgroundColor(this.SELECTED_COLOR);
 		
 		stage.ready_to_update = true;
 	}
@@ -84,15 +84,15 @@
 
 	p.clickHandler = function(evt)
 	{
-		if (this.currentMaterialName != null)
+		if (this.current_material_name != null)
 		{
-			this.tabArray[this.currentMaterialName].setBackgroundColor(this.UNSELECTED_COLOR);
+			this.tabArray[this.current_material_name].setBackgroundColor(this.UNSELECTED_COLOR);
 		}
 		var key = this.rev_materialNameDisplayMapping[evt.target.textString];
 		this.parent.buttonClickHandler(key);
 		this.projectedTextOutlineShape.y = this.tabArray[key].y;
 		this.tabArray[key].setBackgroundColor(this.SELECTED_COLOR);
-		this.currentMaterialName = key;
+		this.current_material_name = key;
 		
 	}
 

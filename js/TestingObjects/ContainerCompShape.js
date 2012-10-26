@@ -37,8 +37,9 @@
 		this.view_sideAngle = GLOBAL_PARAMETERS.view_sideAngle;
 		this.view_topAngle = GLOBAL_PARAMETERS.view_topAngle;
 	
-		
-		this.materialName = "";
+		this.liquid_name = GLOBAL_PARAMETERS.liquid_available;
+		this.liquid = GLOBAL_PARAMETERS.liquids[GLOBAL_PARAMETERS.liquid_available];
+		this.material_name = "";
 		// since this can only be one type of material, find out what it is
 		for (var i = 0; i < this.blockArray3d.length; i++)
 		{
@@ -48,15 +49,15 @@
 				{
 					if (this.blockArray3d[i][j][k] != "")
 					{
-						this.materialName = this.blockArray3d[i][j][k];
+						this.material_name = this.blockArray3d[i][j][k];
 						break;
 					}
 				}
-				if (this.materialName != "") break;	
+				if (this.material_name != "") break;	
 			}	
-			if (this.materialName != "") break;	
+			if (this.material_name != "") break;	
 		}
-		this.material = GLOBAL_PARAMETERS.materials[this.materialName];
+		this.material = GLOBAL_PARAMETERS.materials[this.material_name];
 
 		// create an array to account for the number of cubes on each height level
 		// on the current height level how many cubes are there
@@ -246,7 +247,7 @@
 			var right_x = this.getRightmostColumn();
 			var top_y = this.getHighestRow();
 			var bottom_y = this.getLowestRow();
-			var thickness = 0.5; //this.material.containerThickness;
+			var thickness = 0.5; //this.material.container_thickness;
 			if (typeof(thickness) == "undefined") thickness = 0;
 			// go through rows and columns adding up mass in depths
 			this.array3d_details = [];
@@ -267,7 +268,7 @@
 							if (j == top_y || (j > top_y && this.blockArray3d[i][j-1][k] == ""))
 							{
 								this.array3d_details[i][j][k].top = true;
-								mass += this.material.mass * thickness / GLOBAL_PARAMETERS.SCALE * this.unit_width_px / GLOBAL_PARAMETERS.SCALE * this.unit_depth_px / GLOBAL_PARAMETERS.SCALE;
+								mass += this.material.density * thickness / GLOBAL_PARAMETERS.SCALE * this.unit_width_px / GLOBAL_PARAMETERS.SCALE * this.unit_depth_px / GLOBAL_PARAMETERS.SCALE;
 								volume += thickness / GLOBAL_PARAMETERS.SCALE * this.unit_width_px / GLOBAL_PARAMETERS.SCALE * this.unit_depth_px / GLOBAL_PARAMETERS.SCALE;
 							} else
 							{
@@ -278,7 +279,7 @@
 							if (k == 0 || this.blockArray3d[i][j][k-1] == "")
 							{
 								this.array3d_details[i][j][k].front = true;
-								mass += this.material.mass * thickness / GLOBAL_PARAMETERS.SCALE * this.unit_width_px / GLOBAL_PARAMETERS.SCALE * this.unit_depth_px / GLOBAL_PARAMETERS.SCALE;
+								mass += this.material.density * thickness / GLOBAL_PARAMETERS.SCALE * this.unit_width_px / GLOBAL_PARAMETERS.SCALE * this.unit_depth_px / GLOBAL_PARAMETERS.SCALE;
 								volume += thickness / GLOBAL_PARAMETERS.SCALE * this.unit_width_px / GLOBAL_PARAMETERS.SCALE * this.unit_depth_px / GLOBAL_PARAMETERS.SCALE;
 							} else
 							{
@@ -289,7 +290,7 @@
 							if (i == right_x || this.blockArray3d[i+1][j][k] == "")
 							{
 								this.array3d_details[i][j][k].right = true;
-								mass += this.material.mass * thickness / GLOBAL_PARAMETERS.SCALE * this.unit_width_px / GLOBAL_PARAMETERS.SCALE * this.unit_depth_px / GLOBAL_PARAMETERS.SCALE;
+								mass += this.material.density * thickness / GLOBAL_PARAMETERS.SCALE * this.unit_width_px / GLOBAL_PARAMETERS.SCALE * this.unit_depth_px / GLOBAL_PARAMETERS.SCALE;
 								volume += thickness / GLOBAL_PARAMETERS.SCALE * this.unit_width_px / GLOBAL_PARAMETERS.SCALE * this.unit_depth_px / GLOBAL_PARAMETERS.SCALE;
 							} else
 							{
@@ -300,7 +301,7 @@
 							if (j == bottom_y || (j < bottom_y && this.blockArray3d[i][j+1][k] == ""))
 							{
 								this.array3d_details[i][j][k].bottom = true;
-								mass += this.material.mass * thickness / GLOBAL_PARAMETERS.SCALE * this.unit_width_px / GLOBAL_PARAMETERS.SCALE * this.unit_depth_px / GLOBAL_PARAMETERS.SCALE;
+								mass += this.material.density * thickness / GLOBAL_PARAMETERS.SCALE * this.unit_width_px / GLOBAL_PARAMETERS.SCALE * this.unit_depth_px / GLOBAL_PARAMETERS.SCALE;
 								volume += thickness / GLOBAL_PARAMETERS.SCALE * this.unit_width_px / GLOBAL_PARAMETERS.SCALE * this.unit_depth_px / GLOBAL_PARAMETERS.SCALE;
 							} else
 							{
@@ -311,7 +312,7 @@
 							if (k == this.blockArray3d[i][j].length-1 || this.blockArray3d[i][j][k+1] == "")
 							{
 								this.array3d_details[i][j][k].back = true;
-								mass += this.material.mass * thickness / GLOBAL_PARAMETERS.SCALE * this.unit_width_px / GLOBAL_PARAMETERS.SCALE * this.unit_depth_px / GLOBAL_PARAMETERS.SCALE;
+								mass += this.material.density * thickness / GLOBAL_PARAMETERS.SCALE * this.unit_width_px / GLOBAL_PARAMETERS.SCALE * this.unit_depth_px / GLOBAL_PARAMETERS.SCALE;
 								volume += thickness / GLOBAL_PARAMETERS.SCALE * this.unit_width_px / GLOBAL_PARAMETERS.SCALE * this.unit_depth_px / GLOBAL_PARAMETERS.SCALE;
 							} else
 							{
@@ -322,7 +323,7 @@
 							if (i == left_x || this.blockArray3d[i-1][j][k] == "")
 							{
 								this.array3d_details[i][j][k].left = true;
-								mass += this.material.mass * thickness / GLOBAL_PARAMETERS.SCALE * this.unit_width_px / GLOBAL_PARAMETERS.SCALE * this.unit_depth_px / GLOBAL_PARAMETERS.SCALE;
+								mass += this.material.density * thickness / GLOBAL_PARAMETERS.SCALE * this.unit_width_px / GLOBAL_PARAMETERS.SCALE * this.unit_depth_px / GLOBAL_PARAMETERS.SCALE;
 								volume += thickness / GLOBAL_PARAMETERS.SCALE * this.unit_width_px / GLOBAL_PARAMETERS.SCALE * this.unit_depth_px / GLOBAL_PARAMETERS.SCALE;
 							} else
 							{
@@ -330,28 +331,28 @@
 							}
 
 							// deal with mass of container at edges
-							if (this.array3d_details[i][j][k].top && this.array3d_details[i][j][k].front){ volume += this.unit_width_px / GLOBAL_PARAMETERS.SCALE * thickness / GLOBAL_PARAMETERS.SCALE * thickness / GLOBAL_PARAMETERS.SCALE; mass += this.material.mass * this.unit_width_px / GLOBAL_PARAMETERS.SCALE * thickness / GLOBAL_PARAMETERS.SCALE * thickness / GLOBAL_PARAMETERS.SCALE;}
-							if (this.array3d_details[i][j][k].top && this.array3d_details[i][j][k].back){ volume +=  this.unit_width_px / GLOBAL_PARAMETERS.SCALE * thickness / GLOBAL_PARAMETERS.SCALE * thickness / GLOBAL_PARAMETERS.SCALE; mass += this.material.mass * this.unit_width_px / GLOBAL_PARAMETERS.SCALE * thickness / GLOBAL_PARAMETERS.SCALE * thickness / GLOBAL_PARAMETERS.SCALE;}
-							if (this.array3d_details[i][j][k].top && this.array3d_details[i][j][k].right){ volume +=  this.unit_depth_px / GLOBAL_PARAMETERS.SCALE * thickness / GLOBAL_PARAMETERS.SCALE * thickness / GLOBAL_PARAMETERS.SCALE; mass += this.material.mass * this.unit_depth_px / GLOBAL_PARAMETERS.SCALE * thickness / GLOBAL_PARAMETERS.SCALE * thickness / GLOBAL_PARAMETERS.SCALE;}
-							if (this.array3d_details[i][j][k].top && this.array3d_details[i][j][k].left){ volume += this.unit_depth_px / GLOBAL_PARAMETERS.SCALE * thickness / GLOBAL_PARAMETERS.SCALE * thickness / GLOBAL_PARAMETERS.SCALE; mass += this.material.mass * this.unit_depth_px / GLOBAL_PARAMETERS.SCALE * thickness / GLOBAL_PARAMETERS.SCALE * thickness / GLOBAL_PARAMETERS.SCALE;}
-							if (this.array3d_details[i][j][k].bottom && this.array3d_details[i][j][k].front){ volume += this.unit_width_px / GLOBAL_PARAMETERS.SCALE * thickness / GLOBAL_PARAMETERS.SCALE * thickness / GLOBAL_PARAMETERS.SCALE; mass += this.material.mass * this.unit_width_px / GLOBAL_PARAMETERS.SCALE * thickness / GLOBAL_PARAMETERS.SCALE * thickness / GLOBAL_PARAMETERS.SCALE;}
-							if (this.array3d_details[i][j][k].bottom && this.array3d_details[i][j][k].back){ volume += this.unit_width_px / GLOBAL_PARAMETERS.SCALE * thickness / GLOBAL_PARAMETERS.SCALE * thickness / GLOBAL_PARAMETERS.SCALE; mass += this.material.mass * this.unit_width_px / GLOBAL_PARAMETERS.SCALE * thickness / GLOBAL_PARAMETERS.SCALE * thickness / GLOBAL_PARAMETERS.SCALE;}
-							if (this.array3d_details[i][j][k].bottom && this.array3d_details[i][j][k].right){ volume += this.unit_depth_px / GLOBAL_PARAMETERS.SCALE * thickness / GLOBAL_PARAMETERS.SCALE * thickness / GLOBAL_PARAMETERS.SCALE; mass += this.material.mass * this.unit_depth_px / GLOBAL_PARAMETERS.SCALE * thickness / GLOBAL_PARAMETERS.SCALE * thickness / GLOBAL_PARAMETERS.SCALE;}
-							if (this.array3d_details[i][j][k].bottom && this.array3d_details[i][j][k].left){ volume += this.unit_depth_px / GLOBAL_PARAMETERS.SCALE * thickness / GLOBAL_PARAMETERS.SCALE * thickness / GLOBAL_PARAMETERS.SCALE; mass += this.material.mass * this.unit_depth_px / GLOBAL_PARAMETERS.SCALE * thickness / GLOBAL_PARAMETERS.SCALE * thickness / GLOBAL_PARAMETERS.SCALE}
-							if (this.array3d_details[i][j][k].left && this.array3d_details[i][j][k].front){ volume += this.unit_height_px / GLOBAL_PARAMETERS.SCALE * thickness / GLOBAL_PARAMETERS.SCALE * thickness / GLOBAL_PARAMETERS.SCALE; mass += this.material.mass * this.unit_height_px / GLOBAL_PARAMETERS.SCALE * thickness / GLOBAL_PARAMETERS.SCALE * thickness / GLOBAL_PARAMETERS.SCALE;}
-							if (this.array3d_details[i][j][k].front && this.array3d_details[i][j][k].right){ volume += this.unit_height_px / GLOBAL_PARAMETERS.SCALE * thickness / GLOBAL_PARAMETERS.SCALE * thickness / GLOBAL_PARAMETERS.SCALE; mass += this.material.mass * this.unit_height_px / GLOBAL_PARAMETERS.SCALE * thickness / GLOBAL_PARAMETERS.SCALE * thickness / GLOBAL_PARAMETERS.SCALE;}
-							if (this.array3d_details[i][j][k].right && this.array3d_details[i][j][k].back){ volume += this.unit_height_px / GLOBAL_PARAMETERS.SCALE * thickness / GLOBAL_PARAMETERS.SCALE * thickness / GLOBAL_PARAMETERS.SCALE; mass += this.material.mass * this.unit_height_px / GLOBAL_PARAMETERS.SCALE * thickness / GLOBAL_PARAMETERS.SCALE * thickness / GLOBAL_PARAMETERS.SCALE;}
-							if (this.array3d_details[i][j][k].back && this.array3d_details[i][j][k].left){ volume += this.unit_height_px / GLOBAL_PARAMETERS.SCALE * thickness / GLOBAL_PARAMETERS.SCALE * thickness / GLOBAL_PARAMETERS.SCALE; mass += this.material.mass * this.unit_height_px / GLOBAL_PARAMETERS.SCALE * thickness / GLOBAL_PARAMETERS.SCALE * thickness / GLOBAL_PARAMETERS.SCALE;}												
+							if (this.array3d_details[i][j][k].top && this.array3d_details[i][j][k].front){ volume += this.unit_width_px / GLOBAL_PARAMETERS.SCALE * thickness / GLOBAL_PARAMETERS.SCALE * thickness / GLOBAL_PARAMETERS.SCALE; mass += this.material.density * this.unit_width_px / GLOBAL_PARAMETERS.SCALE * thickness / GLOBAL_PARAMETERS.SCALE * thickness / GLOBAL_PARAMETERS.SCALE;}
+							if (this.array3d_details[i][j][k].top && this.array3d_details[i][j][k].back){ volume +=  this.unit_width_px / GLOBAL_PARAMETERS.SCALE * thickness / GLOBAL_PARAMETERS.SCALE * thickness / GLOBAL_PARAMETERS.SCALE; mass += this.material.density * this.unit_width_px / GLOBAL_PARAMETERS.SCALE * thickness / GLOBAL_PARAMETERS.SCALE * thickness / GLOBAL_PARAMETERS.SCALE;}
+							if (this.array3d_details[i][j][k].top && this.array3d_details[i][j][k].right){ volume +=  this.unit_depth_px / GLOBAL_PARAMETERS.SCALE * thickness / GLOBAL_PARAMETERS.SCALE * thickness / GLOBAL_PARAMETERS.SCALE; mass += this.material.density * this.unit_depth_px / GLOBAL_PARAMETERS.SCALE * thickness / GLOBAL_PARAMETERS.SCALE * thickness / GLOBAL_PARAMETERS.SCALE;}
+							if (this.array3d_details[i][j][k].top && this.array3d_details[i][j][k].left){ volume += this.unit_depth_px / GLOBAL_PARAMETERS.SCALE * thickness / GLOBAL_PARAMETERS.SCALE * thickness / GLOBAL_PARAMETERS.SCALE; mass += this.material.density * this.unit_depth_px / GLOBAL_PARAMETERS.SCALE * thickness / GLOBAL_PARAMETERS.SCALE * thickness / GLOBAL_PARAMETERS.SCALE;}
+							if (this.array3d_details[i][j][k].bottom && this.array3d_details[i][j][k].front){ volume += this.unit_width_px / GLOBAL_PARAMETERS.SCALE * thickness / GLOBAL_PARAMETERS.SCALE * thickness / GLOBAL_PARAMETERS.SCALE; mass += this.material.density * this.unit_width_px / GLOBAL_PARAMETERS.SCALE * thickness / GLOBAL_PARAMETERS.SCALE * thickness / GLOBAL_PARAMETERS.SCALE;}
+							if (this.array3d_details[i][j][k].bottom && this.array3d_details[i][j][k].back){ volume += this.unit_width_px / GLOBAL_PARAMETERS.SCALE * thickness / GLOBAL_PARAMETERS.SCALE * thickness / GLOBAL_PARAMETERS.SCALE; mass += this.material.density * this.unit_width_px / GLOBAL_PARAMETERS.SCALE * thickness / GLOBAL_PARAMETERS.SCALE * thickness / GLOBAL_PARAMETERS.SCALE;}
+							if (this.array3d_details[i][j][k].bottom && this.array3d_details[i][j][k].right){ volume += this.unit_depth_px / GLOBAL_PARAMETERS.SCALE * thickness / GLOBAL_PARAMETERS.SCALE * thickness / GLOBAL_PARAMETERS.SCALE; mass += this.material.density * this.unit_depth_px / GLOBAL_PARAMETERS.SCALE * thickness / GLOBAL_PARAMETERS.SCALE * thickness / GLOBAL_PARAMETERS.SCALE;}
+							if (this.array3d_details[i][j][k].bottom && this.array3d_details[i][j][k].left){ volume += this.unit_depth_px / GLOBAL_PARAMETERS.SCALE * thickness / GLOBAL_PARAMETERS.SCALE * thickness / GLOBAL_PARAMETERS.SCALE; mass += this.material.density * this.unit_depth_px / GLOBAL_PARAMETERS.SCALE * thickness / GLOBAL_PARAMETERS.SCALE * thickness / GLOBAL_PARAMETERS.SCALE}
+							if (this.array3d_details[i][j][k].left && this.array3d_details[i][j][k].front){ volume += this.unit_height_px / GLOBAL_PARAMETERS.SCALE * thickness / GLOBAL_PARAMETERS.SCALE * thickness / GLOBAL_PARAMETERS.SCALE; mass += this.material.density * this.unit_height_px / GLOBAL_PARAMETERS.SCALE * thickness / GLOBAL_PARAMETERS.SCALE * thickness / GLOBAL_PARAMETERS.SCALE;}
+							if (this.array3d_details[i][j][k].front && this.array3d_details[i][j][k].right){ volume += this.unit_height_px / GLOBAL_PARAMETERS.SCALE * thickness / GLOBAL_PARAMETERS.SCALE * thickness / GLOBAL_PARAMETERS.SCALE; mass += this.material.density * this.unit_height_px / GLOBAL_PARAMETERS.SCALE * thickness / GLOBAL_PARAMETERS.SCALE * thickness / GLOBAL_PARAMETERS.SCALE;}
+							if (this.array3d_details[i][j][k].right && this.array3d_details[i][j][k].back){ volume += this.unit_height_px / GLOBAL_PARAMETERS.SCALE * thickness / GLOBAL_PARAMETERS.SCALE * thickness / GLOBAL_PARAMETERS.SCALE; mass += this.material.density * this.unit_height_px / GLOBAL_PARAMETERS.SCALE * thickness / GLOBAL_PARAMETERS.SCALE * thickness / GLOBAL_PARAMETERS.SCALE;}
+							if (this.array3d_details[i][j][k].back && this.array3d_details[i][j][k].left){ volume += this.unit_height_px / GLOBAL_PARAMETERS.SCALE * thickness / GLOBAL_PARAMETERS.SCALE * thickness / GLOBAL_PARAMETERS.SCALE; mass += this.material.density * this.unit_height_px / GLOBAL_PARAMETERS.SCALE * thickness / GLOBAL_PARAMETERS.SCALE * thickness / GLOBAL_PARAMETERS.SCALE;}												
 
 							// deal with mass of corners
-							if (this.array3d_details[i][j][k].top && this.array3d_details[i][j][k].front && this.array3d_details[i][j][k].right){ volume += thickness / GLOBAL_PARAMETERS.SCALE * thickness / GLOBAL_PARAMETERS.SCALE * thickness / GLOBAL_PARAMETERS.SCALE; mass += this.material.mass * thickness / GLOBAL_PARAMETERS.SCALE * thickness / GLOBAL_PARAMETERS.SCALE * thickness / GLOBAL_PARAMETERS.SCALE;}
-							if (this.array3d_details[i][j][k].top && this.array3d_details[i][j][k].right && this.array3d_details[i][j][k].back){ volume += thickness / GLOBAL_PARAMETERS.SCALE * thickness / GLOBAL_PARAMETERS.SCALE * thickness / GLOBAL_PARAMETERS.SCALE; mass += this.material.mass * thickness / GLOBAL_PARAMETERS.SCALE * thickness / GLOBAL_PARAMETERS.SCALE * thickness / GLOBAL_PARAMETERS.SCALE;}
-							if (this.array3d_details[i][j][k].top && this.array3d_details[i][j][k].back && this.array3d_details[i][j][k].left){ volume += thickness / GLOBAL_PARAMETERS.SCALE * thickness / GLOBAL_PARAMETERS.SCALE * thickness / GLOBAL_PARAMETERS.SCALE; mass += this.material.mass * thickness / GLOBAL_PARAMETERS.SCALE * thickness / GLOBAL_PARAMETERS.SCALE * thickness / GLOBAL_PARAMETERS.SCALE;}
-							if (this.array3d_details[i][j][k].top && this.array3d_details[i][j][k].left && this.array3d_details[i][j][k].front){ volume += thickness / GLOBAL_PARAMETERS.SCALE * thickness / GLOBAL_PARAMETERS.SCALE * thickness / GLOBAL_PARAMETERS.SCALE; mass += this.material.mass * thickness / GLOBAL_PARAMETERS.SCALE * thickness / GLOBAL_PARAMETERS.SCALE * thickness / GLOBAL_PARAMETERS.SCALE;}
-							if (this.array3d_details[i][j][k].bottom && this.array3d_details[i][j][k].front && this.array3d_details[i][j][k].right){ volume += thickness / GLOBAL_PARAMETERS.SCALE * thickness / GLOBAL_PARAMETERS.SCALE * thickness / GLOBAL_PARAMETERS.SCALE; mass += this.material.mass * thickness / GLOBAL_PARAMETERS.SCALE * thickness / GLOBAL_PARAMETERS.SCALE * thickness / GLOBAL_PARAMETERS.SCALE;}
-							if (this.array3d_details[i][j][k].bottom && this.array3d_details[i][j][k].right && this.array3d_details[i][j][k].back){ volume += thickness / GLOBAL_PARAMETERS.SCALE * thickness / GLOBAL_PARAMETERS.SCALE * thickness / GLOBAL_PARAMETERS.SCALE; mass += this.material.mass * thickness / GLOBAL_PARAMETERS.SCALE * thickness / GLOBAL_PARAMETERS.SCALE * thickness / GLOBAL_PARAMETERS.SCALE;}
-							if (this.array3d_details[i][j][k].bottom && this.array3d_details[i][j][k].back && this.array3d_details[i][j][k].left){ volume += thickness / GLOBAL_PARAMETERS.SCALE * thickness / GLOBAL_PARAMETERS.SCALE * thickness / GLOBAL_PARAMETERS.SCALE; mass += this.material.mass * thickness / GLOBAL_PARAMETERS.SCALE * thickness / GLOBAL_PARAMETERS.SCALE * thickness / GLOBAL_PARAMETERS.SCALE;}
-							if (this.array3d_details[i][j][k].bottom && this.array3d_details[i][j][k].left && this.array3d_details[i][j][k].front){ volume += thickness / GLOBAL_PARAMETERS.SCALE * thickness / GLOBAL_PARAMETERS.SCALE * thickness / GLOBAL_PARAMETERS.SCALE; mass += this.material.mass * thickness / GLOBAL_PARAMETERS.SCALE * thickness / GLOBAL_PARAMETERS.SCALE * thickness / GLOBAL_PARAMETERS.SCALE;}
+							if (this.array3d_details[i][j][k].top && this.array3d_details[i][j][k].front && this.array3d_details[i][j][k].right){ volume += thickness / GLOBAL_PARAMETERS.SCALE * thickness / GLOBAL_PARAMETERS.SCALE * thickness / GLOBAL_PARAMETERS.SCALE; mass += this.material.density * thickness / GLOBAL_PARAMETERS.SCALE * thickness / GLOBAL_PARAMETERS.SCALE * thickness / GLOBAL_PARAMETERS.SCALE;}
+							if (this.array3d_details[i][j][k].top && this.array3d_details[i][j][k].right && this.array3d_details[i][j][k].back){ volume += thickness / GLOBAL_PARAMETERS.SCALE * thickness / GLOBAL_PARAMETERS.SCALE * thickness / GLOBAL_PARAMETERS.SCALE; mass += this.material.density * thickness / GLOBAL_PARAMETERS.SCALE * thickness / GLOBAL_PARAMETERS.SCALE * thickness / GLOBAL_PARAMETERS.SCALE;}
+							if (this.array3d_details[i][j][k].top && this.array3d_details[i][j][k].back && this.array3d_details[i][j][k].left){ volume += thickness / GLOBAL_PARAMETERS.SCALE * thickness / GLOBAL_PARAMETERS.SCALE * thickness / GLOBAL_PARAMETERS.SCALE; mass += this.material.density * thickness / GLOBAL_PARAMETERS.SCALE * thickness / GLOBAL_PARAMETERS.SCALE * thickness / GLOBAL_PARAMETERS.SCALE;}
+							if (this.array3d_details[i][j][k].top && this.array3d_details[i][j][k].left && this.array3d_details[i][j][k].front){ volume += thickness / GLOBAL_PARAMETERS.SCALE * thickness / GLOBAL_PARAMETERS.SCALE * thickness / GLOBAL_PARAMETERS.SCALE; mass += this.material.density * thickness / GLOBAL_PARAMETERS.SCALE * thickness / GLOBAL_PARAMETERS.SCALE * thickness / GLOBAL_PARAMETERS.SCALE;}
+							if (this.array3d_details[i][j][k].bottom && this.array3d_details[i][j][k].front && this.array3d_details[i][j][k].right){ volume += thickness / GLOBAL_PARAMETERS.SCALE * thickness / GLOBAL_PARAMETERS.SCALE * thickness / GLOBAL_PARAMETERS.SCALE; mass += this.material.density * thickness / GLOBAL_PARAMETERS.SCALE * thickness / GLOBAL_PARAMETERS.SCALE * thickness / GLOBAL_PARAMETERS.SCALE;}
+							if (this.array3d_details[i][j][k].bottom && this.array3d_details[i][j][k].right && this.array3d_details[i][j][k].back){ volume += thickness / GLOBAL_PARAMETERS.SCALE * thickness / GLOBAL_PARAMETERS.SCALE * thickness / GLOBAL_PARAMETERS.SCALE; mass += this.material.density * thickness / GLOBAL_PARAMETERS.SCALE * thickness / GLOBAL_PARAMETERS.SCALE * thickness / GLOBAL_PARAMETERS.SCALE;}
+							if (this.array3d_details[i][j][k].bottom && this.array3d_details[i][j][k].back && this.array3d_details[i][j][k].left){ volume += thickness / GLOBAL_PARAMETERS.SCALE * thickness / GLOBAL_PARAMETERS.SCALE * thickness / GLOBAL_PARAMETERS.SCALE; mass += this.material.density * thickness / GLOBAL_PARAMETERS.SCALE * thickness / GLOBAL_PARAMETERS.SCALE * thickness / GLOBAL_PARAMETERS.SCALE;}
+							if (this.array3d_details[i][j][k].bottom && this.array3d_details[i][j][k].left && this.array3d_details[i][j][k].front){ volume += thickness / GLOBAL_PARAMETERS.SCALE * thickness / GLOBAL_PARAMETERS.SCALE * thickness / GLOBAL_PARAMETERS.SCALE; mass += this.material.density * thickness / GLOBAL_PARAMETERS.SCALE * thickness / GLOBAL_PARAMETERS.SCALE * thickness / GLOBAL_PARAMETERS.SCALE;}
 							
 							this.array3d_details[i][j][k].baseMass = mass;
 							this.array3d_details[i][j][k].mass = mass;
@@ -403,7 +404,7 @@
 				{
 					if (this.blockArray3d[i][j][k] != "")
 					{
-						mass += (array3d_details[i][j][k].baseMass + array3d_details[i][j][k].liquidVolume * GLOBAL_PARAMETERS.liquid_density) / array3d_details[i][j][k].volume;
+						mass += (array3d_details[i][j][k].baseMass + array3d_details[i][j][k].liquidVolume * this.liquid.density) / array3d_details[i][j][k].volume;
 					}
 					if (spaces3d[i][j][k] == "B")
 					{
@@ -907,10 +908,10 @@
 			openTop = this.openTop;
 		}
 		
-		var thickness = this.material.containerThickness;
+		var thickness = this.material.container_thickness;
 		if (typeof(thickness) == "undefined") thickness = 0;
 		var array3d_details = this.array3d_details;
-		var i, j, k, k_rev;
+		var i, j, k, k_rev, i_shift, j_shift;
 		var btr_x, btr_y, btl_x, btl_y, bbr_x, bbr_y, ftr_x, ftr_y, ftl_x, ftl_y, fbr_x, fbr_y, fbl_x, fbl_y;
 		var c_btr_x, c_btr_y, c_btl_x, c_btl_y, c_bbr_x, c_bbr_y, c_ftr_x, c_ftr_y, c_ftl_x, c_ftl_y, c_fbr_x, c_fbr_y, c_fbl_x, c_fbl_y;
 		var g = this.g;
@@ -959,13 +960,13 @@
 						var highlightColors = []; 
 						if (this.isFull)
 						{
-							for (var c = 0; c < material.strokeColors.length; c++)
+							for (var c = 0; c < material.stroke_colors.length; c++)
 							{
 								highlightColors[c] =  "rgba(0,255,0,1.0)";
 							}
 						} else
 						{
-							highlightColors = material.strokeColors;
+							highlightColors = material.stroke_colors;
 						}	
 								
 						i_shift = col - this.leftmost_column;
@@ -1027,8 +1028,8 @@
 							if (array3d_details[col][row][k_rev].liquidVolume > 0)
 							{
 								g.setStrokeStyle(1);
-								g.beginStroke(GLOBAL_PARAMETERS.liquid_stroke_color_container);
-								g.beginFill(GLOBAL_PARAMETERS.liquid_color_container);
+								g.beginStroke(this.liquid.stroke_color_container);
+								g.beginFill(this.liquid.fill_color_container);
 								g.moveTo(bbr_x, bbr_y);
 								g.lineTo(bbl_x, bbl_y);
 								g.lineTo(fbl_x, fbl_y);
@@ -1043,8 +1044,8 @@
 								//console.log("draw bottom");
 								// draw bottom
 								g.setStrokeStyle(thickness);
-								g.beginLinearGradientStroke(highlightColors, material.strokeRatios, fbl_x, fbl_y, bbr_x, fbl_y);
-								g.beginLinearGradientFill(material.fillColors, material.fillRatios, fbl_x, fbl_y, bbr_x, fbl_y);
+								g.beginLinearGradientStroke(highlightColors, material.stroke_ratios, fbl_x, fbl_y, bbr_x, fbl_y);
+								g.beginLinearGradientFill(material.fill_colors, material.fill_ratios, fbl_x, fbl_y, bbr_x, fbl_y);
 								g.moveTo(c_bbr_x, c_bbr_y);
 								g.lineTo(c_bbl_x, c_bbl_y);
 								g.lineTo(c_fbl_x, c_fbl_y);
@@ -1058,8 +1059,8 @@
 							if (array3d_details[col][row][k_rev].liquidVolume > 0)
 							{
 								g.setStrokeStyle(1);
-								g.beginStroke(GLOBAL_PARAMETERS.liquid_stroke_color_container);
-								g.beginFill(GLOBAL_PARAMETERS.liquid_color_container);
+								g.beginStroke(this.liquid.stroke_color_container);
+								g.beginFill(this.liquid.fill_color_container);
 								g.moveTo(btr_x, btr_y);
 								g.lineTo(btl_x, btl_y);
 								g.lineTo(ftl_x, ftl_y);
@@ -1073,8 +1074,8 @@
 							{
 								// draw top
 								g.setStrokeStyle(thickness);
-								g.beginLinearGradientStroke(highlightColors, material.strokeRatios, ftl_x, ftl_y, btr_x, ftl_y);
-								g.beginLinearGradientFill(material.fillColors, material.fillRatios, ftl_x, ftl_y, btr_x, ftl_y);
+								g.beginLinearGradientStroke(highlightColors, material.stroke_ratios, ftl_x, ftl_y, btr_x, ftl_y);
+								g.beginLinearGradientFill(material.fill_colors, material.fill_ratios, ftl_x, ftl_y, btr_x, ftl_y);
 								g.moveTo(c_btr_x, c_btr_y);
 								g.lineTo(c_btl_x, c_btl_y);
 								g.lineTo(c_ftl_x, c_ftl_y);
@@ -1091,8 +1092,8 @@
 							{
 								// draw left
 								g.setStrokeStyle(1);
-								g.beginStroke(GLOBAL_PARAMETERS.liquid_stroke_color_container);
-								g.beginFill(GLOBAL_PARAMETERS.liquid_color_container);
+								g.beginStroke(this.liquid.stroke_color_container);
+								g.beginFill(this.liquid.fill_color_container);
 								g.moveTo(btl_x, btl_y);
 								g.lineTo(ftl_x, ftl_y);
 								g.lineTo(fbl_x, fbl_y);
@@ -1107,8 +1108,8 @@
 								// draw left
 								//console.log("draw left");
 								g.setStrokeStyle(thickness);
-								g.beginLinearGradientStroke(highlightColors, material.strokeRatios, ftl_x, ftl_y, btl_x, ftl_y);
-								g.beginLinearGradientFill(material.fillColors, material.fillRatios, ftl_x, ftl_y, btl_x, ftl_y);
+								g.beginLinearGradientStroke(highlightColors, material.stroke_ratios, ftl_x, ftl_y, btl_x, ftl_y);
+								g.beginLinearGradientFill(material.fill_colors, material.fill_ratios, ftl_x, ftl_y, btl_x, ftl_y);
 								g.moveTo(c_btl_x, c_btl_y);
 								g.lineTo(c_ftl_x, c_ftl_y);
 								g.lineTo(c_fbl_x, c_fbl_y);
@@ -1123,8 +1124,8 @@
 							if (array3d_details[col][row][k_rev].liquidVolume > 0)
 							{
 								g.setStrokeStyle(1);
-								g.beginStroke(GLOBAL_PARAMETERS.liquid_stroke_color_container);
-								g.beginFill(GLOBAL_PARAMETERS.liquid_color_container);
+								g.beginStroke(this.liquid.stroke_color_container);
+								g.beginFill(this.liquid.fill_color_container);
 								g.moveTo(btr_x, btr_y);
 								g.lineTo(ftr_x, ftr_y);
 								g.lineTo(fbr_x, fbr_y);
@@ -1138,8 +1139,8 @@
 							{
 								// draw right
 								g.setStrokeStyle(thickness);
-								g.beginLinearGradientStroke(highlightColors, material.strokeRatios, ftr_x, ftr_y, btr_x, ftr_y);
-								g.beginLinearGradientFill(material.fillShadowColors, material.fillShadowRatios, ftr_x, ftr_y, btr_x, ftr_y);
+								g.beginLinearGradientStroke(highlightColors, material.stroke_ratios, ftr_x, ftr_y, btr_x, ftr_y);
+								g.beginLinearGradientFill(material.fill_colors_shadow, material.fill_ratios_shadow, ftr_x, ftr_y, btr_x, ftr_y);
 								g.moveTo(c_btr_x, c_btr_y);
 								g.lineTo(c_ftr_x, c_ftr_y);
 								g.lineTo(c_fbr_x, c_fbr_y);
@@ -1156,8 +1157,8 @@
 							if (array3d_details[col][row][k_rev].liquidVolume > 0)
 							{
 								g.setStrokeStyle(1);
-								g.beginStroke(GLOBAL_PARAMETERS.liquid_stroke_color_container);
-								g.beginFill(GLOBAL_PARAMETERS.liquid_color_container);
+								g.beginStroke(this.liquid.stroke_color_container);
+								g.beginFill(this.liquid.fill_color_container);
 								g.moveTo(btr_x, btr_y);
 								g.lineTo(btl_x, btl_y);
 								g.lineTo(bbl_x, bbl_y);
@@ -1171,9 +1172,9 @@
 								// draw back
 								//console.log("draw back");
 								g.setStrokeStyle(thickness);
-								g.beginLinearGradientStroke(highlightColors, material.strokeRatios, btl_x, btl_y, btr_x, btr_y);
-								if (k != this.blockArray3d[0][0].length-1) {g.beginLinearGradientFill(material.fillColors, material.fillRatios, btl_x, btl_y, btr_x, btl_y);}
-								else {g.beginLinearGradientFill(material.fillColors, material.fillRatios, btl_x, btl_y, btr_x, btl_y);}
+								g.beginLinearGradientStroke(highlightColors, material.stroke_ratios, btl_x, btl_y, btr_x, btr_y);
+								if (k != this.blockArray3d[0][0].length-1) {g.beginLinearGradientFill(material.fill_colors, material.fill_ratios, btl_x, btl_y, btr_x, btl_y);}
+								else {g.beginLinearGradientFill(material.fill_colors, material.fill_ratios, btl_x, btl_y, btr_x, btl_y);}
 								g.moveTo(c_btr_x, c_btr_y);
 								g.lineTo(c_btl_x, c_btl_y);
 								g.lineTo(c_bbl_x, c_bbl_y);
@@ -1187,8 +1188,8 @@
 							if (array3d_details[col][row][k_rev].liquidVolume > 0)
 							{
 								g.setStrokeStyle(1);
-								g.beginStroke(GLOBAL_PARAMETERS.liquid_stroke_color_container);
-								g.beginFill(GLOBAL_PARAMETERS.liquid_color_container);
+								g.beginStroke(this.liquid.stroke_color_container);
+								g.beginFill(this.liquid.fill_color_container);
 								g.moveTo(ftr_x, ftr_y);
 								g.lineTo(ftl_x, ftl_y);
 								g.lineTo(fbl_x, fbl_y);
@@ -1201,9 +1202,9 @@
 							if (array3d_details[col][row][k_rev].front)
 							{
 								g.setStrokeStyle(thickness);
-								g.beginLinearGradientStroke(highlightColors, material.strokeRatios, ftl_x, ftl_y, ftr_x, ftr_y);
-								if (k != 0){ g.beginLinearGradientFill(material.fillColors, material.fillRatios, ftl_x, ftl_y, ftr_x, ftr_y);}
-								else {g.beginLinearGradientFill(material.fillShadowColors, material.fillRatios, ftl_x, ftl_y, ftr_x, ftr_y);}
+								g.beginLinearGradientStroke(highlightColors, material.stroke_ratios, ftl_x, ftl_y, ftr_x, ftr_y);
+								if (k != 0){ g.beginLinearGradientFill(material.fill_colors, material.fill_ratios, ftl_x, ftl_y, ftr_x, ftr_y);}
+								else {g.beginLinearGradientFill(material.fill_colors_shadow, material.fill_ratios, ftl_x, ftl_y, ftr_x, ftr_y);}
 								g.moveTo(c_ftr_x, c_ftr_y);
 								g.lineTo(c_ftl_x, c_ftl_y);
 								g.lineTo(c_fbl_x, c_fbl_y);
@@ -1220,8 +1221,8 @@
 							if (array3d_details[col][row][k_rev].liquidVolume > 0)
 							{
 								g.setStrokeStyle(1);
-								g.beginStroke(GLOBAL_PARAMETERS.liquid_stroke_color_container);
-								g.beginFill(GLOBAL_PARAMETERS.liquid_color_container);
+								g.beginStroke(this.liquid.stroke_color_container);
+								g.beginFill(this.liquid.fill_color_container);
 								g.moveTo(bbr_x, bbr_y);
 								g.lineTo(bbl_x, bbl_y);
 								g.lineTo(fbl_x, fbl_y);
@@ -1235,8 +1236,8 @@
 							{
 								// draw bottom
 								g.setStrokeStyle(thickness);
-								g.beginLinearGradientStroke(highlightColors, material.strokeRatios, fbl_x, fbl_y, bbr_x, fbl_y);
-								g.beginLinearGradientFill(material.fillColors, material.fillRatios, fbl_x, fbl_y, bbr_x, fbl_y);
+								g.beginLinearGradientStroke(highlightColors, material.stroke_ratios, fbl_x, fbl_y, bbr_x, fbl_y);
+								g.beginLinearGradientFill(material.fill_colors, material.fill_ratios, fbl_x, fbl_y, bbr_x, fbl_y);
 								g.moveTo(c_bbr_x, c_bbr_y);
 								g.lineTo(c_bbl_x, c_bbl_y);
 								g.lineTo(c_fbl_x, c_fbl_y);
@@ -1250,8 +1251,8 @@
 							if (array3d_details[col][row][k_rev].liquidVolume > 0)
 							{
 								g.setStrokeStyle(1);
-								g.beginStroke(GLOBAL_PARAMETERS.liquid_stroke_color_container);
-								g.beginFill(GLOBAL_PARAMETERS.liquid_color_container);
+								g.beginStroke(this.liquid.stroke_color_container);
+								g.beginFill(this.liquid.fill_color_container);
 								g.moveTo(btr_x, btr_y);
 								g.lineTo(btl_x, btl_y);
 								g.lineTo(ftl_x, ftl_y);
@@ -1266,8 +1267,8 @@
 								// draw top
 								//console.log("draw top");
 								g.setStrokeStyle(thickness);
-								g.beginLinearGradientStroke(highlightColors, material.strokeRatios, ftl_x, ftl_y, btr_x, ftl_y);
-								g.beginLinearGradientFill(material.fillColors, material.fillRatios, ftl_x, ftl_y, btr_x, ftl_y);
+								g.beginLinearGradientStroke(highlightColors, material.stroke_ratios, ftl_x, ftl_y, btr_x, ftl_y);
+								g.beginLinearGradientFill(material.fill_colors, material.fill_ratios, ftl_x, ftl_y, btr_x, ftl_y);
 								g.moveTo(c_btr_x, c_btr_y);
 								g.lineTo(c_btl_x, c_btl_y);
 								g.lineTo(c_ftl_x, c_ftl_y);
@@ -1284,8 +1285,8 @@
 							{
 								// draw left
 								g.setStrokeStyle(1);
-								g.beginStroke(GLOBAL_PARAMETERS.liquid_stroke_color_container);
-								g.beginFill(GLOBAL_PARAMETERS.liquid_color_container);
+								g.beginStroke(this.liquid.stroke_color_container);
+								g.beginFill(this.liquid.fill_color_container);
 								g.moveTo(btl_x, btl_y);
 								g.lineTo(ftl_x, ftl_y);
 								g.lineTo(fbl_x, fbl_y);
@@ -1299,8 +1300,8 @@
 							{
 								// draw left
 								g.setStrokeStyle(thickness);
-								g.beginLinearGradientStroke(highlightColors, material.strokeRatios, ftl_x, ftl_y, btl_x, btl_y);
-								g.beginLinearGradientFill(material.fillShadowColors, material.fillShadowRatios, ftl_x, ftl_y, btl_x, btl_y);
+								g.beginLinearGradientStroke(highlightColors, material.stroke_ratios, ftl_x, ftl_y, btl_x, btl_y);
+								g.beginLinearGradientFill(material.fill_colors_shadow, material.fill_ratios_shadow, ftl_x, ftl_y, btl_x, btl_y);
 								g.moveTo(c_btl_x, c_btl_y);
 								g.lineTo(c_ftl_x, c_ftl_y);
 								g.lineTo(c_fbl_x, c_fbl_y);
@@ -1315,8 +1316,8 @@
 							if (array3d_details[col][row][k_rev].liquidVolume > 0)
 							{
 								g.setStrokeStyle(1);
-								g.beginStroke(GLOBAL_PARAMETERS.liquid_stroke_color_container);
-								g.beginFill(GLOBAL_PARAMETERS.liquid_color_container);
+								g.beginStroke(this.liquid.stroke_color_container);
+								g.beginFill(this.liquid.fill_color_container);
 								g.moveTo(btr_x, btr_y);
 								g.lineTo(ftr_x, ftr_y);
 								g.lineTo(fbr_x, fbr_y);
@@ -1331,8 +1332,8 @@
 								// draw right
 								//console.log("draw right");
 								g.setStrokeStyle(thickness);
-								g.beginLinearGradientStroke(highlightColors, material.strokeRatios, ftr_x, ftr_y, btr_x, ftr_y);
-								g.beginLinearGradientFill(material.fillShadowColors, material.fillShadowRatios, ftr_x, ftr_y, btr_x, ftr_y);
+								g.beginLinearGradientStroke(highlightColors, material.stroke_ratios, ftr_x, ftr_y, btr_x, ftr_y);
+								g.beginLinearGradientFill(material.fill_colors_shadow, material.fill_ratios_shadow, ftr_x, ftr_y, btr_x, ftr_y);
 								g.moveTo(c_btr_x, c_btr_y);
 								g.lineTo(c_ftr_x, c_ftr_y);
 								g.lineTo(c_fbr_x, c_fbr_y);
@@ -1349,8 +1350,8 @@
 							if (array3d_details[col][row][k_rev].liquidVolume > 0)
 							{
 								g.setStrokeStyle(1);
-								g.beginStroke(GLOBAL_PARAMETERS.liquid_stroke_color_container);
-								g.beginFill(GLOBAL_PARAMETERS.liquid_color_container);
+								g.beginStroke(this.liquid.stroke_color_container);
+								g.beginFill(this.liquid.fill_color_container);
 								g.moveTo(btr_x, btr_y);
 								g.lineTo(btl_x, btl_y);
 								g.lineTo(bbl_x, bbl_y);
@@ -1363,9 +1364,9 @@
 							{
 								// draw back
 								g.setStrokeStyle(thickness);
-								g.beginLinearGradientStroke(highlightColors, material.strokeRatios, btl_x, btl_y, btr_x, btr_y);
-								if (k != this.blockArray3d[0][0].length-1) {g.beginLinearGradientFill(material.fillColors, material.fillRatios, btl_x, btl_y, btr_x, btl_y);}
-								else {g.beginLinearGradientFill(material.fillColors, material.fillRatios, btl_x, btl_y, btr_x, btl_y);}
+								g.beginLinearGradientStroke(highlightColors, material.stroke_ratios, btl_x, btl_y, btr_x, btr_y);
+								if (k != this.blockArray3d[0][0].length-1) {g.beginLinearGradientFill(material.fill_colors, material.fill_ratios, btl_x, btl_y, btr_x, btl_y);}
+								else {g.beginLinearGradientFill(material.fill_colors, material.fill_ratios, btl_x, btl_y, btr_x, btl_y);}
 								g.moveTo(c_btr_x, c_btr_y);
 								g.lineTo(c_btl_x, c_btl_y);
 								g.lineTo(c_bbl_x, c_bbl_y);
@@ -1379,8 +1380,8 @@
 							if (array3d_details[col][row][k_rev].liquidVolume > 0)
 							{
 								g.setStrokeStyle(1);
-								g.beginStroke(GLOBAL_PARAMETERS.liquid_stroke_color_container);
-								g.beginFill(GLOBAL_PARAMETERS.liquid_color_container);
+								g.beginStroke(this.liquid.stroke_color_container);
+								g.beginFill(this.liquid.fill_color_container);
 								g.moveTo(ftr_x, ftr_y);
 								g.lineTo(ftl_x, ftl_y);
 								g.lineTo(fbl_x, fbl_y);
@@ -1394,13 +1395,13 @@
 							{
 								//console.log("draw front");
 								g.moveTo(c_ftr_x, c_ftr_y);		
-								if (array3d_details[col][row][k_rev].top){ g.setStrokeStyle(thickness).beginLinearGradientStroke(highlightColors, material.strokeRatios, ftl_x, ftl_y, ftr_x, ftr_y); g.lineTo(c_ftl_x, c_ftl_y); g.endStroke();} else {g.moveTo(c_ftl_x, c_ftl_y);};
-								if (array3d_details[col][row][k_rev].left){ g.setStrokeStyle(thickness).beginLinearGradientStroke(highlightColors, material.strokeRatios, ftl_x, ftl_y, ftr_x, ftr_y); g.lineTo(c_fbl_x, c_fbl_y); g.endStroke();} else {g.moveTo(c_fbl_x, c_fbl_y);} 
-								if (array3d_details[col][row][k_rev].bottom){ g.setStrokeStyle(thickness).beginLinearGradientStroke(highlightColors, material.strokeRatios, ftl_x, ftl_y, ftr_x, ftr_y); g.lineTo(c_fbr_x, c_fbr_y); g.endStroke();} else{g.moveTo(c_fbr_x, c_fbr_y);} 
-								if (array3d_details[col][row][k_rev].right){ g.setStrokeStyle(thickness).beginLinearGradientStroke(highlightColors, material.strokeRatios, ftl_x, ftl_y, ftr_x, ftr_y); g.lineTo(c_ftr_x, c_ftr_y); g.endStroke();} else{g.moveTo(c_ftr_x, c_ftr_y);} 
+								if (array3d_details[col][row][k_rev].top){ g.setStrokeStyle(thickness).beginLinearGradientStroke(highlightColors, material.stroke_ratios, ftl_x, ftl_y, ftr_x, ftr_y); g.lineTo(c_ftl_x, c_ftl_y); g.endStroke();} else {g.moveTo(c_ftl_x, c_ftl_y);};
+								if (array3d_details[col][row][k_rev].left){ g.setStrokeStyle(thickness).beginLinearGradientStroke(highlightColors, material.stroke_ratios, ftl_x, ftl_y, ftr_x, ftr_y); g.lineTo(c_fbl_x, c_fbl_y); g.endStroke();} else {g.moveTo(c_fbl_x, c_fbl_y);} 
+								if (array3d_details[col][row][k_rev].bottom){ g.setStrokeStyle(thickness).beginLinearGradientStroke(highlightColors, material.stroke_ratios, ftl_x, ftl_y, ftr_x, ftr_y); g.lineTo(c_fbr_x, c_fbr_y); g.endStroke();} else{g.moveTo(c_fbr_x, c_fbr_y);} 
+								if (array3d_details[col][row][k_rev].right){ g.setStrokeStyle(thickness).beginLinearGradientStroke(highlightColors, material.stroke_ratios, ftl_x, ftl_y, ftr_x, ftr_y); g.lineTo(c_ftr_x, c_ftr_y); g.endStroke();} else{g.moveTo(c_ftr_x, c_ftr_y);} 
 								
-								if (k != 0){ g.beginLinearGradientFill(material.fillColors, material.fillRatios, ftl_x, ftl_y, ftr_x, ftr_y);}
-								else {g.beginLinearGradientFill(material.fillShadowColors, material.fillRatios, ftl_x, ftl_y, ftr_x, ftr_y);}
+								if (k != 0){ g.beginLinearGradientFill(material.fill_colors, material.fill_ratios, ftl_x, ftl_y, ftr_x, ftr_y);}
+								else {g.beginLinearGradientFill(material.fill_colors_shadow, material.fill_ratios, ftl_x, ftl_y, ftr_x, ftr_y);}
 								g.drawRect(c_ftl_x, c_ftl_y, c_ftr_x - c_ftl_x, c_fbl_y - c_ftl_y);
 								g.endFill();
 								//g.endStroke();

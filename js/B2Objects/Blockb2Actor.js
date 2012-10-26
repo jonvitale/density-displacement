@@ -77,6 +77,7 @@
 		}
 	}
 	
+	/** Update skin to reflect position of b2 body on screen */
 	p.update = function ()
 	{
 		if (this.body != null && typeof(this.body) != "undefined" && typeof(this.parent) != "undefined" && this.parent != null)
