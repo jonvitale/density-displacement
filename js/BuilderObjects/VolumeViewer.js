@@ -391,7 +391,7 @@
 					}  else
 					{	
 						// separate rules for container
-						if (GLOBAL_PARAMETERS.materials[o.materialName].is_container)
+						if (GLOBAL_PARAMETERS.materials[o.material_name].is_container)
 						{
 							// is this block attached to another, and is the block below the same size or smaller
 							if (y_index < this.height_units-1 && this.blockArray2d[x_index][y_index+1] != null && o.connectsToOtherContainer(this.blockArray2d[x_index][y_index+1], "below")) {goodLocation = true;}

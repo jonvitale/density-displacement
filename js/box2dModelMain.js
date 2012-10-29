@@ -18,11 +18,7 @@
         , b2BuoyancyController = Box2D.Dynamics.Controllers.b2BuoyancyController;
         ;
 
-      //  <script src="js/DensityParameters.json"></script>
-		
-		
-
-        // GLOBAL VARIABLES, with default values
+          // GLOBAL VARIABLES, with default values
         var GLOBAL_PARAMETERS =
         {
        		"DEBUG" : true,
@@ -42,24 +38,13 @@
 			"total_objects_made" : 0,
 			"materials_available":[],
 			"materials": {},
-			"objectLibrary":{}
+			"premades_available":[],
+			"premades":{},
+			"objectLibrary":[]
         }
         
 		
-		// load parameters file to overwrite defaults
-		$(document).ready( function (){
-			$.getJSON('box2dModelParameters.json', function(data) {
-				for (var key in data)
-				{
-					GLOBAL_PARAMETERS[key] = data[key];
-				}
-				if (typeof GLOBAL_PARAMETERS.view_sideAngle_degrees != "undefined") GLOBAL_PARAMETERS.view_sideAngle = GLOBAL_PARAMETERS.view_sideAngle_degrees * Math.PI / 180;
-				if (typeof GLOBAL_PARAMETERS.view_topAngle_degrees != "undefined") GLOBAL_PARAMETERS.view_topAngle = GLOBAL_PARAMETERS.view_topAngle_degrees * Math.PI / 180;
-				GLOBAL_PARAMETERS.MATERIAL_COUNT = GLOBAL_PARAMETERS.materials_available.length;
-				init();
-			});     
-		});
-
+		
 		// GLOBAL OBJECTS			
 		var canvas;
 		var stage;
@@ -67,7 +52,38 @@
 		var tester;
 		var eventLogger;
 		
-		function init()
+		function init(wiseData)
+		{
+			if (typeof wiseData === "undefined")
+			{
+				// load parameters file to overwrite defaults
+				$(document).ready( function (){
+					$.getJSON('box2dModelTemplate.b2m', function(data) {
+						for (var key in data)
+						{
+							GLOBAL_PARAMETERS[key] = data[key];
+						}
+						if (typeof GLOBAL_PARAMETERS.view_sideAngle_degrees != "undefined") GLOBAL_PARAMETERS.view_sideAngle = GLOBAL_PARAMETERS.view_sideAngle_degrees * Math.PI / 180;
+						if (typeof GLOBAL_PARAMETERS.view_topAngle_degrees != "undefined") GLOBAL_PARAMETERS.view_topAngle = GLOBAL_PARAMETERS.view_topAngle_degrees * Math.PI / 180;
+						GLOBAL_PARAMETERS.MATERIAL_COUNT = GLOBAL_PARAMETERS.materials_available.length;
+						start();
+					});     
+				});
+			} else
+			{
+				// load from WISE
+				for (var key in wiseData)
+				{
+					GLOBAL_PARAMETERS[key] = wiseData[key];
+				}
+				if (typeof GLOBAL_PARAMETERS.view_sideAngle_degrees != "undefined") GLOBAL_PARAMETERS.view_sideAngle = GLOBAL_PARAMETERS.view_sideAngle_degrees * Math.PI / 180;
+				if (typeof GLOBAL_PARAMETERS.view_topAngle_degrees != "undefined") GLOBAL_PARAMETERS.view_topAngle = GLOBAL_PARAMETERS.view_topAngle_degrees * Math.PI / 180;
+				GLOBAL_PARAMETERS.MATERIAL_COUNT = GLOBAL_PARAMETERS.materials_available.length;
+				start();
+			}
+		}
+
+		function start()
 		{
 			canvas = document.getElementById("canvas");
 			stage = new Stage(canvas);
@@ -177,11 +193,12 @@
 			eventLogger = new EventLogger();
 
 			// make all objects given in parameters
-			for (var i = 0; i < GLOBAL_PARAMETERS.objectLibrary.length; i++)
+			for (var i = 0; i < GLOBAL_PARAMETERS.premades_available.length; i++)
 			{
-				createObject(GLOBAL_PARAMETERS.objectLibrary[i], true);
+				if (typeof GLOBAL_PARAMETERS.premades[GLOBAL_PARAMETERS.premades_available[i]] != "undefined")
+				createObject(GLOBAL_PARAMETERS.premades[GLOBAL_PARAMETERS.premades_available[i]]);
 			}
-			GLOBAL_PARAMETERS.num_initial_objects = GLOBAL_PARAMETERS.objectLibrary.length;
+			GLOBAL_PARAMETERS.num_initial_objects = GLOBAL_PARAMETERS.premades_available.length;
 
 			Ticker.setFPS(24);
 			Ticker.addListener(window);
@@ -204,7 +221,7 @@
 				var savedObject = builder.saveObject();
 				
 				// save to global parameters
-				console.log(JSON.stringify(savedObject));
+				if(GLOBAL_PARAMETERS.DEBUG) console.log(JSON.stringify(savedObject));
 				createObject(savedObject);
 			} else 
 			{
