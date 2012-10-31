@@ -26,6 +26,10 @@
 		<script src="js/B2Objects/Liquidb2Actor.js"></script>
 		<script src="js/EventLogger.js"></script>
 		<script src="js/box2dModelMain.js"></script>
+		<script src="Node.js"></script>
+		<script src="nodeFactory.js"></script>
+		<script src="Box2dModelNode.js"></script>
+		<script src="box2dModel.js"></script>
 		
 	</head>
 	<body>
@@ -39,7 +43,33 @@
 		<canvas width=700 height=600 id="debugcanvas2" ></canvas>
 		<canvas width=600 height=600 id="debugcanvas" ></canvas>
 		<script type="text/javascript">
-			init();
+			var box2dModel;
+			var View = {"prototype":{}};
+			var eventManager = {"fire":function(){}};
+			var componentloader = {"addEvent":function(){}};
+			
+			$.getJSON('box2dModelTemplate.b2m', function(data) 
+			{
+				var _box2dModelNode = new Box2dModelNode("Box2dModelNode", null);
+				_box2dModelNode.getContent = function()
+				{
+					return {
+						"getContentJSON":function(){return data}
+					}
+				}	
+				box2dModel = new Box2dModel(_box2dModelNode);
+				 box2dModel.render();
+			});
+			
+			
+	        function save() {
+		       box2dModel.save();
+	        }
+	       
+	      
+
 		</script>
+		<script src="box2dModelEvents.js"></script>
+		<script src="box2dModelState.js"></script>
 	</body>	
 </html>

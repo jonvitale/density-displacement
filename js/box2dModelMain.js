@@ -101,7 +101,7 @@
 				
 				var htmlText, htmlElement;
 				// jquery ui
-				 $(function() {
+				
 				 	htmlText = '<input type="submit" id="make-object" value="Create"/>';
 
 			        //htmlElement = $( "input[id='make-object']" )
@@ -112,10 +112,9 @@
 			                event.preventDefault();
 			                createObjectFromBuilder();
 			            }).hide();  
-			    });
+			   
 
-				$(function() {
-
+				
 				    htmlText = '<div id="slider-topAngle" style="height: 100px;"></div>';
 				   //$( "#slider-topAngle" )
 					$("#builder-button-holder").append(htmlText);
@@ -134,10 +133,9 @@
 		               }).hide();
 				     $("#slider-topAngle").load(function (){$( "#amount" ).val( $( "#slider-topAngle" ).slider( "value" ) );});
 
-				});
+				
 
-				$(function() {
-					 htmlText = '<div id="slider-sideAngle" style="width: 100px;"></div>';
+				 htmlText = '<div id="slider-sideAngle" style="width: 100px;"></div>';
 				   //$( "#slider-topAngle" )
 					$("#builder-button-holder").append(htmlText);
 					$("#slider-sideAngle")
@@ -155,7 +153,7 @@
 		               }).hide();
 				       $("#slider-sideAngle").load(function (){$( "#amount" ).val( $( "#slider-sideAngle" ).slider( "value" ) );});
 		
-				});
+				
 
 				// setup buttons for volume viewer	
 				var element = new DOMElement($("#make-object")[0]);
@@ -239,12 +237,14 @@
 			{
 				compShape = new BlockCompShape(GLOBAL_PARAMETERS.SCALE, GLOBAL_PARAMETERS.SCALE, GLOBAL_PARAMETERS.SCALE, savedObject);
 			}
-			eventLogger.addEvent("make", "", [savedObject]);
+			
 			savedObject.id = GLOBAL_PARAMETERS.total_objects_made;
 			tester.createObjectForLibrary(compShape);
 			GLOBAL_PARAMETERS.total_objects_made++;
 			if (typeof already_in_globals === "undefined" || !already_in_globals)
 				GLOBAL_PARAMETERS.objectLibrary.push(savedObject);	
+
+			eventLogger.addEvent("make", "", [savedObject]);
 		}
 
 

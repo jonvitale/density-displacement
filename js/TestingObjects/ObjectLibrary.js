@@ -100,6 +100,7 @@
 			element.x = this.x + o.x;
 			element.y = this.y + this.height_px - 30;
 			o.html = htmlElement.parent();
+			o.button = element;
 		}
 	}
 
@@ -130,29 +131,35 @@
 		{
 			if (this.shapes[i].html.attr("id") == html.attr("id"))
 			{
+				this.shapes[i].skin.savedObject.is_deleted = true;
 				this.removeObject(this.shapes[i]);
+				eventLogger.addEvent("delete", "", [this.shapes[i].skin.savedObject]);
+				return true;
 			}
 		}
+		return false;
 	}
 
 	p.removeObject= function (o)
 	{
 		var index = this.shapes.indexOf(o);
 		this.shapes.splice(index, 1);
+		if (typeof o.button != "undefined") this.removeChild(o.button);
+		if (typeof o.html != "undefined" && o.html != null)	o.html.remove();
 		this.removeChild(o);
 		// move shapes below up
-		var i;
-		for (i = index; i < this.shapes.length; i++)
+		for (var i = index; i < this.shapes.length; i++)
 		{
 			var s = this.shapes[i];
 			var new_index = i + 1;
 			s.x = (new_index % this.num_cols) * this.shape_width_px + this.shape_dx;
 			s.y = Math.floor(new_index / this.num_cols) * this.shape_height_px + this.shape_dy;
+			if (typeof s.button != "undefined")
+			{
+				s.button.x = this.x + s.x;
+				s.button.y = this.y + this.height_px - 30;							
+			}
 		}
-		if (typeof o.html != "undefined" && o.html != null)
-		{
-			o.html.remove();
-		} 
 	}
 
 	p._tick = function()

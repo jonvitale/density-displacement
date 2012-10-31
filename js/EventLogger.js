@@ -25,6 +25,12 @@
         evt.objects2 = typeof objects2 === "undefined" ? [] : objects2;
         console.log(evt.type, evt.what, evt.objects1, evt.objects2);
         this.eventArray.push(evt);
+
+        // save when a new object is created or deleted
+        if (type == "make" || "delete")
+        {
+            save();
+        }
     }
 
     window.EventLogger = EventLogger;
